@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import Modal from '../components/Modal';
+import AppIcon from '../components/AppIcon';
 
-const PRIORITY_FILTERS = ['Semua', '❤️‍🔥 Wajib Dipakai', '🟢 Sangat Bagus', '🔵 Coba Nanti'];
+const PRIORITY_FILTERS = ['Semua', 'Prioritas Tinggi', 'Sangat Bagus', 'Coba Nanti'];
 const CATEGORY_FILTERS = ['Semua', 'Research', 'Writing', 'Coding', 'Data', 'Academic', 'Productivity'];
 
 // Badge component for priority
@@ -35,7 +36,9 @@ function SavedToolCard({ tool, onDelete }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
         <div>
           <h3 style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 700 }}>{tool.name}</h3>
-          <p style={{ margin: 0, fontSize: 12, color: 'var(--color-text-secondary)' }}>🔗 {tool.url}</p>
+          <p style={{ margin: 0, fontSize: 12, color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <AppIcon name="link" size={12} /> {tool.url}
+          </p>
         </div>
         <PriorityBadge priorityKey={tool.priorityKey} label={tool.priority} />
       </div>
@@ -80,7 +83,9 @@ function SavedToolCard({ tool, onDelete }) {
             textDecoration: 'none', transition: 'background 0.2s',
           }}
         >
-          Buka Tool ↗
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            Buka Tool <AppIcon name="external-link" size={14} color="#fff" />
+          </span>
         </a>
         <button
           onClick={() => onDelete(tool.id)}
@@ -92,7 +97,9 @@ function SavedToolCard({ tool, onDelete }) {
           onMouseEnter={e => e.currentTarget.style.background = '#FEE2E2'}
           onMouseLeave={e => e.currentTarget.style.background = '#FFF5F5'}
         >
-          🗑️ Hapus
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <AppIcon name="trash" size={14} /> Hapus
+          </span>
         </button>
       </div>
     </div>
@@ -126,7 +133,7 @@ export default function LibraryView() {
       id: Date.now(),
       name: newTool.name,
       url: newTool.url.replace(/^https?:\/\//, ''),
-      priority: '🟢 Sangat Bagus',
+      priority: 'Sangat Bagus',
       priorityKey: 'good',
       category: newTool.category,
       keywords: [newTool.category.toLowerCase(), 'ai tools', 'manual'],
@@ -151,25 +158,29 @@ export default function LibraryView() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>📚 Library Tools Saya</h1>
+          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <AppIcon name="library" size={22} /> Library Tools Saya
+          </h1>
           <p style={{ margin: '6px 0 0', fontSize: 14, color: 'var(--color-text-secondary)' }}>
             Koleksi alat AI yang sudah kamu simpan, dilengkapi label prioritas otomatis.
           </p>
         </div>
         <button className="btn-primary" onClick={() => setShowAddModal(true)} style={{ whiteSpace: 'nowrap' }}>
-          + Tambah Manual
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <AppIcon name="plus" size={14} color="#fff" /> Tambah Manual
+          </span>
         </button>
       </div>
 
       {/* Stats row */}
       <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
         {[
-          { label: 'Total Tools', val: savedTools.length, emoji: '🗂️' },
-          { label: 'Wajib Dipakai', val: savedTools.filter(t => t.priorityKey === 'high').length, emoji: '❤️‍🔥' },
-          { label: 'Sangat Bagus', val: savedTools.filter(t => t.priorityKey === 'good').length, emoji: '🟢' },
+          { label: 'Total Tools', val: savedTools.length, icon: 'folder' },
+          { label: 'Prioritas Tinggi', val: savedTools.filter(t => t.priorityKey === 'high').length, icon: 'flame' },
+          { label: 'Sangat Bagus', val: savedTools.filter(t => t.priorityKey === 'good').length, icon: 'check' },
         ].map(stat => (
           <div key={stat.label} className="card" style={{ flex: 1, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: 24 }}>{stat.emoji}</span>
+            <span style={{ display: 'flex' }}><AppIcon name={stat.icon} size={22} /></span>
             <div>
               <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--color-primary)' }}>{stat.val}</p>
               <p style={{ margin: 0, fontSize: 12, color: 'var(--color-text-secondary)' }}>{stat.label}</p>
@@ -186,7 +197,7 @@ export default function LibraryView() {
           <input
             value={searchVal}
             onChange={e => setSearchVal(e.target.value)}
-            placeholder="🔍  Cari keyword..."
+            placeholder="Cari keyword..."
             style={{ ...inputStyle, marginBottom: 20 }}
             onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
             onBlur={e => e.target.style.borderColor = 'var(--color-border)'}
@@ -231,13 +242,15 @@ export default function LibraryView() {
         <div style={{ flex: 1 }}>
           {filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-              <span style={{ fontSize: 52 }}>📚</span>
+              <span style={{ display: 'inline-flex' }}><AppIcon name="library" size={44} /></span>
               <h3 style={{ margin: '16px 0 8px' }}>Belum ada tools tersimpan</h3>
               <p style={{ color: 'var(--color-text-secondary)', marginBottom: 20 }}>
                 Jelajahi Dashboard dan simpan tools favoritmu!
               </p>
               <button className="btn-primary" onClick={() => setActiveView('dashboard')}>
-                → Ke Dashboard
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <AppIcon name="arrow-right" size={14} color="#fff" /> Ke Dashboard
+                </span>
               </button>
             </div>
           ) : (
@@ -257,7 +270,7 @@ export default function LibraryView() {
 
       {/* Add Tool Modal */}
       {showAddModal && (
-        <Modal title="+ Tambah Tool Baru" onClose={() => setShowAddModal(false)}>
+        <Modal title="Tambah Tool Baru" onClose={() => setShowAddModal(false)}>
           <div>
             <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Nama Tool *</label>
             <input value={newTool.name} onChange={e => setNewTool(p => ({ ...p, name: e.target.value }))} placeholder="Contoh: Perplexity AI" style={inputStyle} />
@@ -270,11 +283,15 @@ export default function LibraryView() {
             <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Catatan (opsional)</label>
             <textarea value={newTool.note} onChange={e => setNewTool(p => ({ ...p, note: e.target.value }))} placeholder="Untuk apa tool ini?" rows={3} style={{ ...inputStyle, resize: 'none' }} />
             <p style={{ fontSize: 12, color: 'var(--color-text-secondary)', margin: '0 0 16px' }}>
-              🤖 Leva akan otomatis menganalisis dan memberikan label prioritas serta keywords.
+              Leva akan otomatis menganalisis dan memberikan label prioritas serta keywords.
             </p>
             <div style={{ display: 'flex', gap: 10 }}>
               <button className="btn-ghost" onClick={() => setShowAddModal(false)} style={{ flex: 1 }}>Batal</button>
-              <button className="btn-primary" onClick={handleAddTool} style={{ flex: 2 }}>+ Tambah & Generate Label</button>
+              <button className="btn-primary" onClick={handleAddTool} style={{ flex: 2 }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <AppIcon name="plus" size={14} color="#fff" /> Tambah & Generate Label
+                </span>
+              </button>
             </div>
           </div>
         </Modal>

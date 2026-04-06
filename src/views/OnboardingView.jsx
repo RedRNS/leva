@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import AppIcon from '../components/AppIcon';
 
 const JURUSAN_OPTIONS = [
   'Teknik Informatika', 'Sistem Informasi', 'Hukum', 'Kedokteran',
@@ -68,7 +69,7 @@ export default function OnboardingView() {
 
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div style={{ fontSize: 36, marginBottom: 6 }}>✦</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}><AppIcon name="sparkles" size={30} /></div>
           <span style={{ fontSize: 26, fontWeight: 800, color: 'var(--color-primary)', letterSpacing: '-0.5px' }}>
             Leva
           </span>
@@ -91,7 +92,7 @@ export default function OnboardingView() {
         {/* --- STEP 1 --- */}
         {step === 1 && (
           <div>
-            <h2 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 700 }}>Hei! Perkenalkan dirimu dulu 👋</h2>
+            <h2 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 700 }}>Hei! Perkenalkan dirimu dulu</h2>
             <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--color-text-secondary)' }}>
               Leva butuh sedikit info untuk mempersonalisasi pengalaman belajarmu.
             </p>
@@ -122,7 +123,9 @@ export default function OnboardingView() {
                 cursor: form.name.trim() ? 'pointer' : 'not-allowed',
               }}
             >
-              Lanjut →
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                Lanjut <AppIcon name="arrow-right" size={14} color="#fff" />
+              </span>
             </button>
           </div>
         )}
@@ -130,7 +133,7 @@ export default function OnboardingView() {
         {/* --- STEP 2 --- */}
         {step === 2 && (
           <div>
-            <h2 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 700 }}>Info Akademik Kamu 🎓</h2>
+            <h2 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 700 }}>Info Akademik Kamu</h2>
             <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--color-text-secondary)' }}>
               Ini membantu Leva merekomendasikan tools yang paling relevan untukmu.
             </p>
@@ -174,17 +177,21 @@ export default function OnboardingView() {
                     border: `1.5px solid ${form.bahasa === lang ? 'var(--color-primary)' : 'var(--color-border)'}`,
                   }}
                 >
-                  {lang === 'Indonesia' ? '🇮🇩 Indonesia' : '🇬🇧 English'}
+                  {lang === 'Indonesia' ? 'ID Indonesia' : 'EN English'}
                 </button>
               ))}
             </div>
 
             <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
               <button className="btn-ghost" onClick={() => setStep(1)} style={{ flex: 1, padding: '13px' }}>
-                ← Kembali
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <AppIcon name="arrow-left" size={14} /> Kembali
+                </span>
               </button>
               <button className="btn-primary" onClick={handleNext} style={{ flex: 2, padding: '13px', fontSize: 15 }}>
-                Lanjut →
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  Lanjut <AppIcon name="arrow-right" size={14} color="#fff" />
+                </span>
               </button>
             </div>
           </div>
@@ -193,7 +200,7 @@ export default function OnboardingView() {
         {/* --- STEP 3 --- */}
         {step === 3 && (
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 64, marginBottom: 16 }}>🎓</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}><AppIcon name="graduation-cap" size={56} /></div>
             <h2 style={{ margin: '0 0 12px', fontSize: 22, fontWeight: 700, lineHeight: 1.35 }}>
               Siap, <span style={{ color: 'var(--color-primary)' }}>{form.name.split(' ')[0]}</span>!
             </h2>
@@ -208,10 +215,10 @@ export default function OnboardingView() {
               padding: '14px 18px', marginBottom: 24, textAlign: 'left',
             }}>
               {[
-                { label: '👤 Nama',    val: form.name },
-                { label: '🏫 Jurusan', val: form.jurusan },
-                { label: '📅 Semester',val: `Semester ${form.semester}` },
-                { label: '🌐 Bahasa',  val: form.bahasa },
+                { label: 'Nama',    val: form.name },
+                { label: 'Jurusan', val: form.jurusan },
+                { label: 'Semester',val: `Semester ${form.semester}` },
+                { label: 'Bahasa',  val: form.bahasa },
               ].map(row => (
                 <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '5px 0', borderBottom: '1px solid rgba(108,99,255,0.15)' }}>
                   <span style={{ color: 'var(--color-text-secondary)' }}>{row.label}</span>
@@ -231,11 +238,15 @@ export default function OnboardingView() {
               onMouseEnter={e => e.currentTarget.style.background = '#059669'}
               onMouseLeave={e => e.currentTarget.style.background = 'var(--color-secondary)'}
             >
-              Masuk ke Dashboard →
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                Masuk ke Dashboard <AppIcon name="arrow-right" size={14} color="#fff" />
+              </span>
             </button>
 
             <button className="btn-ghost" onClick={() => setStep(2)} style={{ width: '100%', marginTop: 10 }}>
-              ← Edit Data
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <AppIcon name="arrow-left" size={14} /> Edit Data
+              </span>
             </button>
           </div>
         )}

@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { historyTasks } from '../data/mockData';
 import Modal from './Modal';
+import AppIcon from './AppIcon';
 
 const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Dashboard',   icon: '🏠' },
-  { id: 'chat',      label: 'Chat & Task', icon: '💬' },
-  { id: 'library',   label: 'Library',     icon: '📚' },
-  { id: 'profile',   label: 'Profile',     icon: '👤' },
+  { id: 'dashboard', label: 'Dashboard',   icon: 'home' },
+  { id: 'chat',      label: 'Chat & Task', icon: 'message' },
+  { id: 'library',   label: 'Library',     icon: 'library' },
+  { id: 'profile',   label: 'Profile',     icon: 'user' },
 ];
 
 export default function Sidebar() {
@@ -39,7 +40,7 @@ export default function Sidebar() {
 
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, paddingLeft: 4 }}>
-          <span style={{ fontSize: 22 }}>✦</span>
+          <AppIcon name="sparkles" size={20} color="#fff" />
           <span style={{ color: '#fff', fontSize: 20, fontWeight: 800, letterSpacing: '-0.5px' }}>Leva</span>
         </div>
 
@@ -58,12 +59,14 @@ export default function Sidebar() {
           onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
         >
-          <span style={{ fontSize: 16 }}>✚</span> New Chat
+          <AppIcon name="plus" size={16} color="#fff" /> New Chat
         </button>
 
         {/* Search */}
         <div style={{ position: 'relative', marginBottom: 16 }}>
-          <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 13, opacity: 0.5 }}>🔍</span>
+          <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', opacity: 0.5, display: 'flex' }}>
+            <AppIcon name="search" size={14} color="#fff" />
+          </span>
           <input
             value={searchVal}
             onChange={e => setSearchVal(e.target.value)}
@@ -88,7 +91,7 @@ export default function Sidebar() {
               type="button"
               style={{ width: '100%', background: 'transparent', border: 'none', textAlign: 'left' }}
             >
-              <span style={{ fontSize: 16 }}>{item.icon}</span>
+              <span style={{ display: 'flex' }}><AppIcon name={item.icon} size={16} /></span>
               {item.label}
             </button>
           ))}
@@ -96,7 +99,7 @@ export default function Sidebar() {
             className="sidebar-item"
             onClick={() => setShowSettings(true)}
           >
-            <span style={{ fontSize: 16 }}>⚙️</span> Settings
+            <span style={{ display: 'flex' }}><AppIcon name="settings" size={16} /></span> Settings
           </div>
         </nav>
 
@@ -164,7 +167,7 @@ export default function Sidebar() {
 
       {/* Settings Modal */}
       {showSettings && (
-        <Modal title="⚙️ Pengaturan" onClose={() => setShowSettings(false)}>
+        <Modal title="Pengaturan" onClose={() => setShowSettings(false)}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
 
             {/* Toggle row helper */}
@@ -197,7 +200,7 @@ export default function Sidebar() {
             <div style={{ height: 1, background: 'var(--color-border)' }} />
 
             <p style={{ margin: 0, fontSize: 12, color: 'var(--color-text-secondary)', textAlign: 'center' }}>
-              Leva v1.0.0 · Dibuat untuk Hackathon 🚀
+              Leva v1.0.0 · Dibuat untuk Hackathon
             </p>
 
             <button className="btn-primary" onClick={() => setShowSettings(false)} style={{ width: '100%' }}>

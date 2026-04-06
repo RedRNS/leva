@@ -27,14 +27,14 @@ export function AppProvider({ children }) {
   const saveToolToLibrary = (tool) => {
     const already = savedTools.find((t) => t.name === tool.name);
     if (already) {
-      showToast('⚠️ Tool ini sudah ada di Library-mu!');
+      showToast('Tool ini sudah ada di Library-mu.');
       return;
     }
     const newEntry = {
       id: Date.now(),
       name: tool.name,
       url: tool.url,
-      priority: '🟢 Sangat Bagus',
+      priority: 'Sangat Bagus',
       priorityKey: 'good',
       category: tool.category,
       keywords: [tool.category.toLowerCase(), 'ai tools', 'leva'],
@@ -42,7 +42,7 @@ export function AppProvider({ children }) {
       note: '',
     };
     setSavedTools((prev) => [newEntry, ...prev]);
-    showToast('✅ Disimpan ke Library!');
+    showToast('Disimpan ke Library.');
   };
 
   return (

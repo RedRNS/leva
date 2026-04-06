@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { mockSubTasks, mockTools } from '../data/mockData';
+import AppIcon from '../components/AppIcon';
 
 // --- Tag color helper
 const tagStyle = (cat) => {
@@ -22,7 +23,7 @@ function TypingIndicator() {
       <div style={{
         width: 32, height: 32, borderRadius: '50%', background: 'var(--color-primary)',
         display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 14, flexShrink: 0,
-      }}>✦</div>
+      }}><AppIcon name="sparkles" size={14} color="#fff" /></div>
       <div style={{ background: '#fff', border: '1px solid var(--color-border)', borderRadius: 12, padding: '10px 16px', display: 'flex', gap: 4 }}>
         <span className="typing-dot" />
         <span className="typing-dot" />
@@ -58,7 +59,7 @@ function SubTaskCard({ task, index, isExpanded, onToggle, onMarkDone, onSaveTool
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 12, fontWeight: 700,
           }}>
-            {task.status === 'done' ? '✓' : index + 1}
+            {task.status === 'done' ? <AppIcon name="check" size={14} color="#fff" /> : index + 1}
           </div>
           <span style={{ fontWeight: 600, fontSize: 15, color: 'var(--color-text-primary)' }}>
             {task.title}
@@ -66,14 +67,14 @@ function SubTaskCard({ task, index, isExpanded, onToggle, onMarkDone, onSaveTool
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {task.status === 'done'
-            ? <span className="badge-done">Done ✓</span>
-            : <span className="badge-next">Next Section ›</span>
+            ? <span className="badge-done" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>Done <AppIcon name="check" size={12} color="#fff" /></span>
+            : <span className="badge-next" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>Next Section <AppIcon name="arrow-right" size={12} /></span>
           }
           <span style={{
-            color: 'var(--color-text-secondary)', fontSize: 18,
+            color: 'var(--color-text-secondary)', fontSize: 18, display: 'flex',
             transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)',
             transition: 'transform 0.3s',
-          }}>⌄</span>
+          }}><AppIcon name="chevron-down" size={16} /></span>
         </div>
       </div>
 
@@ -86,7 +87,7 @@ function SubTaskCard({ task, index, isExpanded, onToggle, onMarkDone, onSaveTool
               {task.kategori}
             </span>
             <span style={{ fontSize: 12, color: 'var(--color-text-secondary)', padding: '3px 10px', background: 'var(--color-bg)', borderRadius: 8 }}>
-              ⏱️ {task.estimasi}
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><AppIcon name="clock" size={12} /> {task.estimasi}</span>
             </span>
           </div>
 
@@ -100,17 +101,17 @@ function SubTaskCard({ task, index, isExpanded, onToggle, onMarkDone, onSaveTool
             <button
               className="btn-primary"
               onClick={() => onMarkDone(task.id)}
-              style={{ padding: '9px 20px', fontSize: 13 }}
+              style={{ padding: '9px 20px', fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 6 }}
             >
-              ✓ Tandai Selesai
+              <AppIcon name="check" size={14} color="#fff" /> Tandai Selesai
             </button>
           ) : (
             <button
               className="btn-ghost"
               onClick={() => onMarkDone(task.id)}
-              style={{ padding: '9px 20px', fontSize: 13 }}
+              style={{ padding: '9px 20px', fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 6 }}
             >
-              ↩ Tandai Ulang
+              <AppIcon name="undo" size={14} /> Tandai Ulang
             </button>
           )}
         </div>
@@ -145,7 +146,7 @@ function RightPanel({ task, isOpen, onSave }) {
           {/* Rekomendasi Tools */}
           <div style={{ marginBottom: 20 }}>
             <p style={{ margin: '0 0 12px', fontSize: 12, fontWeight: 700, color: 'var(--color-text-secondary)', letterSpacing: '0.07em' }}>
-              🤖 REKOMENDASI TOOLS AI
+              REKOMENDASI TOOLS AI
             </p>
             {tools.map(tool => (
               <div
@@ -155,13 +156,13 @@ function RightPanel({ task, isOpen, onSave }) {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 20 }}>{tool.emoji}</span>
+                    <span style={{ display: 'flex' }}><AppIcon name={tool.iconKey} size={18} /></span>
                     <span style={{ fontWeight: 600, fontSize: 14 }}>{tool.name}</span>
                   </div>
                   <a
                     href={`https://${tool.url}`} target="_blank" rel="noreferrer"
-                    style={{ fontSize: 14, color: 'var(--color-primary)', textDecoration: 'none' }}
-                  >↗</a>
+                    style={{ display: 'flex', color: 'var(--color-primary)', textDecoration: 'none' }}
+                  ><AppIcon name="external-link" size={14} /></a>
                 </div>
                 <p style={{ margin: '6px 0 10px', fontSize: 12, color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
                   {tool.desc.slice(0, 70)}...
@@ -169,9 +170,9 @@ function RightPanel({ task, isOpen, onSave }) {
                 <button
                   className="btn-secondary"
                   onClick={() => onSave(tool)}
-                  style={{ width: '100%', padding: '7px', fontSize: 12 }}
+                  style={{ width: '100%', padding: '7px', fontSize: 12, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
                 >
-                  🔖 Simpan ke Library
+                  <AppIcon name="book" size={12} /> Simpan ke Library
                 </button>
               </div>
             ))}
@@ -184,7 +185,7 @@ function RightPanel({ task, isOpen, onSave }) {
             borderRadius: 12, padding: '14px 14px', marginBottom: 16,
           }}>
             <p style={{ margin: '0 0 8px', fontSize: 12, fontWeight: 700, color: '#92400E' }}>
-              💡 TIPS PENGGUNAAN
+              TIPS PENGGUNAAN
             </p>
             <p style={{ margin: 0, fontSize: 12, color: '#78350F', lineHeight: 1.6 }}>
               {task.tips}
@@ -195,12 +196,12 @@ function RightPanel({ task, isOpen, onSave }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <button
               className="btn-ghost"
-              style={{ fontSize: 12, padding: '8px' }}
+              style={{ fontSize: 12, padding: '8px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
               onClick={() => {
                 navigator.clipboard?.writeText(task.tips);
               }}
             >
-              📋 Salin Prompt Tips
+              <AppIcon name="copy" size={12} /> Salin Prompt Tips
             </button>
           </div>
         </>
@@ -276,7 +277,7 @@ export default function ChatWorkspaceView() {
     setFollowUpReply('');
     setTimeout(() => {
       setFollowUpReply(
-        `Untuk subtask "${subTasks.find(t => t.id === expandedId)?.title ?? 'ini'}", aku sarankan mulai dengan Perplexity AI - masukkan kata kunci jurusan kamu dan minta ia menganalisis tren topik 2024-2025. Ini jauh lebih efisien dibandingkan browsing manual di Google Scholar. 🚀`
+        `Untuk subtask "${subTasks.find(t => t.id === expandedId)?.title ?? 'ini'}", aku sarankan mulai dengan Perplexity AI - masukkan kata kunci jurusan kamu dan minta ia menganalisis tren topik 2024-2025. Ini jauh lebih efisien dibandingkan browsing manual di Google Scholar.`
       );
       setFollowUpVal('');
     }, 1200);
@@ -303,7 +304,7 @@ export default function ChatWorkspaceView() {
               alignItems: 'center', justifyContent: 'center',
               padding: '40px 20px', minHeight: 'calc(100vh - 100px)',
             }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>✦</div>
+              <div style={{ display: 'flex', marginBottom: 16 }}><AppIcon name="sparkles" size={40} /></div>
               <h2 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 700, textAlign: 'center' }}>
                 Hei, {firstName}! Ceritakan tugasmu hari ini.
               </h2>
@@ -339,14 +340,14 @@ export default function ChatWorkspaceView() {
                     background: inputVal.trim() ? 'var(--color-primary)' : 'var(--color-border)',
                     border: 'none', borderRadius: 10, padding: '8px 12px',
                     cursor: inputVal.trim() ? 'pointer' : 'default',
-                    color: '#fff', fontSize: 16, transition: 'background 0.2s',
+                    color: '#fff', fontSize: 16, transition: 'background 0.2s', display: 'flex',
                   }}
                 >
-                  →
+                  <AppIcon name="send" size={16} color="#fff" />
                 </button>
               </div>
               <p style={{ marginTop: 12, fontSize: 12, color: 'var(--color-text-secondary)' }}>
-                Tekan Enter atau klik → untuk mulai
+                Tekan Enter atau klik tombol kirim untuk mulai
               </p>
 
               {/* Quick suggestions */}
@@ -420,7 +421,7 @@ export default function ChatWorkspaceView() {
                   background: 'linear-gradient(135deg, var(--color-secondary), #059669)',
                   borderRadius: 16, padding: '24px', textAlign: 'center', marginTop: 16, color: '#fff',
                 }}>
-                  <div style={{ fontSize: 48, marginBottom: 8 }}>🎉</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}><AppIcon name="check" size={40} color="#fff" /></div>
                   <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700 }}>Semua task selesai!</h3>
                   <p style={{ margin: 0, fontSize: 14, opacity: 0.9 }}>
                     Kerja bagus, {firstName}! Kamu berhasil menyelesaikan semua langkah untuk "{taskTitle}".
@@ -432,7 +433,7 @@ export default function ChatWorkspaceView() {
               <div style={{ marginTop: 20, padding: '16px 20px', background: 'var(--color-surface)', borderRadius: 14, border: '1px solid var(--color-border)' }}>
                 {followUpReply && (
                   <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
-                    <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, flexShrink: 0 }}>✦</div>
+                    <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, flexShrink: 0 }}><AppIcon name="sparkles" size={12} color="#fff" /></div>
                     <div style={{ background: 'var(--color-primary-light)', borderRadius: 12, padding: '12px 14px', fontSize: 13, lineHeight: 1.65, color: 'var(--color-text-primary)', flex: 1 }}>
                       {followUpReply}
                     </div>

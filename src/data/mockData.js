@@ -1,13 +1,13 @@
 export const mockTools = [
-  { id: 1, name: "Perplexity AI", category: "Research", emoji: "🔬", url: "perplexity.ai", desc: "Mesin pencari berbasis AI dengan sumber terverifikasi. Ideal untuk literature review cepat.", rating: 4.8, jurusan: ["Teknik Informatika", "Hukum", "Semua"] },
-  { id: 2, name: "GitHub Copilot", category: "Coding", emoji: "💻", url: "github.com/copilot", desc: "Asisten koding AI dari GitHub yang membantu autocomplete dan debug kode secara real-time.", rating: 4.9, jurusan: ["Teknik Informatika"] },
-  { id: 3, name: "Scite.ai", category: "Academic", emoji: "📄", url: "scite.ai", desc: "Temukan dan evaluasi referensi ilmiah dengan konteks sitasi langsung dari paper aslinya.", rating: 4.6, jurusan: ["Semua"] },
-  { id: 4, name: "Julius AI", category: "Data", emoji: "📊", url: "julius.ai", desc: "Analisis data dan buat visualisasi hanya dengan upload spreadsheet dan bertanya dalam bahasa natural.", rating: 4.5, jurusan: ["Teknik Informatika", "Bisnis & Manajemen"] },
-  { id: 5, name: "Grammarly", category: "Writing", emoji: "✍️", url: "grammarly.com", desc: "Periksa grammar, tone, dan kejelasan tulisan akademikmu secara otomatis.", rating: 4.7, jurusan: ["Semua"] },
-  { id: 6, name: "Notion AI", category: "Productivity", emoji: "🗂️", url: "notion.so", desc: "Workspace serba bisa dengan AI terintegrasi untuk nulis, organisir, dan merangkum catatan.", rating: 4.6, jurusan: ["Semua"] },
-  { id: 7, name: "Consensus", category: "Research", emoji: "🔍", url: "consensus.app", desc: "Cari jawaban dari ribuan paper akademik peer-reviewed secara instan.", rating: 4.5, jurusan: ["Semua"] },
-  { id: 8, name: "Codeium", category: "Coding", emoji: "⚡", url: "codeium.com", desc: "Alternatif Copilot gratis dengan kemampuan koding AI multi-bahasa pemrograman.", rating: 4.4, jurusan: ["Teknik Informatika"] },
-  { id: 9, name: "Elicit", category: "Academic", emoji: "🧪", url: "elicit.com", desc: "Otomatiskan literature review dan ekstraksi data dari paper ilmiah.", rating: 4.3, jurusan: ["Semua"] },
+  { id: 1, name: "Perplexity AI", category: "Research", iconKey: "search", url: "perplexity.ai", desc: "Mesin pencari berbasis AI dengan sumber terverifikasi. Ideal untuk literature review cepat.", rating: 4.8, jurusan: ["Teknik Informatika", "Hukum", "Semua"] },
+  { id: 2, name: "GitHub Copilot", category: "Coding", iconKey: "task", url: "github.com/copilot", desc: "Asisten koding AI dari GitHub yang membantu autocomplete dan debug kode secara real-time.", rating: 4.9, jurusan: ["Teknik Informatika"] },
+  { id: 3, name: "Scite.ai", category: "Academic", iconKey: "book", url: "scite.ai", desc: "Temukan dan evaluasi referensi ilmiah dengan konteks sitasi langsung dari paper aslinya.", rating: 4.6, jurusan: ["Semua"] },
+  { id: 4, name: "Julius AI", category: "Data", iconKey: "dashboard", url: "julius.ai", desc: "Analisis data dan buat visualisasi hanya dengan upload spreadsheet dan bertanya dalam bahasa natural.", rating: 4.5, jurusan: ["Teknik Informatika", "Bisnis & Manajemen"] },
+  { id: 5, name: "Grammarly", category: "Writing", iconKey: "pencil", url: "grammarly.com", desc: "Periksa grammar, tone, dan kejelasan tulisan akademikmu secara otomatis.", rating: 4.7, jurusan: ["Semua"] },
+  { id: 6, name: "Notion AI", category: "Productivity", iconKey: "folder", url: "notion.so", desc: "Workspace serba bisa dengan AI terintegrasi untuk nulis, organisir, dan merangkum catatan.", rating: 4.6, jurusan: ["Semua"] },
+  { id: 7, name: "Consensus", category: "Research", iconKey: "search", url: "consensus.app", desc: "Cari jawaban dari ribuan paper akademik peer-reviewed secara instan.", rating: 4.5, jurusan: ["Semua"] },
+  { id: 8, name: "Codeium", category: "Coding", iconKey: "sparkles", url: "codeium.com", desc: "Alternatif Copilot gratis dengan kemampuan koding AI multi-bahasa pemrograman.", rating: 4.4, jurusan: ["Teknik Informatika"] },
+  { id: 9, name: "Elicit", category: "Academic", iconKey: "bot", url: "elicit.com", desc: "Otomatiskan literature review dan ekstraksi data dari paper ilmiah.", rating: 4.3, jurusan: ["Semua"] },
 ];
 
 export const mockSubTasks = [
@@ -44,12 +44,12 @@ export const mockSubTasks = [
 ];
 
 export const mockSavedTools = [
-  { id: 1, name: "Perplexity AI", url: "perplexity.ai", priority: "❤️‍🔥 Wajib Dipakai", priorityKey: "high", category: "Research", keywords: ["literature review", "sumber terverifikasi", "riset cepat", "academic search", "AI search"], savedAt: "3 Apr 2026", note: "Digunakan untuk bab 2 skripsi" },
-  { id: 2, name: "Scite.ai", url: "scite.ai", priority: "🟢 Sangat Bagus", priorityKey: "good", category: "Academic", keywords: ["jurnal", "sitasi", "peer review", "referensi", "paper"], savedAt: "3 Apr 2026", note: "Alternatif Google Scholar yang lebih kontekstual" },
-  { id: 3, name: "Notion AI", url: "notion.so", priority: "❤️‍🔥 Wajib Dipakai", priorityKey: "high", category: "Productivity", keywords: ["catatan", "outline", "workspace", "template", "organisir"], savedAt: "1 Apr 2026", note: "Untuk template BAB I skripsi" },
-  { id: 4, name: "GitHub Copilot", url: "github.com/copilot", priority: "❤️‍🔥 Wajib Dipakai", priorityKey: "high", category: "Coding", keywords: ["coding", "autocomplete", "debug", "python", "javascript"], savedAt: "28 Mar 2026", note: "Wajib untuk praktikum" },
-  { id: 5, name: "Grammarly", url: "grammarly.com", priority: "🟢 Sangat Bagus", priorityKey: "good", category: "Writing", keywords: ["grammar", "parafrase", "writing", "english", "editing"], savedAt: "25 Mar 2026", note: "Untuk proofreading tulisan berbahasa Inggris" },
-  { id: 6, name: "Julius AI", url: "julius.ai", priority: "🔵 Coba Nanti", priorityKey: "later", category: "Data", keywords: ["data analysis", "visualisasi", "spreadsheet", "chart", "statistik"], savedAt: "20 Mar 2026", note: "Mau coba untuk analisis data skripsi" },
+  { id: 1, name: "Perplexity AI", url: "perplexity.ai", priority: "Prioritas Tinggi", priorityKey: "high", category: "Research", keywords: ["literature review", "sumber terverifikasi", "riset cepat", "academic search", "AI search"], savedAt: "3 Apr 2026", note: "Digunakan untuk bab 2 skripsi" },
+  { id: 2, name: "Scite.ai", url: "scite.ai", priority: "Sangat Bagus", priorityKey: "good", category: "Academic", keywords: ["jurnal", "sitasi", "peer review", "referensi", "paper"], savedAt: "3 Apr 2026", note: "Alternatif Google Scholar yang lebih kontekstual" },
+  { id: 3, name: "Notion AI", url: "notion.so", priority: "Prioritas Tinggi", priorityKey: "high", category: "Productivity", keywords: ["catatan", "outline", "workspace", "template", "organisir"], savedAt: "1 Apr 2026", note: "Untuk template BAB I skripsi" },
+  { id: 4, name: "GitHub Copilot", url: "github.com/copilot", priority: "Prioritas Tinggi", priorityKey: "high", category: "Coding", keywords: ["coding", "autocomplete", "debug", "python", "javascript"], savedAt: "28 Mar 2026", note: "Wajib untuk praktikum" },
+  { id: 5, name: "Grammarly", url: "grammarly.com", priority: "Sangat Bagus", priorityKey: "good", category: "Writing", keywords: ["grammar", "parafrase", "writing", "english", "editing"], savedAt: "25 Mar 2026", note: "Untuk proofreading tulisan berbahasa Inggris" },
+  { id: 6, name: "Julius AI", url: "julius.ai", priority: "Coba Nanti", priorityKey: "later", category: "Data", keywords: ["data analysis", "visualisasi", "spreadsheet", "chart", "statistik"], savedAt: "20 Mar 2026", note: "Mau coba untuk analisis data skripsi" },
 ];
 
 export const historyTasks = [

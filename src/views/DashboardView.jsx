@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { mockTools } from '../data/mockData';
+import AppIcon from '../components/AppIcon';
 
 // --- Category tag color helper
 const tagClass = (cat) => {
@@ -46,7 +47,7 @@ function FeaturedToolCard({ tool, onSave, onNavigateChat }) {
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
         <span className={tagClass(tool.category)}>{tool.category}</span>
-        <span style={{ fontSize: 28 }}>{tool.emoji}</span>
+        <span style={{ display: 'flex' }}><AppIcon name={tool.iconKey} size={24} /></span>
       </div>
       <h3 style={{ margin: '0 0 6px', fontSize: 17, fontWeight: 700 }}>{tool.name}</h3>
       <p style={{ margin: '0 0 10px', fontSize: 13, color: 'var(--color-text-secondary)', lineHeight: 1.55 }}>
@@ -60,7 +61,7 @@ function FeaturedToolCard({ tool, onSave, onNavigateChat }) {
           onClick={handleSave}
           style={{ flex: 1, padding: '8px', fontSize: 12 }}
         >
-          {saved ? '✅ Tersimpan' : '🔖 Simpan'}
+          {saved ? 'Tersimpan' : 'Simpan'}
         </button>
         <a
           href={`https://${tool.url}`} target="_blank" rel="noreferrer"
@@ -71,7 +72,9 @@ function FeaturedToolCard({ tool, onSave, onNavigateChat }) {
             padding: '8px', transition: 'background 0.2s',
           }}
         >
-          Buka ↗
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            Buka <AppIcon name="external-link" size={14} color="#fff" />
+          </span>
         </a>
       </div>
     </div>
@@ -100,7 +103,7 @@ function SmallToolCard({ tool, onSave }) {
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 22 }}>{tool.emoji}</span>
+          <span style={{ display: 'flex' }}><AppIcon name={tool.iconKey} size={20} /></span>
           <span style={{ fontWeight: 700, fontSize: 14 }}>{tool.name}</span>
         </div>
         <button
@@ -112,7 +115,7 @@ function SmallToolCard({ tool, onSave }) {
             borderRadius: 8, padding: '4px 8px', cursor: 'pointer', fontSize: 14,
           }}
         >
-          {saved ? '✅' : '🔖'}
+          <AppIcon name={saved ? 'check' : 'book'} size={14} />
         </button>
       </div>
       <p style={{ margin: '0 0 10px', fontSize: 12, color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
@@ -142,7 +145,7 @@ export default function DashboardView() {
 
   const hour = new Date().getHours();
   const greeting = hour < 11 ? 'Selamat pagi' : hour < 15 ? 'Selamat siang' : hour < 18 ? 'Selamat sore' : 'Selamat malam';
-  const greetEmoji = hour < 11 ? '☀️' : hour < 15 ? '🌤️' : hour < 18 ? '🌅' : '🌙';
+  const greetIcon = hour < 11 ? 'lamp' : hour < 15 ? 'refresh' : hour < 18 ? 'calendar' : 'sparkles';
 
   const today = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -172,8 +175,8 @@ export default function DashboardView() {
       {/* -- Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800 }}>
-            {greeting}, {firstName}! {greetEmoji}
+          <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
+            {greeting}, {firstName}! <AppIcon name={greetIcon} size={20} />
           </h1>
           <p style={{ margin: '6px 0 0', fontSize: 14, color: 'var(--color-text-secondary)' }}>
             Ini rekomendasi tools AI hari ini yang relevan untuk <strong>{jurusan}</strong> kamu.
@@ -182,11 +185,11 @@ export default function DashboardView() {
         <div style={{ textAlign: 'right' }}>
           <p style={{ margin: 0, fontSize: 13, color: 'var(--color-text-secondary)' }}>{today}</p>
           <span style={{
-            display: 'inline-block', marginTop: 4, fontSize: 11, fontWeight: 600,
+            display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 4, fontSize: 11, fontWeight: 600,
             background: 'var(--color-secondary-light)', color: 'var(--color-secondary)',
             padding: '3px 10px', borderRadius: 999,
           }}>
-            🔄 Diperbarui otomatis setiap hari
+            <AppIcon name="refresh" size={12} /> Diperbarui otomatis setiap hari
           </span>
         </div>
       </div>
@@ -194,7 +197,7 @@ export default function DashboardView() {
       {/* -- Featured Tools (horizontal scroll) */}
       <section style={{ marginBottom: 36 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-          <span style={{ fontSize: 18 }}>🔥</span>
+          <AppIcon name="flame" size={18} />
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Tools Pilihan Hari Ini</h2>
           <span style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginLeft: 4 }}>
             - dipilihkan khusus untuk {jurusan}
@@ -234,7 +237,7 @@ export default function DashboardView() {
       {/* -- All Tools Grid */}
       <section style={{ marginBottom: 36 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-          <span style={{ fontSize: 18 }}>📰</span>
+          <AppIcon name="news" size={18} />
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Semua Tools Hari Ini</h2>
           <span style={{
             fontSize: 12, fontWeight: 600, background: 'var(--color-primary-light)',
@@ -250,7 +253,7 @@ export default function DashboardView() {
         </div>
         {filteredTools.length === 0 && (
           <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--color-text-secondary)' }}>
-            <span style={{ fontSize: 40 }}>🔍</span>
+            <span style={{ display: 'inline-flex' }}><AppIcon name="search" size={36} /></span>
             <p>Tidak ada tool untuk kategori ini.</p>
           </div>
         )}
@@ -263,7 +266,7 @@ export default function DashboardView() {
         borderRadius: 16, padding: '20px 24px',
         display: 'flex', alignItems: 'center', gap: 16,
       }}>
-        <span style={{ fontSize: 32, flexShrink: 0 }}>💡</span>
+        <span style={{ display: 'flex', flexShrink: 0 }}><AppIcon name="lamp" size={28} /></span>
         <div style={{ flex: 1 }}>
           <p style={{ margin: 0, fontWeight: 600, fontSize: 14 }}>Tips Produktivitas Hari Ini</p>
           <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
@@ -273,9 +276,9 @@ export default function DashboardView() {
         <button
           className="btn-primary"
           onClick={() => setActiveView('chat')}
-          style={{ flexShrink: 0, whiteSpace: 'nowrap', padding: '10px 18px', fontSize: 13 }}
+          style={{ flexShrink: 0, whiteSpace: 'nowrap', padding: '10px 18px', fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 6 }}
         >
-          Coba Sekarang →
+          Coba Sekarang <AppIcon name="arrow-right" size={14} color="#fff" />
         </button>
       </div>
     </div>

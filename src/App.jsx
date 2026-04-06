@@ -7,6 +7,7 @@ import LibraryView from './views/LibraryView';
 import ProfileView from './views/ProfileView';
 import Sidebar from './components/Sidebar';
 import Toast from './components/Toast';
+import AppIcon from './components/AppIcon';
 
 function AppInner() {
   const { activeView, toast } = useApp();
@@ -21,10 +22,10 @@ function AppInner() {
   function MobileBottomNav() {
     const { activeView: mobileActiveView, setActiveView } = useApp();
     const items = [
-      { id: 'dashboard', icon: '🏠', label: 'Home' },
-      { id: 'chat', icon: '💬', label: 'Chat' },
-      { id: 'library', icon: '📚', label: 'Library' },
-      { id: 'profile', icon: '👤', label: 'Profil' },
+      { id: 'dashboard', icon: 'home', label: 'Home' },
+      { id: 'chat', icon: 'message', label: 'Chat' },
+      { id: 'library', icon: 'library', label: 'Library' },
+      { id: 'profile', icon: 'user', label: 'Profil' },
     ];
     return (
       <div
@@ -46,7 +47,9 @@ function AppInner() {
               color: mobileActiveView === item.id ? 'var(--color-primary)' : 'var(--color-text-secondary)',
             }}
           >
-            <div style={{ fontSize: 20 }}>{item.icon}</div>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <AppIcon name={item.icon} size={20} />
+            </div>
             <div style={{ fontSize: 10, fontWeight: 600, marginTop: 2 }}>{item.label}</div>
           </div>
         ))}

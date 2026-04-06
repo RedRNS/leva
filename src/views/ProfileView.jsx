@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import AppIcon from '../components/AppIcon';
 
 const JURUSAN_OPTIONS = ['Teknik Informatika', 'Sistem Informasi', 'Hukum', 'Kedokteran', 'Psikologi', 'Bisnis & Manajemen', 'Desain Komunikasi Visual', 'Akuntansi', 'Ilmu Komunikasi', 'Lainnya'];
 const SEMESTER_OPTIONS = Array.from({ length: 8 }, (_, i) => `${i + 1}`);
@@ -41,7 +42,9 @@ export default function ProfileView() {
   return (
     <div className="main-content view-enter" style={{ padding: '32px 36px', maxWidth: 680, margin: '0 auto' }}>
 
-      <h1 style={{ margin: '0 0 24px', fontSize: 24, fontWeight: 800 }}>👤 Profil & Pengaturan</h1>
+      <h1 style={{ margin: '0 0 24px', fontSize: 24, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <AppIcon name="user" size={22} /> Profil & Pengaturan
+      </h1>
 
       {/* -- Profile Card */}
       <div className="card" style={{ padding: '28px 28px', marginBottom: 20 }}>
@@ -60,12 +63,12 @@ export default function ProfileView() {
               {form.jurusan} · Semester {form.semester}
             </p>
             <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>
-              🌐 {form.bahasa}
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><AppIcon name="book" size={12} /> {form.bahasa}</span>
             </p>
           </div>
           {!editMode && (
             <button className="btn-ghost" onClick={() => setEditMode(true)} style={{ padding: '8px 16px', fontSize: 13 }}>
-              ✏️ Edit
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><AppIcon name="pencil" size={12} /> Edit</span>
             </button>
           )}
         </div>
@@ -96,14 +99,14 @@ export default function ProfileView() {
               <div style={{ display: 'flex', gap: 10 }}>
                 {['Indonesia', 'English'].map(lang => (
                   <button key={lang} onClick={() => update('bahasa', lang)} style={{ flex: 1, padding: '9px', borderRadius: 9, fontSize: 13, fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s', background: form.bahasa === lang ? 'var(--color-primary)' : 'var(--color-bg)', color: form.bahasa === lang ? '#fff' : 'var(--color-text-secondary)', border: `1.5px solid ${form.bahasa === lang ? 'var(--color-primary)' : 'var(--color-border)'}` }}>
-                    {lang === 'Indonesia' ? '🇮🇩 Indonesia' : '🇬🇧 English'}
+                    {lang === 'Indonesia' ? 'ID Indonesia' : 'EN English'}
                   </button>
                 ))}
               </div>
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
               <button className="btn-ghost" onClick={() => setEditMode(false)} style={{ flex: 1 }}>Batal</button>
-              <button className="btn-primary" onClick={handleSave} style={{ flex: 2 }}>✅ Simpan Perubahan</button>
+              <button className="btn-primary" onClick={handleSave} style={{ flex: 2, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}><AppIcon name="check" size={14} color="#fff" /> Simpan Perubahan</button>
             </div>
           </div>
         )}
@@ -111,15 +114,15 @@ export default function ProfileView() {
 
       {/* -- Stats Card */}
       <div className="card" style={{ padding: '20px 24px', marginBottom: 20 }}>
-        <h3 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 700 }}>📊 Statistik Penggunaan</h3>
+        <h3 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}><AppIcon name="dashboard" size={16} /> Statistik Penggunaan</h3>
         <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
           {[
-            { emoji: '📋', val: 12, label: 'Tasks Selesai' },
-            { emoji: '🔖', val: savedTools.length, label: 'Tools Tersimpan' },
-            { emoji: '📅', val: 8, label: 'Hari Berturut-turut' },
+            { icon: 'clipboard', val: 12, label: 'Tasks Selesai' },
+            { icon: 'book', val: savedTools.length, label: 'Tools Tersimpan' },
+            { icon: 'calendar-clock', val: 8, label: 'Hari Berturut-turut' },
           ].map(stat => (
             <div key={stat.label} style={{ textAlign: 'center', padding: '16px 10px', background: 'var(--color-bg)', borderRadius: 12 }}>
-              <div style={{ fontSize: 24, marginBottom: 6 }}>{stat.emoji}</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}><AppIcon name={stat.icon} size={22} /></div>
               <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--color-primary)' }}>{stat.val}</div>
               <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginTop: 2 }}>{stat.label}</div>
             </div>
@@ -129,7 +132,7 @@ export default function ProfileView() {
 
       {/* -- Notification Preferences */}
       <div className="card" style={{ padding: '20px 24px', marginBottom: 20 }}>
-        <h3 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 700 }}>🔔 Preferensi Notifikasi</h3>
+        <h3 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}><AppIcon name="bell" size={16} /> Preferensi Notifikasi</h3>
         {[
           { label: 'Daily Discovery Reminder', sub: 'Ingatkan tools AI baru setiap hari', val: notif1, set: setNotif1 },
           { label: 'Tips Penggunaan Mingguan', sub: 'Tips produktivitas setiap minggu', val: notif2, set: setNotif2 },
@@ -156,7 +159,7 @@ export default function ProfileView() {
         onMouseEnter={e => { e.currentTarget.style.background = '#FEE2E2'; }}
         onMouseLeave={e => { e.currentTarget.style.background = '#FFF5F5'; }}
       >
-        🚪 Keluar & Reset Demo
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><AppIcon name="logout" size={14} /> Keluar & Reset Demo</span>
       </button>
     </div>
   );
