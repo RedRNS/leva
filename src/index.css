@@ -536,6 +536,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   .sidebar-desktop { display: none !important; }
   .mobile-bottom-nav { display: flex !important; }
 
+  /* Onboarding semester options become one column on mobile */
+  .onboarding-semester-grid { grid-template-columns: 1fr !important; }
+
   /* Dashboard grid 1 col */
   .tool-grid-3 { grid-template-columns: 1fr !important; }
 

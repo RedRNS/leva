@@ -179,7 +179,7 @@ export default function OnboardingView() {
   };
 
   const handleSemesterKeyDown = (event, index) => {
-    const columns = 4;
+    const columns = window.matchMedia('(max-width: 768px)').matches ? 1 : 4;
     let nextIndex = index;
 
     if (event.key === 'ArrowRight') nextIndex = Math.min(index + 1, SEMESTER_OPTIONS.length - 1);
@@ -353,7 +353,7 @@ export default function OnboardingView() {
               value={form.name}
               onChange={e => update('name', e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleNext()}
-              placeholder="Contoh: Renisa Mahardika"
+              placeholder="Contoh: Renisa Assyifa Putri"
               style={inputStyle(!!errors.name)}
               onFocus={(event) => {
                 event.target.style.borderColor = 'var(--color-primary)';
@@ -538,7 +538,7 @@ export default function OnboardingView() {
 
             {/* Semester */}
             <label style={{ fontSize: 13, fontWeight: 600, display: 'block', margin: '16px 0 8px' }}>Semester</label>
-            <div role="radiogroup" aria-label="Pilih semester" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+            <div className="onboarding-semester-grid" role="radiogroup" aria-label="Pilih semester" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
               {SEMESTER_OPTIONS.map((semester, index) => {
                 const isSelected = form.semester === semester;
                 return (
