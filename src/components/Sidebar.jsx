@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { historyTasks } from '../data/mockData';
 import Modal from './Modal';
 import AppIcon from './AppIcon';
 
@@ -12,18 +11,44 @@ const NAV_ITEMS = [
 ];
 
 export default function Sidebar() {
-  const { user, activeView, setActiveView, setActiveTask } = useApp();
+  const { user, activeView, setActiveView, setActiveTask, historyTasks, soundEnabled, setSoundEnabled } = useApp();
   const [showSettings, setShowSettings] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [notif, setNotif]       = useState(true);
   const [searchVal, setSearchVal] = useState('');
+  const searchInputRef = useRef(null);
 
   const filteredHistory = historyTasks.filter(t =>
     t.title.toLowerCase().includes(searchVal.toLowerCase())
   );
 
+  useEffect(() => {
+    const handleFocusSearch = () => {
+      searchInputRef.current?.focus();
+      searchInputRef.current?.select();
+    };
+
+    const handleEscape = () => {
+      setShowSettings(false);
+    };
+
+    window.addEventListener('leva:focus-sidebar-search', handleFocusSearch);
+    window.addEventListener('leva:escape', handleEscape);
+
+    return () => {
+      window.removeEventListener('leva:focus-sidebar-search', handleFocusSearch);
+      window.removeEventListener('leva:escape', handleEscape);
+    };
+  }, []);
+
   const handleHistoryClick = (task) => {
     setActiveTask(task);
+    setActiveView('chat');
+  };
+
+  const handleNewChat = () => {
+    window.dispatchEvent(new CustomEvent('leva:new-chat'));
+    setActiveTask(null);
     setActiveView('chat');
   };
 
@@ -46,7 +71,7 @@ export default function Sidebar() {
 
         {/* New Chat Button */}
         <button
-          onClick={() => { setActiveTask(null); setActiveView('chat'); }}
+          onClick={handleNewChat}
           style={{
             display: 'flex', alignItems: 'center', gap: 8,
             background: 'transparent',
@@ -68,9 +93,10 @@ export default function Sidebar() {
             <AppIcon name="search" size={14} color="#fff" />
           </span>
           <input
+            ref={searchInputRef}
             value={searchVal}
             onChange={e => setSearchVal(e.target.value)}
-            placeholder="Cari riwayat..."
+            placeholder="Cari riwayat... (Ctrl+K)"
             style={{
               width: '100%', background: 'rgba(255,255,255,0.07)',
               border: '1px solid rgba(255,255,255,0.1)',
@@ -95,12 +121,14 @@ export default function Sidebar() {
               {item.label}
             </button>
           ))}
-          <div
+          <button
+            type="button"
             className="sidebar-item"
             onClick={() => setShowSettings(true)}
+            style={{ width: '100%', background: 'transparent', border: 'none', textAlign: 'left' }}
           >
             <span style={{ display: 'flex' }}><AppIcon name="settings" size={16} /></span> Settings
-          </div>
+          </button>
         </nav>
 
         {/* Divider */}
@@ -112,10 +140,14 @@ export default function Sidebar() {
             RIWAYAT TUGAS
           </p>
           {filteredHistory.map(task => (
-            <div
+            <button
               key={task.id}
+              type="button"
               onClick={() => handleHistoryClick(task)}
               style={{
+                width: '100%',
+                border: 'none',
+                textAlign: 'left',
                 padding: '8px 10px', borderRadius: 9, cursor: 'pointer',
                 background: task.isActive ? 'rgba(108,99,255,0.25)' : 'transparent',
                 marginBottom: 2,
@@ -134,7 +166,7 @@ export default function Sidebar() {
               <p style={{ margin: 0, fontSize: 11, color: 'var(--color-sidebar-text-muted)', marginTop: 2 }}>
                 {task.date}
               </p>
-            </div>
+            </button>
           ))}
         </div>
 
@@ -142,8 +174,19 @@ export default function Sidebar() {
         <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '14px 0' }} />
 
         {/* User Profile Footer */}
-        <div
-          style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', padding: '4px 4px' }}
+        <button
+          type="button"
+          style={{
+            display: 'flex',
+            width: '100%',
+            alignItems: 'center',
+            gap: 10,
+            cursor: 'pointer',
+            padding: '4px 4px',
+            border: 'none',
+            background: 'transparent',
+            textAlign: 'left',
+          }}
           onClick={() => setActiveView('profile')}
         >
           <div style={{
@@ -162,7 +205,7 @@ export default function Sidebar() {
               {user ? `${user.jurusan} · Sem ${user.semester}` : 'Teknik Informatika · Sem 6'}
             </p>
           </div>
-        </div>
+        </button>
       </aside>
 
       {/* Settings Modal */}
@@ -174,18 +217,23 @@ export default function Sidebar() {
             {[
               { label: 'Dark Mode', sublabel: 'Ganti tema ke gelap', val: darkMode, set: setDarkMode },
               { label: 'Notifikasi Daily Discovery', sublabel: 'Reminder tools baru setiap hari', val: notif, set: setNotif },
+              { label: 'Efek Suara', sublabel: 'Putar suara saat menyelesaikan tugas', val: soundEnabled, set: setSoundEnabled },
             ].map(item => (
               <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)' }}>{item.label}</p>
                   <p style={{ margin: 0, fontSize: 12, color: 'var(--color-text-secondary)' }}>{item.sublabel}</p>
                 </div>
-                <div
+                <button
+                  type="button"
+                  aria-label={`Toggle ${item.label}`}
+                  aria-pressed={item.val}
                   onClick={() => item.set(v => !v)}
                   style={{
                     width: 44, height: 24, borderRadius: 12, cursor: 'pointer',
                     background: item.val ? 'var(--color-primary)' : 'var(--color-border)',
                     position: 'relative', transition: 'background 0.2s',
+                    border: 'none',
                   }}
                 >
                   <div style={{
@@ -193,7 +241,7 @@ export default function Sidebar() {
                     width: 18, height: 18, borderRadius: '50%', background: '#fff',
                     transition: 'left 0.2s',
                   }} />
-                </div>
+                </button>
               </div>
             ))}
 

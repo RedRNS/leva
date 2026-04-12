@@ -115,6 +115,14 @@ body {
 }
 .btn-ghost:hover { background: var(--color-bg); color: var(--color-text-primary); }
 
+button {
+  transition: transform 0.1s ease;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
 /* Badge styles */
 .badge-done {
   background: var(--color-secondary);
@@ -199,22 +207,61 @@ body {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  background: var(--color-text-primary);
-  color: #fff;
-  padding: 12px 20px;
+  min-width: 280px;
+  max-width: min(420px, calc(100vw - 32px));
+  background: #EFF6FF;
+  color: #1E3A8A;
+  border: 1px solid #BFDBFE;
+  padding: 12px 14px;
   border-radius: 12px;
   font-size: 14px;
-  font-weight: 500;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  font-weight: 600;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18);
   z-index: 9999;
-  animation: slideUp 0.3s ease, fadeOut 0.3s ease 2.5s forwards;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: toastSlideIn 0.25s ease;
 }
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+
+.toast-success {
+  background: #ECFDF5;
+  color: #065F46;
+  border-color: #A7F3D0;
 }
-@keyframes fadeOut {
-  to { opacity: 0; transform: translateY(10px); }
+
+.toast-error {
+  background: #FEF2F2;
+  color: #991B1B;
+  border-color: #FECACA;
+}
+
+.toast-info {
+  background: #EFF6FF;
+  color: #1E3A8A;
+  border-color: #BFDBFE;
+}
+
+.toast-close {
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+.toast.closing {
+  opacity: 0;
+  transform: translateX(24px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+@keyframes toastSlideIn {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 /* Typing dots loading */
@@ -230,6 +277,219 @@ body {
 @keyframes typingBounce {
   0%, 80%, 100% { transform: scale(0.7); opacity: 0.5; }
   40% { transform: scale(1); opacity: 1; }
+}
+
+/* UI/UX Fix: Step 6 — overlay drop-zone memperjelas area interaksi saat user drag file ke input chat. */
+.file-drop-overlay {
+  position: absolute;
+  inset: 0;
+  border: 2px dashed var(--color-primary);
+  border-radius: 16px;
+  background: rgba(108, 99, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  pointer-events: auto;
+}
+
+/* UI/UX Fix: Step 7 — spinner + dots memberi feedback proses agar user paham sistem sedang bekerja. */
+.send-spinner {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.processing-indicator {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.processing-dot {
+  display: inline-block;
+  animation: processingDotPulse 1.2s infinite;
+}
+
+.processing-dot:nth-child(1) { animation-delay: 0s; }
+.processing-dot:nth-child(2) { animation-delay: 0.2s; }
+.processing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes processingDotPulse {
+  0%, 80%, 100% { opacity: 0.2; }
+  40% { opacity: 1; }
+}
+
+.tool-tooltip {
+  position: absolute;
+  left: 50%;
+  top: -10px;
+  width: min(320px, calc(100% - 8px));
+  background: #1E293B;
+  color: #F8FAFC;
+  border-radius: 12px;
+  padding: 10px 12px;
+  transform: translate(-50%, calc(-100% - 4px));
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.tool-tooltip.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tool-tooltip-title {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tool-tooltip-line {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: #CBD5E1;
+}
+
+.tool-tooltip-desc {
+  margin: 6px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #E2E8F0;
+}
+
+.tool-tooltip-arrow {
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 12px;
+  height: 12px;
+  background: #1E293B;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.onboarding-step-panel {
+  position: relative;
+  z-index: 1;
+}
+
+.onboarding-slide-next {
+  animation: onboardingSlideNext 0.3s ease-in-out;
+}
+
+.onboarding-slide-back {
+  animation: onboardingSlideBack 0.3s ease-in-out;
+}
+
+@keyframes onboardingSlideNext {
+  from { opacity: 0; transform: translateX(34px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes onboardingSlideBack {
+  from { opacity: 0; transform: translateX(-34px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.onboarding-confetti-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.onboarding-confetti-piece {
+  position: absolute;
+  top: -12%;
+  width: 8px;
+  height: 16px;
+  border-radius: 4px;
+  opacity: 0;
+  animation-name: confettiDrop;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+.completion-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3600;
+  background: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.completion-card {
+  position: relative;
+  width: min(430px, 92vw);
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+  padding: 26px 24px;
+  text-align: center;
+}
+
+.completion-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  background: linear-gradient(135deg, var(--color-secondary), #059669);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 24px rgba(16, 185, 129, 0.32);
+}
+
+.completion-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.completion-subtitle {
+  margin: 8px 0 16px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.completion-confetti-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.completion-confetti-piece {
+  position: absolute;
+  top: -10%;
+  width: 9px;
+  height: 15px;
+  border-radius: 4px;
+  opacity: 0;
+  animation-name: confettiDrop;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+@keyframes confettiDrop {
+  0% { opacity: 1; transform: translateY(-24px) rotate(0deg); }
+  100% { opacity: 0; transform: translateY(340px) rotate(540deg); }
 }
 
 button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {

@@ -1,28 +1,237 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import AppIcon from '../components/AppIcon';
+import { playSoftChime } from '../utils/sound';
 
 const JURUSAN_OPTIONS = [
-  'Teknik Informatika', 'Sistem Informasi', 'Hukum', 'Kedokteran',
-  'Psikologi', 'Bisnis & Manajemen', 'Desain Komunikasi Visual',
-  'Akuntansi', 'Ilmu Komunikasi', 'Lainnya',
+  'Teknik Informatika',
+  'Sistem Informasi',
+  'Sains Data',
+  'Rekayasa Perangkat Lunak',
+  'Teknik Elektro',
+  'Teknik Mesin',
+  'Ilmu Komunikasi',
+  'Psikologi',
+  'Hukum',
+  'Kedokteran',
+  'Manajemen',
+  'Akuntansi',
+  'Desain Komunikasi Visual',
+  'Sastra Inggris',
+  'Ilmu Politik',
+  'Farmasi',
+  'Arsitektur',
+  'Teknik Sipil',
 ];
 
 const SEMESTER_OPTIONS = Array.from({ length: 8 }, (_, i) => `${i + 1}`);
 
 export default function OnboardingView() {
-  const { setUser, setActiveView } = useApp();
+  const { setUser, setActiveView, showToast, soundEnabled } = useApp();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({ name: '', jurusan: '', semester: '', bahasa: 'Indonesia' });
   const [errors, setErrors] = useState({});
+  const [stepAnimationClass, setStepAnimationClass] = useState('');
+  const [showStep3Confetti, setShowStep3Confetti] = useState(false);
+  const [jurusanQuery, setJurusanQuery] = useState('');
+  const [isJurusanOpen, setIsJurusanOpen] = useState(false);
+  const [jurusanHighlightIndex, setJurusanHighlightIndex] = useState(-1);
+  const nameInputRef = useRef(null);
+  const jurusanBoxRef = useRef(null);
+  const jurusanInputRef = useRef(null);
+  const semesterChipRefs = useRef([]);
+  const bahasaToggleRefs = useRef([]);
+
+  const step3ConfettiPieces = useMemo(
+    () => Array.from({ length: 24 }, (_, index) => {
+      const colors = ['#6C63FF', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4'];
+      return {
+        id: `step3-confetti-${index}`,
+        left: `${(index * 11) % 100}%`,
+        delay: `${(index % 7) * 0.08}s`,
+        duration: `${1.2 + (index % 5) * 0.18}s`,
+        color: colors[index % colors.length],
+      };
+    }),
+    []
+  );
+
+  const filteredJurusan = useMemo(() => {
+    const normalizedQuery = jurusanQuery.trim().toLowerCase();
+    if (!normalizedQuery) return JURUSAN_OPTIONS;
+    return JURUSAN_OPTIONS.filter((option) => option.toLowerCase().includes(normalizedQuery));
+  }, [jurusanQuery]);
+
+  useEffect(() => {
+    if (!form.jurusan) {
+      setJurusanQuery('');
+      return;
+    }
+
+    setJurusanQuery(form.jurusan);
+  }, [form.jurusan]);
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (!jurusanBoxRef.current?.contains(event.target)) {
+        setIsJurusanOpen(false);
+        setJurusanHighlightIndex(-1);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
+
+  useEffect(() => {
+    if (step === 1) nameInputRef.current?.focus();
+  }, [step]);
+
+  useEffect(() => {
+    if (!stepAnimationClass) return;
+
+    const clearTimer = setTimeout(() => setStepAnimationClass(''), 320);
+    return () => clearTimeout(clearTimer);
+  }, [stepAnimationClass]);
+
+  useEffect(() => {
+    if (step !== 3) {
+      setShowStep3Confetti(false);
+      return;
+    }
+
+    /* UI/UX Fix: Step 6 — Output device speaker (sound feedback) untuk positive reinforcement. Micro-animations memberikan reward psikologis, mendukung habit loop. 47,5% user bekerja larut malam — dopamine hit kecil membantu. */
+    if (soundEnabled) playSoftChime({ duration: 0.28, frequency: 800, volume: 0.3 });
+    setShowStep3Confetti(true);
+
+    const confettiTimer = setTimeout(() => setShowStep3Confetti(false), 2000);
+    return () => clearTimeout(confettiTimer);
+  }, [step, soundEnabled]);
+
+  useEffect(() => {
+    const handleGlobalEscape = () => {
+      setIsJurusanOpen(false);
+      setJurusanHighlightIndex(-1);
+    };
+
+    window.addEventListener('leva:escape', handleGlobalEscape);
+    return () => window.removeEventListener('leva:escape', handleGlobalEscape);
+  }, []);
 
   const update = (key, val) => {
     setForm(f => ({ ...f, [key]: val }));
     setErrors(e => ({ ...e, [key]: '' }));
   };
 
+  const selectJurusan = (jurusan) => {
+    update('jurusan', jurusan);
+    setJurusanQuery(jurusan);
+    setIsJurusanOpen(false);
+    setJurusanHighlightIndex(-1);
+  };
+
+  const clearJurusan = () => {
+    update('jurusan', '');
+    setJurusanQuery('');
+    setIsJurusanOpen(false);
+    setJurusanHighlightIndex(-1);
+    jurusanInputRef.current?.focus();
+  };
+
+  const handleJurusanTyping = (value) => {
+    setJurusanQuery(value);
+    setIsJurusanOpen(true);
+    setJurusanHighlightIndex(0);
+    setErrors((prev) => ({ ...prev, jurusan: '' }));
+    setForm((prev) => ({ ...prev, jurusan: prev.jurusan.toLowerCase() === value.trim().toLowerCase() ? prev.jurusan : '' }));
+  };
+
+  const handleJurusanKeyDown = (event) => {
+    if (!isJurusanOpen && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+      setIsJurusanOpen(true);
+      setJurusanHighlightIndex(0);
+      event.preventDefault();
+      return;
+    }
+
+    if (event.key === 'ArrowDown' && filteredJurusan.length > 0) {
+      event.preventDefault();
+      setJurusanHighlightIndex((prev) => Math.min(prev + 1, filteredJurusan.length - 1));
+      return;
+    }
+
+    if (event.key === 'ArrowUp' && filteredJurusan.length > 0) {
+      event.preventDefault();
+      setJurusanHighlightIndex((prev) => Math.max(prev - 1, 0));
+      return;
+    }
+
+    if (event.key === 'Enter' && isJurusanOpen && jurusanHighlightIndex >= 0 && filteredJurusan[jurusanHighlightIndex]) {
+      event.preventDefault();
+      selectJurusan(filteredJurusan[jurusanHighlightIndex]);
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      setIsJurusanOpen(false);
+      setJurusanHighlightIndex(-1);
+    }
+  };
+
+  const handleSemesterKeyDown = (event, index) => {
+    const columns = 4;
+    let nextIndex = index;
+
+    if (event.key === 'ArrowRight') nextIndex = Math.min(index + 1, SEMESTER_OPTIONS.length - 1);
+    if (event.key === 'ArrowLeft') nextIndex = Math.max(index - 1, 0);
+    if (event.key === 'ArrowDown') nextIndex = Math.min(index + columns, SEMESTER_OPTIONS.length - 1);
+    if (event.key === 'ArrowUp') nextIndex = Math.max(index - columns, 0);
+
+    if (nextIndex !== index) {
+      event.preventDefault();
+      update('semester', SEMESTER_OPTIONS[nextIndex]);
+      semesterChipRefs.current[nextIndex]?.focus();
+      return;
+    }
+
+    if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
+      event.preventDefault();
+      update('semester', SEMESTER_OPTIONS[index]);
+    }
+  };
+
+  const handleBahasaKeyDown = (event, index) => {
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+      event.preventDefault();
+      const nextIndex = Math.min(index + 1, 1);
+      const nextValue = nextIndex === 0 ? 'Indonesia' : 'English';
+      update('bahasa', nextValue);
+      bahasaToggleRefs.current[nextIndex]?.focus();
+      return;
+    }
+
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      const nextIndex = Math.max(index - 1, 0);
+      const nextValue = nextIndex === 0 ? 'Indonesia' : 'English';
+      update('bahasa', nextValue);
+      bahasaToggleRefs.current[nextIndex]?.focus();
+      return;
+    }
+
+    if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
+      event.preventDefault();
+      update('bahasa', index === 0 ? 'Indonesia' : 'English');
+    }
+  };
+
   const validateStep1 = () => {
-    if (!form.name.trim()) { setErrors({ name: 'Nama tidak boleh kosong.' }); return false; }
+    if (!form.name.trim()) {
+      setErrors((prev) => ({ ...prev, name: 'Nama tidak boleh kosong' }));
+      nameInputRef.current?.focus();
+      return false;
+    }
+
     return true;
   };
 
@@ -35,8 +244,24 @@ export default function OnboardingView() {
   };
 
   const handleNext = () => {
-    if (step === 1 && validateStep1()) setStep(2);
-    if (step === 2 && validateStep2()) setStep(3);
+    if (step === 1 && validateStep1()) {
+      setStepAnimationClass('onboarding-slide-next');
+      setStep(2);
+    }
+
+    if (step === 2 && validateStep2()) {
+      setStepAnimationClass('onboarding-slide-next');
+      setStep(3);
+    }
+  };
+
+  const goToPreviousStep = (nextStep) => {
+    setStepAnimationClass('onboarding-slide-back');
+    setStep(nextStep);
+  };
+
+  const handleGoogleContinue = () => {
+    showToast('Fitur Google Sign-In segera hadir!', 'info');
   };
 
   const handleStart = () => {
@@ -51,7 +276,7 @@ export default function OnboardingView() {
     borderRadius: 10, fontSize: 14,
     outline: 'none', color: 'var(--color-text-primary)',
     background: '#fff',
-    transition: 'border 0.2s',
+    transition: 'border 0.2s, box-shadow 0.2s',
     boxSizing: 'border-box',
   });
 
@@ -59,13 +284,34 @@ export default function OnboardingView() {
     ? <p style={{ margin: '4px 0 0', fontSize: 12, color: '#EF4444' }}>{errors[key]}</p>
     : null;
 
+  const isStep2Complete = Boolean(form.jurusan && form.semester);
+
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: 'linear-gradient(135deg, #6C63FF 0%, #8B5CF6 50%, #A78BFA 100%)',
       padding: 20,
     }}>
-      <div className="card" style={{ width: '100%', maxWidth: 460, padding: 36 }}>
+      <div className="card" style={{ width: '100%', maxWidth: 460, padding: 36, position: 'relative', overflow: 'hidden' }}>
+
+        {step === 3 && showStep3Confetti && (
+          <div className="onboarding-confetti-layer" aria-hidden="true">
+            {step3ConfettiPieces.map((piece) => (
+              <span
+                key={piece.id}
+                className="onboarding-confetti-piece"
+                style={{
+                  left: piece.left,
+                  background: piece.color,
+                  animationDelay: piece.delay,
+                  animationDuration: piece.duration,
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        <div className={`onboarding-step-panel ${stepAnimationClass}`}>
 
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
@@ -101,13 +347,22 @@ export default function OnboardingView() {
               Nama lengkap kamu
             </label>
             <input
+              ref={nameInputRef}
+              autoFocus
+              autoComplete="name"
               value={form.name}
               onChange={e => update('name', e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleNext()}
               placeholder="Contoh: Renisa Mahardika"
               style={inputStyle(!!errors.name)}
-              onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
-              onBlur={e => e.target.style.borderColor = errors.name ? '#EF4444' : 'var(--color-border)'}
+              onFocus={(event) => {
+                event.target.style.borderColor = 'var(--color-primary)';
+                event.target.style.boxShadow = '0 0 0 4px rgba(196, 181, 253, 0.55)';
+              }}
+              onBlur={(event) => {
+                event.target.style.borderColor = errors.name ? '#EF4444' : 'var(--color-border)';
+                event.target.style.boxShadow = 'none';
+              }}
             />
             {errText('name')}
 
@@ -127,6 +382,42 @@ export default function OnboardingView() {
                 Lanjut <AppIcon name="arrow-right" size={14} color="#fff" />
               </span>
             </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '16px 0 12px' }}>
+              <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
+              <span style={{ fontSize: 12, color: 'var(--color-text-secondary)', fontWeight: 600 }}>atau</span>
+              <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleGoogleContinue}
+              style={{
+                width: '100%',
+                padding: '12px 14px',
+                marginTop: 2,
+                borderRadius: 10,
+                border: '1px solid #D1D5DB',
+                background: '#fff',
+                color: '#374151',
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                transition: 'background 0.2s ease',
+              }}
+              onMouseEnter={(event) => {
+                event.currentTarget.style.background = '#F9FAFB';
+              }}
+              onMouseLeave={(event) => {
+                event.currentTarget.style.background = '#fff';
+              }}
+            >
+              <AppIcon name="google" size={14} /> Atau lanjutkan dengan Google
+            </button>
           </div>
         )}
 
@@ -140,35 +431,164 @@ export default function OnboardingView() {
 
             {/* Jurusan */}
             <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Jurusan</label>
-            <select
-              value={form.jurusan}
-              onChange={e => update('jurusan', e.target.value)}
-              style={{ ...inputStyle(!!errors.jurusan), cursor: 'pointer' }}
-            >
-              <option value="">-- Pilih jurusanmu --</option>
-              {JURUSAN_OPTIONS.map(j => <option key={j} value={j}>{j}</option>)}
-            </select>
+            {/* UI/UX Fix: Step 7 — Combo box menggabungkan text entry + list box untuk pencarian cepat. Radio button grid menampilkan semua opsi sekaligus (display as many choices as possible). */}
+            <div ref={jurusanBoxRef} style={{ position: 'relative' }}>
+              <input
+                ref={jurusanInputRef}
+                value={jurusanQuery}
+                onChange={(event) => handleJurusanTyping(event.target.value)}
+                onFocus={() => {
+                  setIsJurusanOpen(true);
+                  setJurusanHighlightIndex(filteredJurusan.length ? 0 : -1);
+                }}
+                onKeyDown={handleJurusanKeyDown}
+                onBlur={(event) => {
+                  if (!jurusanBoxRef.current?.contains(event.relatedTarget)) {
+                    setIsJurusanOpen(false);
+                    setJurusanHighlightIndex(-1);
+                  }
+                }}
+                placeholder="Ketik atau pilih jurusan..."
+                role="combobox"
+                aria-expanded={isJurusanOpen}
+                aria-controls="jurusan-combobox-list"
+                aria-autocomplete="list"
+                style={{ ...inputStyle(!!errors.jurusan), paddingRight: 66 }}
+              />
+
+              {jurusanQuery && (
+                <button
+                  type="button"
+                  onClick={clearJurusan}
+                  aria-label="Reset jurusan"
+                  style={{
+                    position: 'absolute',
+                    right: 34,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    border: 'none',
+                    background: 'transparent',
+                    color: 'var(--color-text-secondary)',
+                    cursor: 'pointer',
+                    padding: 0,
+                    display: 'flex',
+                  }}
+                >
+                  <AppIcon name="x" size={14} />
+                </button>
+              )}
+
+              <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-secondary)', pointerEvents: 'none', display: 'flex' }}>
+                <AppIcon name="chevron-down" size={14} />
+              </span>
+
+              {isJurusanOpen && (
+                <div
+                  id="jurusan-combobox-list"
+                  role="listbox"
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    top: 'calc(100% + 6px)',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: 10,
+                    background: '#fff',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                    maxHeight: 210,
+                    overflowY: 'auto',
+                    zIndex: 20,
+                  }}
+                >
+                  {filteredJurusan.length === 0 ? (
+                    <div style={{ padding: '10px 12px', fontSize: 13, color: 'var(--color-text-secondary)' }}>
+                      Jurusan tidak ditemukan
+                    </div>
+                  ) : (
+                    filteredJurusan.map((jurusan, index) => {
+                      const isHighlighted = index === jurusanHighlightIndex;
+                      return (
+                        <button
+                          key={jurusan}
+                          type="button"
+                          role="option"
+                          aria-selected={form.jurusan === jurusan}
+                          onMouseDown={(event) => event.preventDefault()}
+                          onClick={() => selectJurusan(jurusan)}
+                          style={{
+                            width: '100%',
+                            textAlign: 'left',
+                            border: 'none',
+                            background: isHighlighted ? 'var(--color-primary-light)' : '#fff',
+                            color: isHighlighted ? 'var(--color-primary)' : 'var(--color-text-primary)',
+                            padding: '10px 12px',
+                            cursor: 'pointer',
+                            fontSize: 13,
+                          }}
+                        >
+                          {jurusan}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+            </div>
             {errText('jurusan')}
 
             {/* Semester */}
-            <label style={{ fontSize: 13, fontWeight: 600, display: 'block', margin: '16px 0 6px' }}>Semester</label>
-            <select
-              value={form.semester}
-              onChange={e => update('semester', e.target.value)}
-              style={{ ...inputStyle(!!errors.semester), cursor: 'pointer' }}
-            >
-              <option value="">-- Pilih semestermu --</option>
-              {SEMESTER_OPTIONS.map(s => <option key={s} value={s}>Semester {s}</option>)}
-            </select>
+            <label style={{ fontSize: 13, fontWeight: 600, display: 'block', margin: '16px 0 8px' }}>Semester</label>
+            <div role="radiogroup" aria-label="Pilih semester" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+              {SEMESTER_OPTIONS.map((semester, index) => {
+                const isSelected = form.semester === semester;
+                return (
+                  <button
+                    key={semester}
+                    ref={(element) => { semesterChipRefs.current[index] = element; }}
+                    type="button"
+                    role="radio"
+                    aria-checked={isSelected}
+                    tabIndex={form.semester ? (isSelected ? 0 : -1) : (index === 0 ? 0 : -1)}
+                    onKeyDown={(event) => handleSemesterKeyDown(event, index)}
+                    onClick={() => update('semester', semester)}
+                    style={{
+                      padding: '10px 8px',
+                      borderRadius: 10,
+                      border: `1.5px solid ${isSelected ? 'var(--color-primary)' : 'var(--color-border)'}`,
+                      background: isSelected ? 'var(--color-primary)' : '#fff',
+                      color: isSelected ? '#fff' : 'var(--color-text-secondary)',
+                      cursor: 'pointer',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(event) => {
+                      if (!isSelected) event.currentTarget.style.borderColor = '#C4B5FD';
+                    }}
+                    onMouseLeave={(event) => {
+                      if (!isSelected) event.currentTarget.style.borderColor = 'var(--color-border)';
+                    }}
+                  >
+                    Semester {semester}
+                  </button>
+                );
+              })}
+            </div>
             {errText('semester')}
 
             {/* Bahasa */}
             <label style={{ fontSize: 13, fontWeight: 600, display: 'block', margin: '16px 0 8px' }}>Preferensi Bahasa</label>
-            <div style={{ display: 'flex', gap: 10 }}>
-              {['Indonesia', 'English'].map(lang => (
+            <div role="radiogroup" aria-label="Preferensi bahasa" style={{ display: 'flex', gap: 10 }}>
+              {['Indonesia', 'English'].map((lang, index) => (
                 <button
                   key={lang}
+                  ref={(element) => { bahasaToggleRefs.current[index] = element; }}
+                  type="button"
+                  role="radio"
+                  aria-checked={form.bahasa === lang}
+                  tabIndex={form.bahasa === lang ? 0 : -1}
                   onClick={() => update('bahasa', lang)}
+                  onKeyDown={(event) => handleBahasaKeyDown(event, index)}
                   style={{
                     flex: 1, padding: '10px', borderRadius: 10, fontSize: 14, fontWeight: 500,
                     cursor: 'pointer', transition: 'all 0.2s',
@@ -183,12 +603,30 @@ export default function OnboardingView() {
             </div>
 
             <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
-              <button className="btn-ghost" onClick={() => setStep(1)} style={{ flex: 1, padding: '13px' }}>
+              <button className="btn-ghost" onClick={() => goToPreviousStep(1)} style={{ flex: 1, padding: '13px' }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                   <AppIcon name="arrow-left" size={14} /> Kembali
                 </span>
               </button>
-              <button className="btn-primary" onClick={handleNext} style={{ flex: 2, padding: '13px', fontSize: 15 }}>
+              <button
+                className="btn-primary"
+                onClick={handleNext}
+                disabled={!isStep2Complete}
+                style={{
+                  flex: 2,
+                  padding: '13px',
+                  fontSize: 15,
+                  opacity: isStep2Complete ? 1 : 0.5,
+                  cursor: isStep2Complete ? 'pointer' : 'not-allowed',
+                  transition: 'filter 0.2s ease',
+                }}
+                onMouseEnter={(event) => {
+                  if (isStep2Complete) event.currentTarget.style.filter = 'brightness(1.04)';
+                }}
+                onMouseLeave={(event) => {
+                  if (isStep2Complete) event.currentTarget.style.filter = 'none';
+                }}
+              >
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                   Lanjut <AppIcon name="arrow-right" size={14} color="#fff" />
                 </span>
@@ -243,13 +681,14 @@ export default function OnboardingView() {
               </span>
             </button>
 
-            <button className="btn-ghost" onClick={() => setStep(2)} style={{ width: '100%', marginTop: 10 }}>
+            <button className="btn-ghost" onClick={() => goToPreviousStep(2)} style={{ width: '100%', marginTop: 10 }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                 <AppIcon name="arrow-left" size={14} /> Edit Data
               </span>
             </button>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

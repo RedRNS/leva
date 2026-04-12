@@ -1,17 +1,102 @@
+import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
+
 export default function Modal({ title, onClose, children }) {
-  return (
+  const dialogRef = useRef(null);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    const previousActiveElement = document.activeElement;
+
+    const focusableElements = () => {
+      if (!dialogRef.current) return [];
+
+      return Array.from(
+        dialogRef.current.querySelectorAll(
+          'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      );
+    };
+
+    const setInitialFocus = () => {
+      const candidates = focusableElements();
+      if (candidates.length > 0) {
+        candidates[0].focus();
+        return;
+      }
+
+      dialogRef.current?.focus();
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') onClose();
+
+      if (event.key !== 'Tab') return;
+
+      const candidates = focusableElements();
+      if (candidates.length === 0) {
+        event.preventDefault();
+        dialogRef.current?.focus();
+        return;
+      }
+
+      const firstEl = candidates[0];
+      const lastEl = candidates[candidates.length - 1];
+      const activeEl = document.activeElement;
+
+      if (!event.shiftKey && activeEl === lastEl) {
+        event.preventDefault();
+        firstEl.focus();
+      }
+
+      if (event.shiftKey && activeEl === firstEl) {
+        event.preventDefault();
+        lastEl.focus();
+      }
+    };
+
+    /* UI/UX Fix: Step 7 — Dialog konfirmasi harus menjadi overlay global agar fokus aksi destruktif tidak terpotong area scroll/layout parent. */
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+    setInitialFocus();
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+      if (previousActiveElement instanceof HTMLElement) previousActiveElement.focus();
+    };
+  }, [onClose]);
+
+  return createPortal(
     <div
       style={{
-        position: 'fixed', inset: 0, zIndex: 1000,
+        position: 'fixed',
+        inset: 0,
+        zIndex: 4000,
         background: 'rgba(0,0,0,0.45)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         backdropFilter: 'blur(4px)',
+        padding: 16,
       }}
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
         className="card"
-        style={{ width: 460, maxWidth: '90vw', padding: 28, position: 'relative' }}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        tabIndex={-1}
+        style={{
+          width: 460,
+          maxWidth: 'min(460px, calc(100vw - 32px))',
+          maxHeight: 'calc(100vh - 32px)',
+          overflowY: 'auto',
+          padding: 28,
+          position: 'relative',
+        }}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -21,6 +106,7 @@ export default function Modal({ title, onClose, children }) {
           </h2>
           <button
             onClick={onClose}
+            aria-label="Tutup dialog"
             style={{
               background: 'var(--color-bg)', border: 'none', borderRadius: 8,
               padding: '6px 10px', cursor: 'pointer', fontSize: 16,
@@ -34,6 +120,7 @@ export default function Modal({ title, onClose, children }) {
         {/* Content */}
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

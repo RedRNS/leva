@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { mockTools } from '../data/mockData';
 import AppIcon from '../components/AppIcon';
@@ -13,6 +13,52 @@ const tagClass = (cat) => {
   return map[cat] || 'tag tag-research';
 };
 
+const pricingMeta = (pricingType) => {
+  const map = {
+    free: { label: 'Free', bg: '#DCFCE7', color: '#15803D' },
+    freemium: { label: 'Freemium', bg: '#FEF3C7', color: '#B45309' },
+    paid: { label: 'Berbayar', bg: '#FEE2E2', color: '#B91C1C' },
+    opensource: { label: 'Open-source', bg: '#DBEAFE', color: '#1D4ED8' },
+  };
+
+  return map[pricingType] || map.free;
+};
+
+function PricingBadge({ pricingType }) {
+  const price = pricingMeta(pricingType);
+
+  return (
+    <span
+      style={{
+        fontSize: 11,
+        fontWeight: 700,
+        padding: '3px 9px',
+        borderRadius: 999,
+        background: price.bg,
+        color: price.color,
+      }}
+    >
+      {price.label}
+    </span>
+  );
+}
+
+function ToolTooltip({ tool, show }) {
+  const price = pricingMeta(tool.pricingType);
+  const detailText = tool.detailDesc || tool.desc;
+
+  return (
+    <div className={`tool-tooltip ${show ? 'visible' : ''}`}>
+      {/* UI/UX Fix: Step 7 — Tooltip/balloon tip sebagai presentation control untuk info harga. Survei: 33,9% user terbentur paywall; Persona Bima butuh filter harga instan. */}
+      <p className="tool-tooltip-title">{tool.name}</p>
+      <p className="tool-tooltip-line">Status: <strong style={{ color: price.color }}>{price.label}</strong></p>
+      <p className="tool-tooltip-line">Website: {tool.url}</p>
+      <p className="tool-tooltip-desc">{detailText}</p>
+      <span className="tool-tooltip-arrow" />
+    </div>
+  );
+}
+
 // --- Star rating display
 function StarRating({ rating }) {
   return (
@@ -24,32 +70,66 @@ function StarRating({ rating }) {
 }
 
 // --- Featured Tool Card (large, horizontal scroll)
-function FeaturedToolCard({ tool, onSave, onNavigateChat }) {
-  const [saved, setSaved] = useState(false);
-  const handleSave = () => { onSave(tool); setSaved(true); };
+function FeaturedToolCard({ tool, onSave, isSaved }) {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const tooltipTimerRef = useRef(null);
+  const handleSave = () => {
+    if (isSaved) return;
+    onSave(tool);
+  };
+
+  useEffect(() => () => {
+    if (tooltipTimerRef.current) clearTimeout(tooltipTimerRef.current);
+  }, []);
+
+  useEffect(() => {
+    const handleEscape = () => setShowTooltip(false);
+    window.addEventListener('leva:escape', handleEscape);
+
+    return () => window.removeEventListener('leva:escape', handleEscape);
+  }, []);
+
+  const handleMouseEnter = (event) => {
+    event.currentTarget.style.transform = 'translateY(-4px)';
+    event.currentTarget.style.boxShadow = '0 8px 24px rgba(108,99,255,0.15)';
+
+    if (tooltipTimerRef.current) clearTimeout(tooltipTimerRef.current);
+    tooltipTimerRef.current = setTimeout(() => setShowTooltip(true), 300);
+  };
+
+  const handleMouseLeave = (event) => {
+    event.currentTarget.style.transform = 'translateY(0)';
+    event.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)';
+
+    if (tooltipTimerRef.current) clearTimeout(tooltipTimerRef.current);
+    setShowTooltip(false);
+  };
 
   return (
     <div
       className="card"
       style={{
-        minWidth: 260, width: 260, padding: 22, flexShrink: 0,
+        width: '100%', minWidth: 0, padding: 22,
         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
         cursor: 'default',
+        position: 'relative',
+        overflow: 'visible',
       }}
-      onMouseEnter={e => {
-        e.currentTarget.style.transform = 'translateY(-4px)';
-        e.currentTarget.style.boxShadow = '0 8px 24px rgba(108,99,255,0.15)';
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)';
-      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
+      <ToolTooltip tool={tool} show={showTooltip} />
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
         <span className={tagClass(tool.category)}>{tool.category}</span>
-        <span style={{ display: 'flex' }}><AppIcon name={tool.iconKey} size={24} /></span>
+        <PricingBadge pricingType={tool.pricingType} />
       </div>
-      <h3 style={{ margin: '0 0 6px', fontSize: 17, fontWeight: 700 }}>{tool.name}</h3>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6, gap: 10 }}>
+        <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>{tool.name}</h3>
+        <span style={{ display: 'flex', flexShrink: 0 }}><AppIcon name={tool.iconKey} size={24} /></span>
+      </div>
+
       <p style={{ margin: '0 0 10px', fontSize: 13, color: 'var(--color-text-secondary)', lineHeight: 1.55 }}>
         {tool.desc}
       </p>
@@ -57,11 +137,22 @@ function FeaturedToolCard({ tool, onSave, onNavigateChat }) {
 
       <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
         <button
-          className="btn-secondary"
+          disabled={isSaved}
           onClick={handleSave}
-          style={{ flex: 1, padding: '8px', fontSize: 12 }}
+          style={{
+            flex: 1,
+            padding: '8px',
+            fontSize: 12,
+            borderRadius: 10,
+            border: isSaved ? '1px solid #CBD5E1' : 'none',
+            background: isSaved ? '#E2E8F0' : 'var(--color-primary-light)',
+            color: isSaved ? '#64748B' : 'var(--color-primary)',
+            fontWeight: 600,
+            cursor: isSaved ? 'not-allowed' : 'pointer',
+          }}
         >
-          {saved ? 'Tersimpan' : 'Simpan'}
+          {/* UI/UX Fix: Step 6 — Output device harus memberi respond jelas ke aksi user. Step 7 — Aksi destruktif (hapus) harus ada safeguard/konfirmasi. Survei: 52,5% user sulit temukan referensi. */}
+          {isSaved ? 'Tersimpan ✓' : 'Simpan'}
         </button>
         <a
           href={`https://${tool.url}`} target="_blank" rel="noreferrer"
@@ -82,47 +173,87 @@ function FeaturedToolCard({ tool, onSave, onNavigateChat }) {
 }
 
 // --- Small Tool Card (grid)
-function SmallToolCard({ tool, onSave }) {
-  const [saved, setSaved] = useState(false);
-  const handleSave = () => { onSave(tool); setSaved(true); };
+function SmallToolCard({ tool, onSave, isSaved }) {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const tooltipTimerRef = useRef(null);
+  const handleSave = () => {
+    if (isSaved) return;
+    onSave(tool);
+  };
+
+  useEffect(() => () => {
+    if (tooltipTimerRef.current) clearTimeout(tooltipTimerRef.current);
+  }, []);
+
+  useEffect(() => {
+    const handleEscape = () => setShowTooltip(false);
+    window.addEventListener('leva:escape', handleEscape);
+
+    return () => window.removeEventListener('leva:escape', handleEscape);
+  }, []);
+
+  const handleMouseEnter = (event) => {
+    event.currentTarget.style.transform = 'translateY(-2px)';
+    event.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.1)';
+
+    if (tooltipTimerRef.current) clearTimeout(tooltipTimerRef.current);
+    tooltipTimerRef.current = setTimeout(() => setShowTooltip(true), 300);
+  };
+
+  const handleMouseLeave = (event) => {
+    event.currentTarget.style.transform = 'translateY(0)';
+    event.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)';
+
+    if (tooltipTimerRef.current) clearTimeout(tooltipTimerRef.current);
+    setShowTooltip(false);
+  };
 
   return (
     <div
       className="card"
       style={{
         padding: 16, transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        position: 'relative',
+        overflow: 'visible',
       }}
-      onMouseEnter={e => {
-        e.currentTarget.style.transform = 'translateY(-2px)';
-        e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.1)';
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)';
-      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
+      <ToolTooltip tool={tool} show={showTooltip} />
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <span className={tagClass(tool.category)}>{tool.category}</span>
+        <PricingBadge pricingType={tool.pricingType} />
+      </div>
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ display: 'flex' }}><AppIcon name={tool.iconKey} size={20} /></span>
           <span style={{ fontWeight: 700, fontSize: 14 }}>{tool.name}</span>
         </div>
         <button
+          disabled={isSaved}
           onClick={handleSave}
           title="Simpan ke Library"
           style={{
-            background: saved ? 'var(--color-secondary-light)' : 'var(--color-bg)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 8, padding: '4px 8px', cursor: 'pointer', fontSize: 14,
+            background: isSaved ? '#E2E8F0' : 'var(--color-primary-light)',
+            color: isSaved ? '#64748B' : 'var(--color-primary)',
+            border: isSaved ? '1px solid #CBD5E1' : '1px solid #D7D2FF',
+            borderRadius: 8,
+            padding: '5px 9px',
+            cursor: isSaved ? 'not-allowed' : 'pointer',
+            fontSize: 11,
+            fontWeight: 700,
           }}
         >
-          <AppIcon name={saved ? 'check' : 'book'} size={14} />
+          {isSaved ? 'Tersimpan ✓' : 'Simpan'}
         </button>
       </div>
       <p style={{ margin: '0 0 10px', fontSize: 12, color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
         {tool.desc}
       </p>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span className={tagClass(tool.category)}>{tool.category}</span>
+        <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-secondary)' }}>{tool.url}</span>
         <StarRating rating={tool.rating} />
       </div>
     </div>
@@ -131,9 +262,10 @@ function SmallToolCard({ tool, onSave }) {
 
 // --- Main Dashboard View
 export default function DashboardView() {
-  const { user, saveToolToLibrary, setActiveView } = useApp();
+  const { user, saveToolToLibrary, setActiveView, savedTools } = useApp();
   const [activeFilter, setActiveFilter] = useState('Semua');
   const [mounted, setMounted] = useState(false);
+  const [showAllFeatured, setShowAllFeatured] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setMounted(true), 600);
@@ -151,10 +283,12 @@ export default function DashboardView() {
 
   const FILTERS = ['Semua', 'Research', 'Writing', 'Coding', 'Data', 'Academic', 'Productivity'];
 
-  const featuredTools = mockTools.slice(0, 4);
+  const featuredTools = mockTools;
+  const visibleFeaturedTools = showAllFeatured ? featuredTools : featuredTools.slice(0, 6);
   const filteredTools = activeFilter === 'Semua'
     ? mockTools
     : mockTools.filter(t => t.category === activeFilter);
+  const savedToolNames = new Set(savedTools.map((tool) => tool.name.toLowerCase()));
 
   if (!mounted) return (
     <div className="main-content view-enter" style={{ padding: '32px 36px' }}>
@@ -194,7 +328,8 @@ export default function DashboardView() {
         </div>
       </div>
 
-      {/* -- Featured Tools (horizontal scroll) */}
+      {/* UI/UX Fix: Step 7 — Display as many choices as possible (grid vs scroll). Drop-down untuk sorting meminimalisir pencarian manual. Survei: 52,5% kesulitan temukan referensi tersimpan. */}
+      {/* -- Featured Tools (responsive grid) */}
       <section style={{ marginBottom: 36 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
           <AppIcon name="flame" size={18} />
@@ -203,16 +338,27 @@ export default function DashboardView() {
             - dipilihkan khusus untuk {jurusan}
           </span>
         </div>
-        <div style={{ display: 'flex', gap: 16, overflowX: 'auto', paddingBottom: 8 }}>
-          {featuredTools.map(tool => (
+        <div className="tool-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+          {visibleFeaturedTools.map(tool => (
             <FeaturedToolCard
               key={tool.id}
               tool={tool}
               onSave={saveToolToLibrary}
-              onNavigateChat={() => setActiveView('chat')}
+              isSaved={savedToolNames.has(tool.name.toLowerCase())}
             />
           ))}
         </div>
+        {!showAllFeatured && featuredTools.length > 6 && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
+            <button
+              className="btn-ghost"
+              onClick={() => setShowAllFeatured(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '9px 14px' }}
+            >
+              Lihat Semua <AppIcon name="arrow-right" size={14} />
+            </button>
+          </div>
+        )}
       </section>
 
       {/* -- Filter Tabs */}
@@ -248,7 +394,12 @@ export default function DashboardView() {
         </div>
         <div className="tool-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
           {filteredTools.map(tool => (
-            <SmallToolCard key={tool.id} tool={tool} onSave={saveToolToLibrary} />
+            <SmallToolCard
+              key={tool.id}
+              tool={tool}
+              onSave={saveToolToLibrary}
+              isSaved={savedToolNames.has(tool.name.toLowerCase())}
+            />
           ))}
         </div>
         {filteredTools.length === 0 && (

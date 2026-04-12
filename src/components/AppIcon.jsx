@@ -8,6 +8,7 @@ import {
   CalendarClock,
   Check,
   ChevronDown,
+  Chrome,
   Circle,
   ClipboardList,
   Clock3,
@@ -25,6 +26,7 @@ import {
   LogOut,
   MessageCircle,
   Newspaper,
+  Paperclip,
   Pencil,
   Plus,
   RefreshCw,
@@ -36,6 +38,7 @@ import {
   Trash2,
   Undo2,
   User,
+  X,
 } from 'lucide-react';
 
 const ICONS = {
@@ -48,6 +51,7 @@ const ICONS = {
   'calendar-clock': CalendarClock,
   check: Check,
   'chevron-down': ChevronDown,
+  google: Chrome,
   clipboard: ClipboardList,
   clock: Clock3,
   copy: Copy,
@@ -64,6 +68,8 @@ const ICONS = {
   logout: LogOut,
   message: MessageCircle,
   news: Newspaper,
+  // UI/UX Fix: Step 6 — ikon paperclip dipakai untuk affordance upload file yang familiar.
+  paperclip: Paperclip,
   pencil: Pencil,
   plus: Plus,
   refresh: RefreshCw,
@@ -75,9 +81,11 @@ const ICONS = {
   trash: Trash2,
   undo: Undo2,
   user: User,
+  // UI/UX Fix: Step 7 — ikon close dipakai pada chip agar kontrol remove file mudah dipahami.
+  x: X,
 };
 
-export default function AppIcon({ name, size = 18, color = 'currentColor', strokeWidth = 1.8 }) {
+export default function AppIcon({ name, size = 18, color = 'currentColor', strokeWidth = 1.8, className }) {
   const Icon = ICONS[name] || Circle;
-  return <Icon size={size} color={color} strokeWidth={strokeWidth} />;
+  return <Icon size={size} color={color} strokeWidth={strokeWidth} className={className} />;
 }

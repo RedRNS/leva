@@ -9,8 +9,17 @@ import Sidebar from './components/Sidebar';
 import Toast from './components/Toast';
 import AppIcon from './components/AppIcon';
 
+const isTypingTarget = (target) => {
+  if (!(target instanceof HTMLElement)) return false;
+
+  const tagName = target.tagName;
+  if (target.isContentEditable || target.closest('[contenteditable="true"]')) return true;
+
+  return tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT';
+};
+
 function AppInner() {
-  const { activeView, toast } = useApp();
+  const { activeView, toast, dismissToast, setActiveView, setActiveTask } = useApp();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
@@ -18,6 +27,42 @@ function AppInner() {
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
+
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        window.dispatchEvent(new CustomEvent('leva:escape'));
+        return;
+      }
+
+      if (activeView === 'onboarding' || isTypingTarget(event.target)) return;
+
+      const key = event.key.toLowerCase();
+
+      /* UI/UX Fix: Step 6 — Keyboard shortcuts minimalisir pergerakan tangan (47,5% user larut malam). Step 7 — Disabled state = "work the way it looks". Quick prompts kontekstual mengurangi 35,6% keluhan AI terlalu generik. */
+      if ((event.ctrlKey || event.metaKey) && key === 'k') {
+        event.preventDefault();
+        window.dispatchEvent(new CustomEvent('leva:focus-sidebar-search'));
+        return;
+      }
+
+      if (!event.ctrlKey && !event.metaKey && !event.altKey && key === '/') {
+        event.preventDefault();
+        window.dispatchEvent(new CustomEvent('leva:focus-sidebar-search'));
+        return;
+      }
+
+      if ((event.ctrlKey || event.metaKey) && key === 'n') {
+        event.preventDefault();
+        window.dispatchEvent(new CustomEvent('leva:new-chat'));
+        setActiveTask(null);
+        setActiveView('chat');
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [activeView, setActiveTask, setActiveView]);
 
   function MobileBottomNav() {
     const { activeView: mobileActiveView, setActiveView } = useApp();
@@ -38,20 +83,23 @@ function AppInner() {
         }}
       >
         {items.map(item => (
-          <div
+          <button
             key={item.id}
+            type="button"
             onClick={() => setActiveView(item.id)}
             style={{
               flex: 1, padding: '10px 0', textAlign: 'center',
               cursor: 'pointer',
               color: mobileActiveView === item.id ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+              border: 'none',
+              background: 'transparent',
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <AppIcon name={item.icon} size={20} />
             </div>
             <div style={{ fontSize: 10, fontWeight: 600, marginTop: 2 }}>{item.label}</div>
-          </div>
+          </button>
         ))}
       </div>
     );
@@ -71,7 +119,7 @@ function AppInner() {
         {activeView === 'profile' && <ProfileView />}
       </main>
       {isMobile && <MobileBottomNav />}
-      {toast && <Toast message={toast} />}
+      {toast && <Toast toast={toast} onClose={dismissToast} />}
     </div>
   );
 }

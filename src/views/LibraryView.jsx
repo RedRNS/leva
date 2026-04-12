@@ -1,10 +1,59 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { mockTools } from '../data/mockData';
 import Modal from '../components/Modal';
 import AppIcon from '../components/AppIcon';
 
 const PRIORITY_FILTERS = ['Semua', 'Prioritas Tinggi', 'Sangat Bagus', 'Coba Nanti'];
 const CATEGORY_FILTERS = ['Semua', 'Research', 'Writing', 'Coding', 'Data', 'Academic', 'Productivity'];
+const SORT_OPTIONS = [
+  { value: 'latest', label: 'Terbaru disimpan' },
+  { value: 'oldest', label: 'Terlama disimpan' },
+  { value: 'rating', label: 'Rating tertinggi' },
+  { value: 'az', label: 'A-Z' },
+  { value: 'za', label: 'Z-A' },
+];
+
+const INDONESIAN_MONTH_MAP = {
+  jan: 0,
+  feb: 1,
+  mar: 2,
+  apr: 3,
+  mei: 4,
+  jun: 5,
+  jul: 6,
+  agu: 7,
+  sep: 8,
+  okt: 9,
+  nov: 10,
+  des: 11,
+};
+
+const pricingMeta = (pricingType) => {
+  const map = {
+    free: { label: 'Free', bg: '#DCFCE7', color: '#15803D' },
+    freemium: { label: 'Freemium', bg: '#FEF3C7', color: '#B45309' },
+    paid: { label: 'Berbayar', bg: '#FEE2E2', color: '#B91C1C' },
+    opensource: { label: 'Open-source', bg: '#DBEAFE', color: '#1D4ED8' },
+  };
+
+  return map[pricingType] || map.freemium;
+};
+
+const parseSavedAtToTimestamp = (savedAt, fallback = 0) => {
+  if (!savedAt || typeof savedAt !== 'string') return fallback;
+
+  const parts = savedAt.trim().split(' ');
+  if (parts.length < 3) return fallback;
+
+  const day = Number(parts[0]);
+  const month = INDONESIAN_MONTH_MAP[parts[1].slice(0, 3).toLowerCase()];
+  const year = Number(parts[2]);
+
+  if (!Number.isFinite(day) || month === undefined || !Number.isFinite(year)) return fallback;
+
+  return new Date(year, month, day).getTime();
+};
 
 // Badge component for priority
 function PriorityBadge({ priorityKey, label }) {
@@ -17,6 +66,16 @@ function PriorityBadge({ priorityKey, label }) {
   return (
     <span style={{ ...s, fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999, whiteSpace: 'nowrap' }}>
       {label}
+    </span>
+  );
+}
+
+function PricingBadge({ pricingType }) {
+  const pricing = pricingMeta(pricingType);
+
+  return (
+    <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: pricing.bg, color: pricing.color, whiteSpace: 'nowrap' }}>
+      {pricing.label}
     </span>
   );
 }
@@ -40,7 +99,10 @@ function SavedToolCard({ tool, onDelete }) {
             <AppIcon name="link" size={12} /> {tool.url}
           </p>
         </div>
-        <PriorityBadge priorityKey={tool.priorityKey} label={tool.priority} />
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          <PricingBadge pricingType={tool.pricingType} />
+          <PriorityBadge priorityKey={tool.priorityKey} label={tool.priority} />
+        </div>
       </div>
 
       {/* Category + date */}
@@ -88,7 +150,7 @@ function SavedToolCard({ tool, onDelete }) {
           </span>
         </a>
         <button
-          onClick={() => onDelete(tool.id)}
+          onClick={() => onDelete(tool)}
           style={{
             flex: 1, padding: '8px', borderRadius: 9, border: '1px solid #FEE2E2',
             background: '#FFF5F5', color: '#DC2626', cursor: 'pointer',
@@ -108,23 +170,86 @@ function SavedToolCard({ tool, onDelete }) {
 
 // Main Library View
 export default function LibraryView() {
-  const { savedTools, setSavedTools, setActiveView } = useApp();
+  const { savedTools, setSavedTools, setActiveView, removeToolFromLibrary } = useApp();
   const [priorityFilter, setPriorityFilter] = useState('Semua');
   const [categoryFilter, setCategoryFilter] = useState('Semua');
   const [searchVal, setSearchVal] = useState('');
+  const [debouncedSearchVal, setDebouncedSearchVal] = useState('');
+  const [sortBy, setSortBy] = useState('latest');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [toolToDelete, setToolToDelete] = useState(null);
   const [newTool, setNewTool] = useState({ name: '', url: '', note: '', category: 'Research' });
 
-  const filtered = savedTools.filter(t => {
-    const matchPriority = priorityFilter === 'Semua' || t.priority === priorityFilter;
-    const matchCategory = categoryFilter === 'Semua' || t.category === categoryFilter;
-    const matchSearch = !searchVal || t.name.toLowerCase().includes(searchVal.toLowerCase())
-      || t.keywords.some(k => k.includes(searchVal.toLowerCase()));
-    return matchPriority && matchCategory && matchSearch;
-  });
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedSearchVal(searchVal.trim().toLowerCase());
+    }, 300);
 
-  const handleDelete = (id) => {
-    setSavedTools(prev => prev.filter(t => t.id !== id));
+    return () => clearTimeout(timeoutId);
+  }, [searchVal]);
+
+  const ratingByName = useMemo(() => {
+    const map = new Map();
+    mockTools.forEach((tool) => {
+      map.set(tool.name.toLowerCase(), tool.rating ?? 0);
+    });
+    return map;
+  }, []);
+
+  const pricingByName = useMemo(() => {
+    const map = new Map();
+    mockTools.forEach((tool) => {
+      map.set(tool.name.toLowerCase(), tool.pricingType ?? 'freemium');
+    });
+    return map;
+  }, []);
+
+  const filtered = useMemo(() => {
+    const base = savedTools.filter((tool) => {
+      const matchPriority = priorityFilter === 'Semua' || tool.priority === priorityFilter;
+      const matchCategory = categoryFilter === 'Semua' || tool.category === categoryFilter;
+
+      const searchableText = [
+        tool.name,
+        tool.description,
+        tool.note,
+        tool.tags,
+        tool.keywords?.join(' '),
+      ].filter(Boolean).join(' ').toLowerCase();
+
+      const matchSearch = !debouncedSearchVal || searchableText.includes(debouncedSearchVal);
+      return matchPriority && matchCategory && matchSearch;
+    });
+
+    /* UI/UX Fix: Step 7 — Display as many choices as possible (grid vs scroll). Drop-down untuk sorting meminimalisir pencarian manual. Survei: 52,5% kesulitan temukan referensi tersimpan. */
+    const withMeta = base.map((tool, index) => ({
+      ...tool,
+      _timestamp: tool.savedTimestamp ?? parseSavedAtToTimestamp(tool.savedAt, 0),
+      _rating: tool.rating ?? ratingByName.get(tool.name.toLowerCase()) ?? 0,
+      pricingType: tool.pricingType ?? pricingByName.get(tool.name.toLowerCase()) ?? 'freemium',
+    }));
+
+    withMeta.sort((a, b) => {
+      if (sortBy === 'latest') return b._timestamp - a._timestamp;
+      if (sortBy === 'oldest') return a._timestamp - b._timestamp;
+      if (sortBy === 'rating') return b._rating - a._rating;
+      if (sortBy === 'az') return a.name.localeCompare(b.name, 'id-ID');
+      if (sortBy === 'za') return b.name.localeCompare(a.name, 'id-ID');
+      return 0;
+    });
+
+    return withMeta;
+  }, [savedTools, priorityFilter, categoryFilter, debouncedSearchVal, sortBy, ratingByName, pricingByName]);
+
+  const handleDeleteRequest = (tool) => {
+    /* UI/UX Fix: Step 6 — Output device harus memberi respond jelas ke aksi user. Step 7 — Aksi destruktif (hapus) harus ada safeguard/konfirmasi. Survei: 52,5% user sulit temukan referensi. */
+    setToolToDelete(tool);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!toolToDelete) return;
+    removeToolFromLibrary(toolToDelete.id);
+    setToolToDelete(null);
   };
 
   const handleAddTool = () => {
@@ -135,9 +260,13 @@ export default function LibraryView() {
       url: newTool.url.replace(/^https?:\/\//, ''),
       priority: 'Sangat Bagus',
       priorityKey: 'good',
+      pricingType: 'freemium',
       category: newTool.category,
       keywords: [newTool.category.toLowerCase(), 'ai tools', 'manual'],
       savedAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+      savedTimestamp: Date.now(),
+      description: '',
+      rating: 0,
       note: newTool.note,
     };
     setSavedTools(prev => [entry, ...prev]);
@@ -205,8 +334,9 @@ export default function LibraryView() {
 
           <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-secondary)', letterSpacing: '0.07em', marginBottom: 8 }}>PRIORITAS</p>
           {PRIORITY_FILTERS.map(f => (
-            <div
+            <button
               key={f}
+              type="button"
               onClick={() => setPriorityFilter(f)}
               style={{
                 padding: '7px 10px', borderRadius: 8, cursor: 'pointer', fontSize: 13,
@@ -214,16 +344,20 @@ export default function LibraryView() {
                 color: priorityFilter === f ? 'var(--color-primary)' : 'var(--color-text-secondary)',
                 fontWeight: priorityFilter === f ? 600 : 400,
                 marginBottom: 2, transition: 'all 0.15s',
+                border: 'none',
+                width: '100%',
+                textAlign: 'left',
               }}
             >
               {f}
-            </div>
+            </button>
           ))}
 
           <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-secondary)', letterSpacing: '0.07em', margin: '20px 0 8px' }}>KATEGORI</p>
           {CATEGORY_FILTERS.map(f => (
-            <div
+            <button
               key={f}
+              type="button"
               onClick={() => setCategoryFilter(f)}
               style={{
                 padding: '7px 10px', borderRadius: 8, cursor: 'pointer', fontSize: 13,
@@ -231,16 +365,19 @@ export default function LibraryView() {
                 color: categoryFilter === f ? 'var(--color-primary)' : 'var(--color-text-secondary)',
                 fontWeight: categoryFilter === f ? 600 : 400,
                 marginBottom: 2, transition: 'all 0.15s',
+                border: 'none',
+                width: '100%',
+                textAlign: 'left',
               }}
             >
               {f}
-            </div>
+            </button>
           ))}
         </div>
 
         {/* Tool Cards Grid */}
         <div style={{ flex: 1 }}>
-          {filtered.length === 0 ? (
+          {savedTools.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px 20px' }}>
               <span style={{ display: 'inline-flex' }}><AppIcon name="library" size={44} /></span>
               <h3 style={{ margin: '16px 0 8px' }}>Belum ada tools tersimpan</h3>
@@ -255,14 +392,48 @@ export default function LibraryView() {
             </div>
           ) : (
             <>
-              <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginBottom: 14 }}>
-                Menampilkan <strong>{filtered.length}</strong> dari {savedTools.length} tools
-              </p>
-              <div className="library-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
-                {filtered.map(tool => (
-                  <SavedToolCard key={tool.id} tool={tool} onDelete={handleDelete} />
-                ))}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+                <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', margin: 0 }}>
+                  Menampilkan <strong>{filtered.length}</strong> dari {savedTools.length} tools
+                </p>
+
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--color-text-secondary)' }}>
+                  <span style={{ fontWeight: 600 }}>Urutkan:</span>
+                  <select
+                    value={sortBy}
+                    onChange={(event) => setSortBy(event.target.value)}
+                    style={{
+                      border: '1px solid var(--color-border)',
+                      borderRadius: 9,
+                      fontSize: 13,
+                      padding: '7px 10px',
+                      color: 'var(--color-text-primary)',
+                      background: '#fff',
+                      outline: 'none',
+                    }}
+                  >
+                    {SORT_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                </label>
               </div>
+
+              {filtered.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '50px 20px' }}>
+                  <span style={{ display: 'inline-flex' }}><AppIcon name="search" size={40} /></span>
+                  <h3 style={{ margin: '14px 0 8px' }}>Tidak ada tools yang cocok dengan pencarian</h3>
+                  <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>
+                    Coba ubah kata kunci atau filter untuk menemukan referensi yang kamu cari.
+                  </p>
+                </div>
+              ) : (
+                <div className="library-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+                  {filtered.map(tool => (
+                    <SavedToolCard key={tool.id} tool={tool} onDelete={handleDeleteRequest} />
+                  ))}
+                </div>
+              )}
             </>
           )}
         </div>
@@ -293,6 +464,35 @@ export default function LibraryView() {
                 </span>
               </button>
             </div>
+          </div>
+        </Modal>
+      )}
+
+      {toolToDelete && (
+        <Modal title="Hapus Tool?" onClose={() => setToolToDelete(null)}>
+          <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
+            Apakah kamu yakin ingin menghapus {toolToDelete.name} dari library?
+          </p>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button className="btn-ghost" onClick={() => setToolToDelete(null)} style={{ flex: 1 }}>
+              Batal
+            </button>
+            <button
+              onClick={handleConfirmDelete}
+              style={{
+                flex: 1,
+                background: '#DC2626',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 10,
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: 'pointer',
+                padding: '10px 16px',
+              }}
+            >
+              Hapus
+            </button>
           </div>
         </Modal>
       )}
