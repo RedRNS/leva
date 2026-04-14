@@ -29,6 +29,7 @@ import {
   Paperclip,
   Pencil,
   Plus,
+  CircleAlert,
   RefreshCw,
   Search,
   Send,
@@ -38,6 +39,7 @@ import {
   Trash2,
   Undo2,
   User,
+  TriangleAlert,
   X,
 } from 'lucide-react';
 
@@ -68,6 +70,7 @@ const ICONS = {
   logout: LogOut,
   message: MessageCircle,
   news: Newspaper,
+  info: CircleAlert,
   // UI/UX Fix: Step 6 — ikon paperclip dipakai untuk affordance upload file yang familiar.
   paperclip: Paperclip,
   pencil: Pencil,
@@ -81,6 +84,7 @@ const ICONS = {
   trash: Trash2,
   undo: Undo2,
   user: User,
+  warning: TriangleAlert,
   // UI/UX Fix: Step 7 — ikon close dipakai pada chip agar kontrol remove file mudah dipahami.
   x: X,
 };

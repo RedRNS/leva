@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { mockSubTasks, mockTools } from '../data/mockData';
 import AppIcon from '../components/AppIcon';
-import { playSoftChime } from '../utils/sound';
+import Modal from '../components/Modal';
+import { playSoundEffect } from '../utils/sound';
 
 // --- Tag color helper
 const tagStyle = (cat) => {
@@ -18,7 +19,7 @@ const tagStyle = (cat) => {
 };
 
 const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024;
-const ACCEPTED_ATTACHMENT_EXTENSIONS = ['pdf', 'docx', 'txt'];
+const ACCEPTED_ATTACHMENT_EXTENSIONS = ['pdf', 'txt'];
 const QUICK_PROMPTS_BY_JURUSAN = {
   teknikInformatika: ['Bantu susun skripsi', 'Debug kode Python', 'Review jurnal IEEE', 'Belajar framework baru'],
   ilmuKomunikasi: ['Analisis konten media', 'Susun proposal riset', 'Review teori komunikasi', 'Buat kerangka esai'],
@@ -29,18 +30,49 @@ const getFileExtension = (fileName = '') => fileName.split('.').pop()?.toLowerCa
 
 const validateAttachment = (file) => {
   if (!file) return 'Pilih file terlebih dahulu.';
-  if (file.size > MAX_ATTACHMENT_SIZE_BYTES) return 'Ukuran file melebihi 10MB. Gunakan file yang lebih kecil.';
+  if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
+    const fileSizeMb = (file.size / (1024 * 1024)).toFixed(1);
+    return `Ukuran file maksimal 10MB. File kamu ${fileSizeMb}MB. Coba kompres terlebih dahulu.`;
+  }
 
   const extension = getFileExtension(file.name);
   if (!ACCEPTED_ATTACHMENT_EXTENSIONS.includes(extension)) {
-    return 'Format file belum didukung. Gunakan PDF, DOCX, atau TXT.';
+    return 'Format file belum didukung. Saat ini Leva menerima file PDF dan TXT.';
   }
 
   return '';
 };
 
+const getGeneratedTaskTitle = (text, jurusan, attachedFile) => {
+  const raw = text.toLowerCase();
+
+  if (attachedFile?.name) return `Memecah Tugas dari ${attachedFile.name}`;
+  if (raw.includes('skripsi')) return `Menyusun Skripsi ${jurusan}`;
+  if (raw.includes('essay')) return `Menulis Essay ${jurusan}`;
+  if (raw.includes('koding') || raw.includes('coding')) return 'Belajar Koding dari Nol';
+  if (raw.includes('resume')) return 'Membuat Resume Magang';
+
+  return 'Menyelesaikan Tugas Akademik';
+};
+
+const getEstimatedProcessingMs = ({ text, attachedFile }) => {
+  const baseMs = 12000;
+  const textComplexityMs = Math.min(text.trim().length * 45, 15000);
+  const attachmentMs = attachedFile ? 5000 : 0;
+  return Math.min(baseMs + textComplexityMs + attachmentMs, 32000);
+};
+
+const getProcessingMessage = (elapsedSeconds) => {
+  if (elapsedSeconds < 5) return 'Leva sedang membaca tugasmu...';
+  if (elapsedSeconds < 15) return 'Memecah tugas menjadi langkah-langkah kecil...';
+  if (elapsedSeconds < 30) return 'Mencari tools AI yang paling relevan...';
+  return 'Hampir selesai, mohon tunggu sebentar...';
+};
+
+const RAG_ERROR_MESSAGE = 'Maaf, Leva belum bisa memproses tugasmu saat ini. Coba ulangi atau tulis ulang dengan deskripsi yang lebih spesifik.';
+
 // --- Subtask Card
-function SubTaskCard({ task, index, isExpanded, onToggle, onMarkDone, onSaveTool }) {
+function SubTaskCard({ task, index, isExpanded, onToggle, onMarkDone, onSaveTool, isDoneJustNow }) {
   const tools = mockTools.filter(t => task.toolIds.includes(t.id));
   const ts = tagStyle(task.kategori);
   const [isHeaderHovered, setIsHeaderHovered] = useState(false);
@@ -52,7 +84,7 @@ function SubTaskCard({ task, index, isExpanded, onToggle, onMarkDone, onSaveTool
       : '#F8FAFC';
 
   return (
-    <div className="card" style={{ marginBottom: 10, overflow: 'hidden', transition: 'box-shadow 0.2s' }}>
+    <div className={`card ${isDoneJustNow ? 'subtask-card-highlight' : ''}`} style={{ marginBottom: 10, overflow: 'hidden', transition: 'box-shadow 0.2s' }}>
       {/* Card Header */}
       <div
         onClick={onToggle}
@@ -92,8 +124,16 @@ function SubTaskCard({ task, index, isExpanded, onToggle, onMarkDone, onSaveTool
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {task.status === 'done'
-            ? <span className="badge-done" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>Done <AppIcon name="check" size={12} color="#fff" /></span>
-            : <span className="badge-next" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>Next Section <AppIcon name="arrow-right" size={12} /></span>
+            ? <span className={`badge-done ${isDoneJustNow ? 'badge-done-pop' : ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>Done <AppIcon name="check" size={12} color="#fff" /></span>
+            : (
+              <span
+                className="badge-next tooltip-host"
+                data-tooltip="Lanjut ke subtask berikutnya"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+              >
+                Next Section <AppIcon name="arrow-right" size={12} />
+              </span>
+            )
           }
           <span style={{
             color: 'var(--color-text-secondary)', fontSize: 18, display: 'flex',
@@ -208,14 +248,14 @@ function RightPanel({ task, isOpen, onSave, savedToolNames, onCopyTips, copiedTi
                     justifyContent: 'center',
                     gap: 6,
                     borderRadius: 10,
-                    border: isSaved ? '1px solid #CBD5E1' : 'none',
-                    background: isSaved ? '#E2E8F0' : 'var(--color-primary-light)',
-                    color: isSaved ? '#64748B' : 'var(--color-primary)',
+                    border: isSaved ? '1px solid #86EFAC' : 'none',
+                    background: isSaved ? '#DCFCE7' : 'var(--color-primary-light)',
+                    color: isSaved ? '#15803D' : 'var(--color-primary)',
                     fontWeight: 600,
                     cursor: isSaved ? 'not-allowed' : 'pointer',
                   }}
                 >
-                  <AppIcon name={isSaved ? 'check' : 'book'} size={12} /> {isSaved ? 'Tersimpan ✓' : 'Simpan ke Library'}
+                  <AppIcon name={isSaved ? 'check' : 'book'} size={12} /> {isSaved ? '✓ Tersimpan' : 'Simpan ke Library'}
                 </button>
               </div>
               );
@@ -229,7 +269,7 @@ function RightPanel({ task, isOpen, onSave, savedToolNames, onCopyTips, copiedTi
             borderRadius: 12, padding: '14px 14px', marginBottom: 16,
           }}>
             <p style={{ margin: '0 0 8px', fontSize: 12, fontWeight: 700, color: '#92400E' }}>
-              TIPS PENGGUNAAN
+              CARA MENGGUNAKAN TOOL INI
             </p>
             <p style={{ margin: 0, fontSize: 12, color: '#78350F', lineHeight: 1.6 }}>
               {task.tips}
@@ -243,7 +283,7 @@ function RightPanel({ task, isOpen, onSave, savedToolNames, onCopyTips, copiedTi
               style={{ fontSize: 12, padding: '8px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
               onClick={() => onCopyTips(task)}
             >
-              <AppIcon name="copy" size={12} /> {copiedTipsTaskId === task.id ? 'Tersalin! ✓' : 'Salin Prompt Tips'}
+              <AppIcon name="copy" size={12} /> {copiedTipsTaskId === task.id ? '✓ Tersalin!' : 'Salin Prompt Tips'}
             </button>
           </div>
         </>
@@ -258,6 +298,8 @@ export default function ChatWorkspaceView() {
     user,
     activeTask,
     setActiveTask,
+    setActiveView,
+    setChatHasDraft,
     saveToolToLibrary,
     savedTools,
     showToast,
@@ -275,16 +317,28 @@ export default function ChatWorkspaceView() {
   const [followUpReply, setFollowUpReply] = useState('');
   const [attachedFile, setAttachedFile] = useState(null);
   const [fileError, setFileError]       = useState('');
+  const [ragError, setRagError]         = useState('');
+  const [lastSubmission, setLastSubmission] = useState(null);
+  const [loadingElapsedSeconds, setLoadingElapsedSeconds] = useState(0);
+  const [estimatedProcessingSeconds, setEstimatedProcessingSeconds] = useState(15);
   const [isDraggingFile, setIsDraggingFile] = useState(false);
   const [copiedTipsTaskId, setCopiedTipsTaskId] = useState(null);
   const [showCompletionOverlay, setShowCompletionOverlay] = useState(false);
   const [showCompletionConfetti, setShowCompletionConfetti] = useState(false);
+  const [justCompletedTaskIds, setJustCompletedTaskIds] = useState([]);
+  const [showLeaveDraftModal, setShowLeaveDraftModal] = useState(false);
+  const [pendingLeaveTarget, setPendingLeaveTarget] = useState(null);
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
   const dragCounterRef = useRef(0);
   const copyResetTimerRef = useRef(null);
   const followUpTextareaRef = useRef(null);
   const completionPrimaryActionRef = useRef(null);
+  const hasUnsentDraftRef = useRef(false);
+  const hasPushedBackGuardRef = useRef(false);
+  const allowExternalLeaveRef = useRef(false);
+  const completionAnimationTimersRef = useRef([]);
+  const hasCelebratedAllDoneRef = useRef(false);
 
   const completionConfettiPieces = useMemo(
     () => Array.from({ length: 28 }, (_, index) => {
@@ -310,10 +364,20 @@ export default function ChatWorkspaceView() {
     setFollowUpReply('');
     setAttachedFile(null);
     setFileError('');
+    setRagError('');
+    setLastSubmission(null);
+    setLoadingElapsedSeconds(0);
+    setEstimatedProcessingSeconds(15);
+    setShowLeaveDraftModal(false);
+    setPendingLeaveTarget(null);
     setIsDraggingFile(false);
     setCopiedTipsTaskId(null);
     setShowCompletionOverlay(false);
     setShowCompletionConfetti(false);
+    setJustCompletedTaskIds([]);
+    completionAnimationTimersRef.current.forEach((timerId) => clearTimeout(timerId));
+    completionAnimationTimersRef.current = [];
+    hasCelebratedAllDoneRef.current = false;
   };
 
   // Load from history task if set
@@ -336,7 +400,80 @@ export default function ChatWorkspaceView() {
 
   useEffect(() => () => {
     if (copyResetTimerRef.current) clearTimeout(copyResetTimerRef.current);
+    completionAnimationTimersRef.current.forEach((timerId) => clearTimeout(timerId));
   }, []);
+
+  const hasUnsentDraft = inputVal.trim().length > 0;
+
+  useEffect(() => {
+    hasUnsentDraftRef.current = hasUnsentDraft;
+    setChatHasDraft(hasUnsentDraft);
+  }, [hasUnsentDraft, setChatHasDraft]);
+
+  useEffect(() => () => {
+    setChatHasDraft(false);
+  }, [setChatHasDraft]);
+
+  useEffect(() => {
+    if (!hasUnsentDraft || hasPushedBackGuardRef.current) return;
+
+    window.history.pushState({ levaChatDraftGuard: true }, '', window.location.href);
+    hasPushedBackGuardRef.current = true;
+  }, [hasUnsentDraft]);
+
+  useEffect(() => {
+    if (hasUnsentDraft) return;
+    hasPushedBackGuardRef.current = false;
+  }, [hasUnsentDraft]);
+
+  useEffect(() => {
+    const handleBackNavigation = () => {
+      if (!hasUnsentDraftRef.current || allowExternalLeaveRef.current) return;
+
+      window.history.pushState({ levaChatDraftGuard: true }, '', window.location.href);
+      setPendingLeaveTarget('__history_back__');
+      setShowLeaveDraftModal(true);
+    };
+
+    window.addEventListener('popstate', handleBackNavigation);
+    return () => window.removeEventListener('popstate', handleBackNavigation);
+  }, []);
+
+  useEffect(() => {
+    if (!hasUnsentDraft) return;
+
+    const handleBeforeUnload = (event) => {
+      if (allowExternalLeaveRef.current) return;
+      event.preventDefault();
+      event.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsentDraft]);
+
+  useEffect(() => {
+    const handleConfirmLeaveChat = (event) => {
+      const nextView = event.detail?.nextView;
+      if (!hasUnsentDraftRef.current || !nextView) return;
+
+      setPendingLeaveTarget(nextView);
+      setShowLeaveDraftModal(true);
+    };
+
+    window.addEventListener('leva:confirm-leave-chat', handleConfirmLeaveChat);
+    return () => window.removeEventListener('leva:confirm-leave-chat', handleConfirmLeaveChat);
+  }, []);
+
+  useEffect(() => {
+    if (!isLoading) return;
+
+    const timer = setInterval(() => {
+      setLoadingElapsedSeconds((previous) => previous + 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isLoading]);
 
   const applyAttachment = (file) => {
     /* UI/UX Fix: Step 6 — Menambah alternatif input device (file upload + drag-drop) untuk mengurangi beban kognitif memecah tugas. Survei: 76,3% user habiskan >15 menit sebelum mulai kerja. */
@@ -350,12 +487,77 @@ export default function ChatWorkspaceView() {
 
     setAttachedFile(file);
     setFileError('');
+    setRagError('');
   };
 
   const removeAttachment = () => {
     /* UI/UX Fix: Step 7 — Kontrol screen-based berupa chip removable membantu pengguna mengecek dan mengoreksi file sebelum mengirim. */
     setAttachedFile(null);
     setFileError('');
+  };
+
+  const runMockRag = (submissionPayload) => {
+    const text = submissionPayload.text.trim();
+    const estimatedMs = getEstimatedProcessingMs(submissionPayload);
+    const loweredText = text.toLowerCase();
+
+    const ragPromise = new Promise((resolve, reject) => {
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        reject(new Error('offline'));
+        return;
+      }
+
+      if (loweredText.includes('server error') || loweredText.includes('server gagal')) {
+        setTimeout(() => reject(new Error('server-error')), 1200);
+        return;
+      }
+
+      setTimeout(() => {
+        resolve({
+          title: getGeneratedTaskTitle(text, jurusan, submissionPayload.attachedFile),
+          subTasks: mockSubTasks.map((task) => ({ ...task })),
+        });
+      }, estimatedMs);
+    });
+
+    let timeoutHandle;
+    const timeoutPromise = new Promise((_, reject) => {
+      timeoutHandle = setTimeout(() => reject(new Error('timeout')), 45000);
+    });
+
+    return Promise.race([ragPromise, timeoutPromise]).finally(() => {
+      if (timeoutHandle) clearTimeout(timeoutHandle);
+    });
+  };
+
+  const submitTaskToRag = async (submissionPayload) => {
+    const trimmedText = submissionPayload.text.trim();
+    if (!trimmedText || isLoading) return;
+
+    const estimatedMs = getEstimatedProcessingMs(submissionPayload);
+
+    setIsLoading(true);
+    setRagError('');
+    setLoadingElapsedSeconds(0);
+    setEstimatedProcessingSeconds(Math.max(15, Math.round(estimatedMs / 1000)));
+    setTaskTitle('');
+    setSubTasks([]);
+    setExpandedId(null);
+
+    try {
+      const ragResult = await runMockRag(submissionPayload);
+      setTaskTitle(ragResult.title);
+      setSubTasks(ragResult.subTasks);
+      setExpandedId(1);
+      setInputVal('');
+      setAttachedFile(null);
+      setFileError('');
+      setRagError('');
+    } catch {
+      setRagError(RAG_ERROR_MESSAGE);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handlePickAttachment = () => {
@@ -406,31 +608,51 @@ export default function ChatWorkspaceView() {
 
   const handleSubmit = () => {
     if (isLoading) return;
-    if (!inputVal.trim() && !attachedFile) return;
+    if (!inputVal.trim()) return;
     if (fileError) return;
 
-    /* UI/UX Fix: Step 7 — Menjaga status proses tetap terlihat (disable input + spinner) agar user tidak mengirim berulang saat sistem sedang bekerja. */
-    const raw = inputVal.toLowerCase();
-    let title = attachedFile ? `Memecah Tugas dari ${attachedFile.name}` : 'Menyelesaikan Tugas Akademik';
-    if (raw.includes('skripsi'))     title = `Menyusun Skripsi ${jurusan}`;
-    else if (raw.includes('essay'))  title = `Menulis Essay ${jurusan}`;
-    else if (raw.includes('koding') || raw.includes('coding')) title = `Belajar Koding dari Nol`;
-    else if (raw.includes('resume')) title = `Membuat Resume Magang`;
+    const submissionPayload = {
+      text: inputVal,
+      attachedFile,
+    };
 
-    setInputVal('');
-    setAttachedFile(null);
-    setFileError('');
-    setIsLoading(true);
-    setTaskTitle('');
-    setSubTasks([]);
-    setExpandedId(null);
+    setLastSubmission(submissionPayload);
+    submitTaskToRag(submissionPayload);
+  };
 
-    setTimeout(() => {
-      setIsLoading(false);
-      setTaskTitle(title);
-      setSubTasks(mockSubTasks.map(t => ({ ...t })));
-      setExpandedId(1);
-    }, 1800);
+  const handleRetryLastSubmission = () => {
+    if (!lastSubmission || isLoading) return;
+    submitTaskToRag(lastSubmission);
+  };
+
+  const handleStayInChat = () => {
+    setShowLeaveDraftModal(false);
+    setPendingLeaveTarget(null);
+  };
+
+  const handleLeaveFromChat = () => {
+    const target = pendingLeaveTarget;
+
+    setShowLeaveDraftModal(false);
+    setPendingLeaveTarget(null);
+
+    if (!target) return;
+
+    if (target === '__history_back__') {
+      allowExternalLeaveRef.current = true;
+      setInputVal('');
+      setAttachedFile(null);
+      setFileError('');
+      setRagError('');
+
+      setTimeout(() => {
+        window.history.back();
+      }, 0);
+
+      return;
+    }
+
+    setActiveView(target, { force: true });
   };
 
   const toggleExpand = (id) => {
@@ -453,7 +675,16 @@ export default function ChatWorkspaceView() {
 
     /* UI/UX Fix: Step 6 — Output device speaker (sound feedback) untuk positive reinforcement. Micro-animations memberikan reward psikologis, mendukung habit loop. 47,5% user bekerja larut malam — dopamine hit kecil membantu. */
     if (isMarkingDone && soundEnabled) {
-      playSoftChime({ duration: 0.22, frequency: 800, volume: 0.3 });
+      playSoundEffect('chime');
+    }
+
+    if (isMarkingDone) {
+      setJustCompletedTaskIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+
+      const timerId = setTimeout(() => {
+        setJustCompletedTaskIds((prev) => prev.filter((taskId) => taskId !== id));
+      }, 520);
+      completionAnimationTimersRef.current.push(timerId);
     }
   };
 
@@ -482,6 +713,8 @@ export default function ChatWorkspaceView() {
 
   const expandedTask  = subTasks.find(t => t.id === expandedId) ?? null;
   const hasResults    = subTasks.length > 0;
+  const canSendMessage = inputVal.trim().length > 0;
+  const processingMessage = getProcessingMessage(loadingElapsedSeconds);
   const rightPanelOpen = !!expandedTask;
   const savedToolNames = new Set(savedTools.map((tool) => tool.name.toLowerCase()));
 
@@ -493,7 +726,7 @@ export default function ChatWorkspaceView() {
 
       await navigator.clipboard.writeText(task.tips);
       setCopiedTipsTaskId(task.id);
-      showToast('Prompt tips berhasil disalin!', 'success');
+      showToast('Tersalin! Prompt tips berhasil disalin ke clipboard.', 'success');
 
       if (copyResetTimerRef.current) clearTimeout(copyResetTimerRef.current);
       copyResetTimerRef.current = setTimeout(() => setCopiedTipsTaskId(null), 2000);
@@ -517,21 +750,23 @@ export default function ChatWorkspaceView() {
 
   useEffect(() => {
     if (!allTasksDone) {
+      hasCelebratedAllDoneRef.current = false;
       setShowCompletionOverlay(false);
       setShowCompletionConfetti(false);
       return;
     }
 
-    if (soundEnabled) playSoftChime({ duration: 0.3, frequency: 800, volume: 0.3 });
+    if (hasCelebratedAllDoneRef.current) return;
+    hasCelebratedAllDoneRef.current = true;
+
+    if (soundEnabled) playSoundEffect('celebration');
     setShowCompletionOverlay(true);
     setShowCompletionConfetti(true);
 
-    const confettiTimer = setTimeout(() => setShowCompletionConfetti(false), 2000);
-    const dismissTimer = setTimeout(() => setShowCompletionOverlay(false), 3000);
+    const confettiTimer = setTimeout(() => setShowCompletionConfetti(false), 3000);
 
     return () => {
       clearTimeout(confettiTimer);
-      clearTimeout(dismissTimer);
     };
   }, [allTasksDone, soundEnabled]);
 
@@ -539,15 +774,11 @@ export default function ChatWorkspaceView() {
     if (!showCompletionOverlay) return;
 
     completionPrimaryActionRef.current?.focus();
-
-    const handleOverlayEscape = (event) => {
-      if (event.key !== 'Escape') return;
-      setShowCompletionOverlay(false);
-    };
-
-    window.addEventListener('keydown', handleOverlayEscape);
-    return () => window.removeEventListener('keydown', handleOverlayEscape);
   }, [showCompletionOverlay]);
+
+  const handleViewSummary = () => {
+    setShowCompletionOverlay(false);
+  };
 
   const handleStartNewTask = () => {
     window.dispatchEvent(new CustomEvent('leva:new-chat'));
@@ -574,7 +805,7 @@ export default function ChatWorkspaceView() {
                 Hei, {firstName}! Ceritakan tugasmu hari ini.
               </h2>
               <p style={{ margin: '0 0 32px', fontSize: 14, color: 'var(--color-text-secondary)', textAlign: 'center', maxWidth: 440, lineHeight: 1.65 }}>
-                Leva akan memecahnya jadi langkah-langkah kecil + merekomendasikan tools AI terbaik untukmu.
+                Leva akan memecahnya jadi langkah-langkah kecil dan merekomendasikan tools AI terbaik untukmu.
               </p>
 
               {/* Main Input */}
@@ -583,7 +814,7 @@ export default function ChatWorkspaceView() {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".pdf,.doc,.docx,.txt"
+                  accept=".pdf,.txt"
                   onChange={handleAttachmentInput}
                   style={{ display: 'none' }}
                 />
@@ -616,7 +847,10 @@ export default function ChatWorkspaceView() {
                   ref={inputRef}
                   value={inputVal}
                   disabled={isLoading}
-                  onChange={e => setInputVal(e.target.value)}
+                  onChange={e => {
+                    setInputVal(e.target.value);
+                    if (ragError) setRagError('');
+                  }}
                   onKeyDown={e => {
                     /* UI/UX Fix: Step 7 — Menyediakan kontrol keyboard (Enter/Ctrl+Enter) untuk efisiensi pada user laptop/desktop. */
                     const shouldSend = e.key === 'Enter' && (e.ctrlKey || !e.shiftKey);
@@ -650,6 +884,8 @@ export default function ChatWorkspaceView() {
                   onClick={handlePickAttachment}
                   disabled={isLoading}
                   aria-label="Unggah file"
+                  className="tooltip-host"
+                  data-tooltip="Lampirkan file PDF silabus atau dokumen tugasmu"
                   style={{
                     position: 'absolute', left: 12, bottom: 12,
                     background: 'transparent',
@@ -664,14 +900,14 @@ export default function ChatWorkspaceView() {
 
                 <button
                   onClick={handleSubmit}
-                  disabled={isLoading || (!inputVal.trim() && !attachedFile) || !!fileError}
+                  disabled={isLoading || !canSendMessage || !!fileError}
                   aria-label="Kirim pesan"
                   style={{
                     position: 'absolute', right: 12, bottom: 12,
-                    background: (inputVal.trim() || attachedFile) ? 'var(--color-primary)' : 'var(--color-border)',
+                    background: canSendMessage ? 'var(--color-primary)' : 'var(--color-border)',
                     border: 'none', borderRadius: 10, padding: '8px 12px',
-                    cursor: (isLoading || (!inputVal.trim() && !attachedFile) || !!fileError) ? 'default' : 'pointer',
-                    color: '#fff', fontSize: 16, transition: 'background 0.2s', display: 'flex',
+                    cursor: (isLoading || !canSendMessage || !!fileError) ? 'default' : 'pointer',
+                    color: '#fff', fontSize: 16, transition: 'background 0.2s', display: 'flex', opacity: (isLoading || !canSendMessage || !!fileError) ? 0.55 : 1,
                   }}
                 >
                   {isLoading
@@ -698,21 +934,53 @@ export default function ChatWorkspaceView() {
                 </p>
               )}
 
-              <p style={{ marginTop: 12, fontSize: 12, color: 'var(--color-text-secondary)' }}>
-                {isLoading ? (
-                  <span className="processing-indicator">
-                    Leva sedang memproses tugasmu
-                    <span className="processing-dot">.</span>
-                    <span className="processing-dot">.</span>
-                    <span className="processing-dot">.</span>
-                  </span>
-                ) : (
-                  'Tekan Enter atau Ctrl+Enter untuk kirim'
-                )}
-              </p>
+              {isLoading && (
+                <div style={{ marginTop: 10, width: '100%', maxWidth: 560, background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 12, padding: '12px 14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                    <span style={{ display: 'inline-flex', marginTop: 2 }}>
+                      <AppIcon name="loader" size={16} className="send-spinner" />
+                    </span>
+                    <div>
+                      <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                        {processingMessage}
+                        <span className="processing-indicator" style={{ marginLeft: 3 }}>
+                          <span className="processing-dot">.</span>
+                          <span className="processing-dot">.</span>
+                          <span className="processing-dot">.</span>
+                        </span>
+                      </p>
+                      <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>
+                        (estimasi ~{estimatedProcessingSeconds} detik)
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {ragError && !isLoading && (
+                <div style={{ marginTop: 10, width: '100%', maxWidth: 560, background: '#FDF2F8', border: '1px solid #FCA5A5', borderRadius: 12, padding: '12px 14px' }}>
+                  <p style={{ margin: 0, fontSize: 12, color: '#B91C1C', lineHeight: 1.6, display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                    <span style={{ display: 'inline-flex', marginTop: 1 }}><AppIcon name="warning" size={13} color="#DC2626" /></span>
+                    <span>{ragError}</span>
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleRetryLastSubmission}
+                    disabled={!lastSubmission || isLoading}
+                    style={{ marginTop: 10, border: '1px solid #FCA5A5', background: '#fff', color: '#B91C1C', borderRadius: 8, fontSize: 12, fontWeight: 700, padding: '6px 10px', cursor: !lastSubmission || isLoading ? 'not-allowed' : 'pointer', opacity: !lastSubmission || isLoading ? 0.6 : 1 }}
+                  >
+                    🔄 Coba Lagi
+                  </button>
+                </div>
+              )}
+
+              {!isLoading && <p style={{ marginTop: 12, fontSize: 12, color: 'var(--color-text-secondary)' }}>Tekan Enter atau Ctrl+Enter untuk kirim</p>}
 
               {/* Quick suggestions */}
-              <div style={{ display: 'flex', gap: 8, marginTop: 24, flexWrap: 'wrap', justifyContent: 'center' }}>
+              <p style={{ margin: '20px 0 8px', fontSize: 13, color: 'var(--color-text-secondary)' }}>
+                Atau coba salah satu contoh ini:
+              </p>
+              <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
                 {quickPromptChips.map(s => (
                   <button
                     key={s}
@@ -754,7 +1022,7 @@ export default function ChatWorkspaceView() {
                 <div style={{ textAlign: 'right' }}>
                   <p style={{ margin: '0 0 6px', fontSize: 12, opacity: 0.75 }}>{completedCount}/{subTasks.length} selesai</p>
                   <div style={{ width: 100, height: 6, background: 'rgba(255,255,255,0.25)', borderRadius: 3 }}>
-                    <div style={{ width: `${progressPct}%`, height: '100%', background: '#fff', borderRadius: 3, transition: 'width 0.4s' }} />
+                    <div style={{ width: `${progressPct}%`, height: '100%', background: '#fff', borderRadius: 3, transition: 'width 0.5s ease-in-out' }} />
                   </div>
                 </div>
               </div>
@@ -769,6 +1037,7 @@ export default function ChatWorkspaceView() {
                   onToggle={() => toggleExpand(task.id)}
                   onMarkDone={toggleDone}
                   onSaveTool={saveToolToLibrary}
+                  isDoneJustNow={justCompletedTaskIds.includes(task.id)}
                 />
               ))}
 
@@ -802,7 +1071,7 @@ export default function ChatWorkspaceView() {
                     onChange={e => setFollowUpVal(e.target.value)}
                     onInput={e => autoResizeFollowUpTextarea(e.currentTarget)}
                     onKeyDown={e => {
-                      if (e.key === 'Enter' && e.ctrlKey) {
+                      if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
                         handleFollowUp();
                       }
@@ -822,7 +1091,7 @@ export default function ChatWorkspaceView() {
                     onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
                     onBlur={e  => e.target.style.borderColor = 'var(--color-border)'}
                   />
-                  <button className="btn-primary" onClick={handleFollowUp} style={{ padding: '10px 18px', fontSize: 13 }}>
+                  <button className="btn-primary tooltip-host" data-tooltip="Kirim (Enter)" onClick={handleFollowUp} style={{ padding: '10px 18px', fontSize: 13 }}>
                     Kirim
                   </button>
                 </div>
@@ -843,7 +1112,7 @@ export default function ChatWorkspaceView() {
       />
 
       {showCompletionOverlay && (
-        <div className="completion-overlay" onClick={() => setShowCompletionOverlay(false)}>
+        <div className="completion-overlay">
           {showCompletionConfetti && (
             <div className="completion-confetti-layer" aria-hidden="true">
               {completionConfettiPieces.map((piece) => (
@@ -861,17 +1130,66 @@ export default function ChatWorkspaceView() {
             </div>
           )}
 
-          <div className="completion-card" role="dialog" aria-modal="true" aria-label="Semua langkah selesai" onClick={(event) => event.stopPropagation()}>
+          <div className="completion-card" role="dialog" aria-modal="true" aria-label="Semua subtask selesai" onClick={(event) => event.stopPropagation()}>
             <div className="completion-icon-wrap">
               <AppIcon name="check" size={44} color="#fff" />
             </div>
-            <h3 className="completion-title">Semua langkah selesai! 🎉</h3>
-            <p className="completion-subtitle">Task kamu sudah tuntas. Lanjutkan dengan tugas baru kapan pun.</p>
-            <button ref={completionPrimaryActionRef} className="btn-primary" onClick={handleStartNewTask} style={{ marginTop: 8 }}>
-              Mulai Tugas Baru
-            </button>
+            <h3 className="completion-title">🎉 Selamat! Semua subtask selesai!</h3>
+            <p className="completion-subtitle">Kerja bagus, {firstName}! Kamu telah menyelesaikan {taskTitle}.</p>
+            <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+              <button ref={completionPrimaryActionRef} className="btn-primary" onClick={handleViewSummary} style={{ flex: 1 }}>
+                Lihat Ringkasan
+              </button>
+              <button className="btn-ghost" onClick={handleStartNewTask} style={{ flex: 1 }}>
+                Mulai Task Baru
+              </button>
+            </div>
           </div>
         </div>
+      )}
+
+      {showLeaveDraftModal && (
+        <Modal title="Teks Belum Terkirim" onClose={handleStayInChat}>
+          <p style={{ margin: '0 0 18px', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
+            Kamu memiliki teks yang belum dikirim. Yakin ingin meninggalkan halaman?
+          </p>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              type="button"
+              onClick={handleStayInChat}
+              style={{
+                flex: 1,
+                border: 'none',
+                borderRadius: 10,
+                background: '#6C5CE7',
+                color: '#fff',
+                fontSize: 14,
+                fontWeight: 700,
+                padding: '10px 14px',
+                cursor: 'pointer',
+              }}
+            >
+              Tetap di Sini
+            </button>
+            <button
+              type="button"
+              onClick={handleLeaveFromChat}
+              style={{
+                flex: 1,
+                border: '1px solid var(--color-border)',
+                borderRadius: 10,
+                background: '#fff',
+                color: 'var(--color-text-secondary)',
+                fontSize: 14,
+                fontWeight: 600,
+                padding: '10px 14px',
+                cursor: 'pointer',
+              }}
+            >
+              Tinggalkan
+            </button>
+          </div>
+        </Modal>
       )}
     </div>
   );

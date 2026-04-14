@@ -8,7 +8,11 @@ export function AppProvider({ children }) {
   const [user, setUser] = useState(null); // null = not onboarded yet
 
   // Active view: 'onboarding' | 'dashboard' | 'chat' | 'library' | 'profile'
-  const [activeView, setActiveView] = useState('onboarding');
+  const [activeView, setActiveViewState] = useState('onboarding');
+
+  // Unsaved changes guards
+  const [chatHasDraft, setChatHasDraft] = useState(false);
+  const [profileHasUnsavedChanges, setProfileHasUnsavedChanges] = useState(false);
 
   // Active task in ChatWorkspaceView
   const [activeTask, setActiveTask] = useState(null);
@@ -20,21 +24,48 @@ export function AppProvider({ children }) {
   const [historyTasks, setHistoryTasks] = useState(mockHistoryTasks);
 
   // Toast notification
-  const [toast, setToast] = useState(null);
+  const [toasts, setToasts] = useState([]);
 
   // UX sound effect preference
   const [soundEnabled, setSoundEnabled] = useState(true);
 
   const showToast = (message, type = 'info') => {
-    setToast({
-      id: Date.now(),
+    const normalizedType = String(type || 'info').toLowerCase();
+
+    setToasts((prev) => [...prev, {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       message,
-      type,
-    });
+      type: normalizedType,
+    }]);
   };
 
-  const dismissToast = () => {
-    setToast(null);
+  const dismissToast = (toastId) => {
+    setToasts((prev) => prev.filter((toastItem) => toastItem.id !== toastId));
+  };
+
+  const setActiveView = (nextView, options = {}) => {
+    const forceNavigate = options.force === true;
+
+    if (!nextView || nextView === activeView) return true;
+
+    if (!forceNavigate) {
+      if (activeView === 'chat' && chatHasDraft) {
+        window.dispatchEvent(new CustomEvent('leva:confirm-leave-chat', {
+          detail: { nextView },
+        }));
+        return false;
+      }
+
+      if (activeView === 'profile' && profileHasUnsavedChanges) {
+        window.dispatchEvent(new CustomEvent('leva:confirm-leave-profile', {
+          detail: { nextView },
+        }));
+        return false;
+      }
+    }
+
+    setActiveViewState(nextView);
+    return true;
   };
 
   const saveToolToLibrary = (tool) => {
@@ -61,7 +92,7 @@ export function AppProvider({ children }) {
       note: '',
     };
     setSavedTools((prev) => [newEntry, ...prev]);
-    showToast(`✓ ${tool.name} berhasil disimpan ke Library!`, 'success');
+    showToast(`${tool.name} berhasil disimpan ke Library!`, 'success');
     return true;
   };
 
@@ -77,13 +108,18 @@ export function AppProvider({ children }) {
         setUser,
         activeView,
         setActiveView,
+        setActiveViewState,
+        chatHasDraft,
+        setChatHasDraft,
+        profileHasUnsavedChanges,
+        setProfileHasUnsavedChanges,
         activeTask,
         setActiveTask,
         savedTools,
         setSavedTools,
         historyTasks,
         setHistoryTasks,
-        toast,
+        toasts,
         showToast,
         dismissToast,
         soundEnabled,

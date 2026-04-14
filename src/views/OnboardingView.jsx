@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import AppIcon from '../components/AppIcon';
-import { playSoftChime } from '../utils/sound';
+import { playSoundEffect } from '../utils/sound';
 
 const JURUSAN_OPTIONS = [
   'Teknik Informatika',
@@ -101,7 +101,7 @@ export default function OnboardingView() {
     }
 
     /* UI/UX Fix: Step 6 — Output device speaker (sound feedback) untuk positive reinforcement. Micro-animations memberikan reward psikologis, mendukung habit loop. 47,5% user bekerja larut malam — dopamine hit kecil membantu. */
-    if (soundEnabled) playSoftChime({ duration: 0.28, frequency: 800, volume: 0.3 });
+    if (soundEnabled) playSoundEffect('chime');
     setShowStep3Confetti(true);
 
     const confettiTimer = setTimeout(() => setShowStep3Confetti(false), 2000);
@@ -227,7 +227,7 @@ export default function OnboardingView() {
 
   const validateStep1 = () => {
     if (!form.name.trim()) {
-      setErrors((prev) => ({ ...prev, name: 'Nama tidak boleh kosong' }));
+      setErrors((prev) => ({ ...prev, name: 'Nama tidak boleh kosong. Silakan isi nama lengkapmu untuk melanjutkan.' }));
       nameInputRef.current?.focus();
       return false;
     }
@@ -237,8 +237,8 @@ export default function OnboardingView() {
 
   const validateStep2 = () => {
     const e = {};
-    if (!form.jurusan)  e.jurusan  = 'Pilih jurusanmu.';
-    if (!form.semester) e.semester = 'Pilih semestermu.';
+    if (!form.jurusan)  e.jurusan  = 'Silakan pilih jurusanmu terlebih dahulu.';
+    if (!form.semester) e.semester = 'Silakan pilih semestermu.';
     if (Object.keys(e).length) { setErrors(e); return false; }
     return true;
   };
@@ -272,7 +272,7 @@ export default function OnboardingView() {
   // -- Shared input style
   const inputStyle = (hasError) => ({
     width: '100%', padding: '12px 14px',
-    border: `1.5px solid ${hasError ? '#EF4444' : 'var(--color-border)'}`,
+    border: `1.5px solid ${hasError ? '#DC2626' : 'var(--color-border)'}`,
     borderRadius: 10, fontSize: 14,
     outline: 'none', color: 'var(--color-text-primary)',
     background: '#fff',
@@ -281,10 +281,23 @@ export default function OnboardingView() {
   });
 
   const errText = (key) => errors[key]
-    ? <p style={{ margin: '4px 0 0', fontSize: 12, color: '#EF4444' }}>{errors[key]}</p>
+    ? (
+      <p className="field-error-message" role="alert">
+        <span style={{ display: 'inline-flex', alignItems: 'center', marginTop: 1 }}>
+          <AppIcon name="warning" size={12} color="#DC2626" />
+        </span>
+        <span>{errors[key]}</span>
+      </p>
+    )
     : null;
 
+  const isStep1Complete = form.name.trim().length > 0;
   const isStep2Complete = Boolean(form.jurusan && form.semester);
+  const STEP_DOT_TOOLTIP = {
+    1: '1. Nama',
+    2: '2. Info Akademik',
+    3: '3. Konfirmasi',
+  };
 
   return (
     <div style={{
@@ -322,16 +335,29 @@ export default function OnboardingView() {
           <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--color-text-secondary)' }}>
             Your Cognitive Lever for Academic Excellence
           </p>
+          <p style={{ margin: '3px 0 0', fontSize: 13, color: '#4B5563', fontWeight: 600 }}>
+            Asisten Akademik Cerdasmu
+          </p>
         </div>
 
         {/* Step Dots */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 28 }}>
           {[1, 2, 3].map(s => (
-            <div key={s} style={{
-              width: s === step ? 24 : 8, height: 8, borderRadius: 4,
-              background: s <= step ? 'var(--color-primary)' : 'var(--color-border)',
-              transition: 'all 0.3s ease',
-            }} />
+            <span
+              key={s}
+              className={`tooltip-host ${s === step ? 'tooltip-active' : ''}`}
+              data-tooltip={STEP_DOT_TOOLTIP[s]}
+              tabIndex={0}
+              aria-label={STEP_DOT_TOOLTIP[s]}
+              style={{ display: 'inline-flex' }}
+            >
+              <span style={{
+                width: s === step ? 24 : 8, height: 8, borderRadius: 4,
+                background: s <= step ? 'var(--color-primary)' : 'var(--color-border)',
+                transition: 'all 0.3s ease',
+                cursor: 'help',
+              }} />
+            </span>
           ))}
         </div>
 
@@ -354,13 +380,14 @@ export default function OnboardingView() {
               onChange={e => update('name', e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleNext()}
               placeholder="Contoh: Renisa Assyifa Putri"
+              aria-invalid={!!errors.name}
               style={inputStyle(!!errors.name)}
               onFocus={(event) => {
                 event.target.style.borderColor = 'var(--color-primary)';
                 event.target.style.boxShadow = '0 0 0 4px rgba(196, 181, 253, 0.55)';
               }}
               onBlur={(event) => {
-                event.target.style.borderColor = errors.name ? '#EF4444' : 'var(--color-border)';
+                event.target.style.borderColor = errors.name ? '#DC2626' : 'var(--color-border)';
                 event.target.style.boxShadow = 'none';
               }}
             />
@@ -369,13 +396,14 @@ export default function OnboardingView() {
             <button
               className="btn-primary"
               onClick={handleNext}
+              aria-disabled={!isStep1Complete}
               style={{
                 width: '100%',
                 padding: '13px',
                 marginTop: 20,
                 fontSize: 15,
-                opacity: form.name.trim() ? 1 : 0.65,
-                cursor: form.name.trim() ? 'pointer' : 'not-allowed',
+                opacity: isStep1Complete ? 1 : 0.6,
+                cursor: isStep1Complete ? 'pointer' : 'not-allowed',
               }}
             >
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
@@ -425,7 +453,7 @@ export default function OnboardingView() {
         {step === 2 && (
           <div>
             <h2 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 700 }}>Info Akademik Kamu</h2>
-            <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--color-text-secondary)' }}>
+            <p style={{ margin: '0 0 24px', fontSize: 14, color: '#4B5563' }}>
               Ini membantu Leva merekomendasikan tools yang paling relevan untukmu.
             </p>
 
@@ -453,6 +481,7 @@ export default function OnboardingView() {
                 aria-expanded={isJurusanOpen}
                 aria-controls="jurusan-combobox-list"
                 aria-autocomplete="list"
+                aria-invalid={!!errors.jurusan}
                 style={{ ...inputStyle(!!errors.jurusan), paddingRight: 66 }}
               />
 
@@ -534,6 +563,9 @@ export default function OnboardingView() {
                 </div>
               )}
             </div>
+            <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>
+              Ketik nama jurusanmu untuk mencari lebih cepat
+            </p>
             {errText('jurusan')}
 
             {/* Semester */}
@@ -577,7 +609,17 @@ export default function OnboardingView() {
             {errText('semester')}
 
             {/* Bahasa */}
-            <label style={{ fontSize: 13, fontWeight: 600, display: 'block', margin: '16px 0 8px' }}>Preferensi Bahasa</label>
+            <label style={{ fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6, margin: '16px 0 8px' }}>
+              <span>Preferensi Bahasa</span>
+              <span
+                className="tooltip-host tooltip-help-icon"
+                data-tooltip="Pilih bahasa yang kamu inginkan untuk rekomendasi tools dan tips dari Leva."
+                aria-label="Info preferensi bahasa"
+                tabIndex={0}
+              >
+                ?
+              </span>
+            </label>
             <div role="radiogroup" aria-label="Preferensi bahasa" style={{ display: 'flex', gap: 10 }}>
               {['Indonesia', 'English'].map((lang, index) => (
                 <button
@@ -611,12 +653,12 @@ export default function OnboardingView() {
               <button
                 className="btn-primary"
                 onClick={handleNext}
-                disabled={!isStep2Complete}
+                aria-disabled={!isStep2Complete}
                 style={{
                   flex: 2,
                   padding: '13px',
                   fontSize: 15,
-                  opacity: isStep2Complete ? 1 : 0.5,
+                  opacity: isStep2Complete ? 1 : 0.6,
                   cursor: isStep2Complete ? 'pointer' : 'not-allowed',
                   transition: 'filter 0.2s ease',
                 }}
@@ -664,6 +706,10 @@ export default function OnboardingView() {
                 </div>
               ))}
             </div>
+
+            <p style={{ margin: '-8px 0 18px', fontSize: 13, color: '#6B7280', fontStyle: 'italic' }}>
+              Tenang, data ini bisa kamu ubah kapan saja di halaman Profil.
+            </p>
 
             <button
               onClick={handleStart}

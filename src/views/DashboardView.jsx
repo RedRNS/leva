@@ -26,19 +26,27 @@ const pricingMeta = (pricingType) => {
 
 function PricingBadge({ pricingType }) {
   const price = pricingMeta(pricingType);
+  const tooltipByType = {
+    free: 'Sepenuhnya gratis untuk digunakan',
+    freemium: 'Fitur dasar gratis, fitur premium berbayar',
+    paid: 'Memerlukan langganan berbayar untuk akses penuh',
+  };
+  const tooltipText = tooltipByType[pricingType] || '';
 
   return (
-    <span
-      style={{
-        fontSize: 11,
-        fontWeight: 700,
-        padding: '3px 9px',
-        borderRadius: 999,
-        background: price.bg,
-        color: price.color,
-      }}
-    >
-      {price.label}
+    <span className={tooltipText ? 'tooltip-host' : undefined} data-tooltip={tooltipText || undefined} style={{ display: 'inline-flex' }}>
+      <span
+        style={{
+          fontSize: 11,
+          fontWeight: 700,
+          padding: '3px 9px',
+          borderRadius: 999,
+          background: price.bg,
+          color: price.color,
+        }}
+      >
+        {price.label}
+      </span>
     </span>
   );
 }
@@ -330,7 +338,7 @@ export default function DashboardView() {
 
       {/* UI/UX Fix: Step 7 — Display as many choices as possible (grid vs scroll). Drop-down untuk sorting meminimalisir pencarian manual. Survei: 52,5% kesulitan temukan referensi tersimpan. */}
       {/* -- Featured Tools (responsive grid) */}
-      <section style={{ marginBottom: 36 }}>
+      <section data-tour="dashboard-featured-tools" style={{ marginBottom: 36 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
           <AppIcon name="flame" size={18} />
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Tools Pilihan Hari Ini</h2>
@@ -338,17 +346,35 @@ export default function DashboardView() {
             - dipilihkan khusus untuk {jurusan}
           </span>
         </div>
-        <div className="tool-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-          {visibleFeaturedTools.map(tool => (
-            <FeaturedToolCard
-              key={tool.id}
-              tool={tool}
-              onSave={saveToolToLibrary}
-              isSaved={savedToolNames.has(tool.name.toLowerCase())}
-            />
-          ))}
-        </div>
-        {!showAllFeatured && featuredTools.length > 6 && (
+        {visibleFeaturedTools.length > 0 ? (
+          <div className="tool-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+            {visibleFeaturedTools.map(tool => (
+              <FeaturedToolCard
+                key={tool.id}
+                tool={tool}
+                onSave={saveToolToLibrary}
+                isSaved={savedToolNames.has(tool.name.toLowerCase())}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="card" style={{ padding: '26px 22px', textAlign: 'center' }}>
+            <p style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--color-text-primary)' }}>
+              Belum ada rekomendasi tools baru hari ini. Cek kembali besok!
+            </p>
+            <p style={{ margin: '0 0 12px', fontSize: 13, color: 'var(--color-text-secondary)' }}>
+              Sementara itu, jelajahi tools yang sudah kamu simpan di Library.
+            </p>
+            <button
+              type="button"
+              onClick={() => setActiveView('library')}
+              style={{ border: 'none', background: 'transparent', color: 'var(--color-primary)', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
+            >
+              Buka Library →
+            </button>
+          </div>
+        )}
+        {!showAllFeatured && featuredTools.length > 6 && visibleFeaturedTools.length > 0 && (
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
             <button
               className="btn-ghost"

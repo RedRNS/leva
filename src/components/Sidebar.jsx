@@ -72,6 +72,7 @@ export default function Sidebar() {
         {/* New Chat Button */}
         <button
           onClick={handleNewChat}
+          data-tour="sidebar-new-chat"
           style={{
             display: 'flex', alignItems: 'center', gap: 8,
             background: 'transparent',
@@ -107,12 +108,28 @@ export default function Sidebar() {
           />
         </div>
 
+        {activeView === 'dashboard' && searchVal.trim().length > 0 && filteredHistory.length === 0 && (
+          <div style={{ marginTop: -6, marginBottom: 14, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 10px' }}>
+            <p style={{ margin: 0, fontSize: 12, color: 'var(--color-sidebar-text)', lineHeight: 1.5 }}>
+              Tidak ada riwayat tugas yang cocok. Coba kata kunci lain atau mulai tugas baru.
+            </p>
+            <button
+              type="button"
+              onClick={handleNewChat}
+              style={{ marginTop: 8, border: 'none', background: 'transparent', color: '#C4B5FD', fontSize: 12, fontWeight: 700, cursor: 'pointer', padding: 0 }}
+            >
+              Mulai Chat Baru →
+            </button>
+          </div>
+        )}
+
         {/* Navigation */}
         <nav style={{ marginBottom: 20 }}>
           {NAV_ITEMS.map(item => (
             <button
               key={item.id}
               className={`sidebar-item ${activeView === item.id ? 'active' : ''}`}
+              data-tour={item.id === 'chat' ? 'sidebar-chat' : item.id === 'library' ? 'sidebar-library' : undefined}
               onClick={() => setActiveView(item.id)}
               type="button"
               style={{ width: '100%', background: 'transparent', border: 'none', textAlign: 'left' }}

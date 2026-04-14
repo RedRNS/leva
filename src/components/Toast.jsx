@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import AppIcon from './AppIcon';
 
-export default function Toast({ toast, onClose }) {
+function ToastItem({ toast, onClose }) {
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
@@ -8,37 +9,41 @@ export default function Toast({ toast, onClose }) {
 
     const dismissTimer = setTimeout(() => {
       setIsClosing(true);
-      setTimeout(onClose, 180);
+      setTimeout(() => onClose(toast.id), 220);
     }, 3000);
 
     return () => clearTimeout(dismissTimer);
-  }, [toast?.id, onClose]);
-
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key !== 'Escape') return;
-
-      setIsClosing(true);
-      setTimeout(onClose, 180);
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, [toast.id, onClose]);
 
   const handleManualClose = () => {
     setIsClosing(true);
-    setTimeout(onClose, 180);
+    setTimeout(() => onClose(toast.id), 220);
   };
 
-  if (!toast) return null;
+  const toastType = toast.type || 'info';
+  const iconName = toastType === 'success' ? 'check' : toastType === 'error' ? 'x' : 'info';
 
   return (
-    <div className={`toast toast-${toast.type || 'info'} ${isClosing ? 'closing' : ''}`} role="status" aria-live="polite">
-      <span style={{ flex: 1 }}>{toast.message}</span>
+    <div className={`toast toast-${toastType} ${isClosing ? 'toast-closing' : ''}`} role="status" aria-live="polite">
+      <span className="toast-icon" aria-hidden="true">
+        <AppIcon name={iconName} size={16} />
+      </span>
+      <span className="toast-message">{toast.message}</span>
       <button className="toast-close" onClick={handleManualClose} aria-label="Tutup notifikasi">
-        x
+        <AppIcon name="x" size={14} />
       </button>
+    </div>
+  );
+}
+
+export default function Toast({ toasts, onClose }) {
+  if (!toasts || toasts.length === 0) return null;
+
+  return (
+    <div className="toast-container" role="region" aria-label="Notifikasi">
+      {toasts.map((toast) => (
+        <ToastItem key={toast.id} toast={toast} onClose={onClose} />
+      ))}
     </div>
   );
 }

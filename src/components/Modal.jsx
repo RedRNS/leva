@@ -69,32 +69,32 @@ export default function Modal({ title, onClose, children }) {
 
   return createPortal(
     <div
+      className="modal-overlay"
       style={{
         position: 'fixed',
         inset: 0,
         zIndex: 4000,
-        background: 'rgba(0,0,0,0.45)',
+        background: 'rgba(0,0,0,0.5)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backdropFilter: 'blur(4px)',
         padding: 16,
       }}
       onClick={onClose}
     >
       <div
         ref={dialogRef}
-        className="card"
+        className="card modal-surface"
         role="dialog"
         aria-modal="true"
         aria-label={title}
         tabIndex={-1}
         style={{
-          width: 460,
-          maxWidth: 'min(460px, calc(100vw - 32px))',
+          width: '100%',
+          maxWidth: 420,
           maxHeight: 'calc(100vh - 32px)',
           overflowY: 'auto',
-          padding: 28,
+          padding: 24,
           position: 'relative',
         }}
         onClick={e => e.stopPropagation()}

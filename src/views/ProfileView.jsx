@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import AppIcon from '../components/AppIcon';
 import Modal from '../components/Modal';
@@ -17,12 +17,16 @@ export default function ProfileView() {
     setHistoryTasks,
     soundEnabled,
     setSoundEnabled,
+    setProfileHasUnsavedChanges,
+    showToast,
   } = useApp();
   const [editMode, setEditMode] = useState(false);
   const [notif1, setNotif1] = useState(true);
   const [notif2, setNotif2] = useState(true);
   const [notif3, setNotif3] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [pendingLeaveTarget, setPendingLeaveTarget] = useState(null);
   const [hoveredStat, setHoveredStat] = useState('');
   const [form, setForm] = useState({
     name: user?.name ?? 'Renisa Mahardika',
@@ -30,26 +34,215 @@ export default function ProfileView() {
     semester: user?.semester ?? '6',
     bahasa: user?.bahasa ?? 'Indonesia',
   });
+  const [errors, setErrors] = useState({});
+  const initialProfileRef = useRef({
+    form: {
+      name: user?.name ?? 'Renisa Mahardika',
+      jurusan: user?.jurusan ?? 'Teknik Informatika',
+      semester: user?.semester ?? '6',
+      bahasa: user?.bahasa ?? 'Indonesia',
+    },
+    notifications: {
+      soundEnabled,
+      notif1: true,
+      notif2: true,
+      notif3: false,
+    },
+  });
+  const hasUnsavedProfileRef = useRef(false);
+  const hasPushedBackGuardRef = useRef(false);
+  const allowExternalLeaveRef = useRef(false);
 
-  const update = (key, val) => setForm(f => ({ ...f, [key]: val }));
+  const update = (key, val) => {
+    setForm(f => ({ ...f, [key]: val }));
+    setErrors(e => ({ ...e, [key]: '' }));
+  };
+
+  const validateProfileForm = () => {
+    const nextErrors = {};
+    const trimmedName = form.name.trim();
+
+    if (!trimmedName) {
+      nextErrors.name = 'Nama tidak boleh kosong.';
+    } else if (trimmedName.length < 2) {
+      nextErrors.name = 'Nama minimal 2 karakter.';
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const commitProfileChanges = () => {
+    if (!validateProfileForm()) return;
+
+    try {
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        throw new Error('Koneksi tidak tersedia');
+      }
+
+      const sanitizedForm = { ...form, name: form.name.trim() };
+
+      setUser(sanitizedForm);
+      setForm(sanitizedForm);
+      initialProfileRef.current = {
+        form: sanitizedForm,
+        notifications: {
+          soundEnabled,
+          notif1,
+          notif2,
+          notif3,
+        },
+      };
+
+      setErrors({});
+      setEditMode(false);
+      showToast('Perubahan profil berhasil disimpan!', 'success');
+      return true;
+    } catch {
+      showToast('Perubahan gagal disimpan. Periksa koneksimu dan coba lagi.', 'error');
+      return false;
+    }
+  };
 
   const handleSave = () => {
-    setUser(form);
+    commitProfileChanges();
+  };
+
+  const resetProfileDraft = () => {
+    const baseline = initialProfileRef.current;
+
+    setForm(baseline.form);
+    setSoundEnabled(baseline.notifications.soundEnabled);
+    setNotif1(baseline.notifications.notif1);
+    setNotif2(baseline.notifications.notif2);
+    setNotif3(baseline.notifications.notif3);
+    setErrors({});
     setEditMode(false);
   };
 
   const handleLogoutOnly = () => {
+    setProfileHasUnsavedChanges(false);
     setUser(null);
-    setActiveView('onboarding');
+    setActiveView('onboarding', { force: true });
   };
 
   const handleResetDemo = () => {
+    setProfileHasUnsavedChanges(false);
     setSavedTools([]);
     setHistoryTasks([]);
     setActiveTask(null);
     setUser(null);
     setShowResetModal(false);
-    setActiveView('onboarding');
+    setActiveView('onboarding', { force: true });
+  };
+
+  const hasUnsavedProfileChanges =
+    form.name !== initialProfileRef.current.form.name
+    || form.jurusan !== initialProfileRef.current.form.jurusan
+    || form.semester !== initialProfileRef.current.form.semester
+    || form.bahasa !== initialProfileRef.current.form.bahasa
+    || soundEnabled !== initialProfileRef.current.notifications.soundEnabled
+    || notif1 !== initialProfileRef.current.notifications.notif1
+    || notif2 !== initialProfileRef.current.notifications.notif2
+    || notif3 !== initialProfileRef.current.notifications.notif3;
+
+  useEffect(() => {
+    hasUnsavedProfileRef.current = hasUnsavedProfileChanges;
+    setProfileHasUnsavedChanges(hasUnsavedProfileChanges);
+  }, [hasUnsavedProfileChanges, setProfileHasUnsavedChanges]);
+
+  useEffect(() => () => {
+    setProfileHasUnsavedChanges(false);
+  }, [setProfileHasUnsavedChanges]);
+
+  useEffect(() => {
+    if (!hasUnsavedProfileChanges || hasPushedBackGuardRef.current) return;
+
+    window.history.pushState({ levaProfileUnsavedGuard: true }, '', window.location.href);
+    hasPushedBackGuardRef.current = true;
+  }, [hasUnsavedProfileChanges]);
+
+  useEffect(() => {
+    if (hasUnsavedProfileChanges) return;
+    hasPushedBackGuardRef.current = false;
+  }, [hasUnsavedProfileChanges]);
+
+  useEffect(() => {
+    const handleBackNavigation = () => {
+      if (!hasUnsavedProfileRef.current || allowExternalLeaveRef.current) return;
+
+      window.history.pushState({ levaProfileUnsavedGuard: true }, '', window.location.href);
+      setPendingLeaveTarget('__history_back__');
+      setShowUnsavedModal(true);
+    };
+
+    window.addEventListener('popstate', handleBackNavigation);
+    return () => window.removeEventListener('popstate', handleBackNavigation);
+  }, []);
+
+  useEffect(() => {
+    if (!hasUnsavedProfileChanges) return;
+
+    const handleBeforeUnload = (event) => {
+      if (allowExternalLeaveRef.current) return;
+      event.preventDefault();
+      event.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedProfileChanges]);
+
+  useEffect(() => {
+    const handleConfirmLeaveProfile = (event) => {
+      const nextView = event.detail?.nextView;
+      if (!hasUnsavedProfileRef.current || !nextView) return;
+
+      setPendingLeaveTarget(nextView);
+      setShowUnsavedModal(true);
+    };
+
+    window.addEventListener('leva:confirm-leave-profile', handleConfirmLeaveProfile);
+    return () => window.removeEventListener('leva:confirm-leave-profile', handleConfirmLeaveProfile);
+  }, []);
+
+  const closeUnsavedModal = () => {
+    setShowUnsavedModal(false);
+    setPendingLeaveTarget(null);
+  };
+
+  const continueLeaveAfterDecision = () => {
+    if (!pendingLeaveTarget) return;
+
+    if (pendingLeaveTarget === '__history_back__') {
+      allowExternalLeaveRef.current = true;
+
+      setTimeout(() => {
+        window.history.back();
+      }, 0);
+
+      return;
+    }
+
+    setActiveView(pendingLeaveTarget, { force: true });
+  };
+
+  const handleSaveAndLeave = () => {
+    const saveSuccess = commitProfileChanges();
+    if (!saveSuccess) return;
+
+    setShowUnsavedModal(false);
+    setProfileHasUnsavedChanges(false);
+    continueLeaveAfterDecision();
+    setPendingLeaveTarget(null);
+  };
+
+  const handleDiscardAndLeave = () => {
+    resetProfileDraft();
+    setShowUnsavedModal(false);
+    setProfileHasUnsavedChanges(false);
+    continueLeaveAfterDecision();
+    setPendingLeaveTarget(null);
   };
 
   const inputStyle = {
@@ -57,6 +250,17 @@ export default function ProfileView() {
     border: '1px solid var(--color-border)', borderRadius: 9,
     fontSize: 13, outline: 'none', boxSizing: 'border-box',
   };
+
+  const errText = (key) => errors[key]
+    ? (
+      <p className="field-error-message" role="alert">
+        <span style={{ display: 'inline-flex', alignItems: 'center', marginTop: 1 }}>
+          <AppIcon name="warning" size={12} color="#DC2626" />
+        </span>
+        <span>{errors[key]}</span>
+      </p>
+    )
+    : null;
 
   const Toggle = ({ val, set }) => (
     <button
@@ -109,7 +313,7 @@ export default function ProfileView() {
             </p>
           </div>
           {!editMode && (
-            <button className="btn-ghost" onClick={() => setEditMode(true)} style={{ padding: '8px 16px', fontSize: 13 }}>
+            <button className="btn-ghost" onClick={() => { setErrors({}); setEditMode(true); }} style={{ padding: '8px 16px', fontSize: 13 }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><AppIcon name="pencil" size={12} /> Edit</span>
             </button>
           )}
@@ -121,7 +325,15 @@ export default function ProfileView() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
               <div>
                 <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 5 }}>Nama</label>
-                <input value={form.name} onChange={e => update('name', e.target.value)} style={inputStyle} onFocus={e => e.target.style.borderColor = 'var(--color-primary)'} onBlur={e => e.target.style.borderColor = 'var(--color-border)'} />
+                <input
+                  value={form.name}
+                  onChange={e => update('name', e.target.value)}
+                  aria-invalid={!!errors.name}
+                  style={{ ...inputStyle, borderColor: errors.name ? '#DC2626' : 'var(--color-border)' }}
+                  onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
+                  onBlur={e => e.target.style.borderColor = errors.name ? '#DC2626' : 'var(--color-border)'}
+                />
+                {errText('name')}
               </div>
               <div>
                 <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 5 }}>Semester</label>
@@ -147,7 +359,7 @@ export default function ProfileView() {
               </div>
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
-              <button className="btn-ghost" onClick={() => setEditMode(false)} style={{ flex: 1 }}>Batal</button>
+              <button className="btn-ghost" onClick={resetProfileDraft} style={{ flex: 1 }}>Batal</button>
               <button className="btn-primary" onClick={handleSave} style={{ flex: 2, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}><AppIcon name="check" size={14} color="#fff" /> Simpan Perubahan</button>
             </div>
           </div>
@@ -187,6 +399,9 @@ export default function ProfileView() {
             },
           ].map(stat => {
             const isClickable = !!stat.clickTo;
+            const statTooltipText = stat.label === 'Hari Berturut-turut'
+              ? 'Jumlah hari berturut-turut kamu menggunakan Leva.'
+              : '';
             const baseStyle = {
               textAlign: 'center',
               padding: '16px 10px',
@@ -229,7 +444,7 @@ export default function ProfileView() {
             }
 
             return (
-              <div key={stat.label} style={baseStyle}>
+              <div key={stat.label} className={statTooltipText ? 'tooltip-host tooltip-block' : undefined} data-tooltip={statTooltipText || undefined} style={baseStyle}>
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}><AppIcon name={stat.icon} size={22} /></div>
                 <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--color-primary)' }}>{stat.val}</div>
                 <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginTop: 2 }}>
@@ -249,9 +464,9 @@ export default function ProfileView() {
         <h3 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}><AppIcon name="bell" size={16} /> Preferensi Notifikasi</h3>
         {[
           { label: 'Efek Suara', sub: 'Putar suara saat menyelesaikan tugas', val: soundEnabled, set: setSoundEnabled },
-          { label: 'Daily Discovery Reminder', sub: 'Ingatkan tools AI baru setiap hari', val: notif1, set: setNotif1 },
+          { label: 'Pengingat Harian', sub: 'Ingatkan tools AI baru setiap hari', val: notif1, set: setNotif1 },
           { label: 'Tips Penggunaan Mingguan', sub: 'Tips produktivitas setiap minggu', val: notif2, set: setNotif2 },
-          { label: 'Update Tool Baru', sub: 'Tools baru sesuai jurusanmu', val: notif3, set: setNotif3 },
+          { label: 'Pembaruan Tool Baru', sub: 'Tools baru sesuai jurusanmu', val: notif3, set: setNotif3 },
         ].map((item, i, arr) => (
           <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--color-border)' : 'none' }}>
             <div>
@@ -317,6 +532,53 @@ export default function ProfileView() {
               }}
             >
               Reset
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {showUnsavedModal && (
+        <Modal title="Perubahan Belum Disimpan" onClose={closeUnsavedModal}>
+          <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
+            Kamu memiliki perubahan profil/notifikasi yang belum disimpan. Apa yang ingin kamu lakukan?
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 8 }}>
+            <button
+              type="button"
+              onClick={handleSaveAndLeave}
+              style={{
+                width: '100%',
+                border: 'none',
+                borderRadius: 10,
+                background: '#6C5CE7',
+                color: '#fff',
+                fontSize: 14,
+                fontWeight: 700,
+                padding: '10px 14px',
+                cursor: 'pointer',
+              }}
+            >
+              Simpan & Lanjut
+            </button>
+            <button
+              type="button"
+              onClick={handleDiscardAndLeave}
+              style={{
+                width: '100%',
+                border: '1px solid #FECACA',
+                borderRadius: 10,
+                background: '#fff',
+                color: '#B91C1C',
+                fontSize: 14,
+                fontWeight: 600,
+                padding: '10px 14px',
+                cursor: 'pointer',
+              }}
+            >
+              Buang Perubahan
+            </button>
+            <button className="btn-ghost" onClick={closeUnsavedModal}>
+              Batal
             </button>
           </div>
         </Modal>

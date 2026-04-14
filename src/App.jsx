@@ -8,6 +8,8 @@ import ProfileView from './views/ProfileView';
 import Sidebar from './components/Sidebar';
 import Toast from './components/Toast';
 import AppIcon from './components/AppIcon';
+import DashboardTour from './components/DashboardTour';
+import { preloadSoundEffects } from './utils/sound';
 
 const isTypingTarget = (target) => {
   if (!(target instanceof HTMLElement)) return false;
@@ -19,8 +21,24 @@ const isTypingTarget = (target) => {
 };
 
 function AppInner() {
-  const { activeView, toast, dismissToast, setActiveView, setActiveTask } = useApp();
+  const { activeView, toasts, dismissToast, setActiveView, setActiveTask } = useApp();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const pageTitleByView = {
+      onboarding: 'Leva — Perkenalan',
+      dashboard: 'Leva — Dashboard',
+      chat: 'Leva — Chat & Task',
+      library: 'Leva — Library',
+      profile: 'Leva — Profil & Pengaturan',
+    };
+
+    document.title = pageTitleByView[activeView] || 'Leva';
+  }, [activeView]);
+
+  useEffect(() => {
+    preloadSoundEffects();
+  }, []);
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
@@ -119,7 +137,8 @@ function AppInner() {
         {activeView === 'profile' && <ProfileView />}
       </main>
       {isMobile && <MobileBottomNav />}
-      {toast && <Toast toast={toast} onClose={dismissToast} />}
+      <DashboardTour isActive={activeView === 'dashboard'} />
+      {toasts.length > 0 && <Toast toasts={toasts} onClose={dismissToast} />}
     </div>
   );
 }
