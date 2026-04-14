@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-const TOUR_COMPLETED_KEY = 'leva_tour_completed';
+const TOUR_COMPLETED_KEY = 'leva_tour_completed_v2';
 const STEP_COUNT = 4;
 
 const TOUR_STEPS = [
@@ -161,10 +161,17 @@ export default function DashboardTour({ isActive }) {
     };
   }, [isOpen, currentStep]);
 
-  const calloutPosition = useMemo(
-    () => getCalloutPosition(targetRect, currentStep?.placement || 'bottom'),
-    [targetRect, currentStep]
-  );
+  const calloutPosition = useMemo(() => {
+    if (currentStep?.id === 1) {
+      return {
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+      };
+    }
+
+    return getCalloutPosition(targetRect, currentStep?.placement || 'bottom');
+  }, [targetRect, currentStep]);
 
   const goNextStep = () => {
     if (stepIndex === STEP_COUNT - 1) {
@@ -194,10 +201,21 @@ export default function DashboardTour({ isActive }) {
 
   const isLastStep = stepIndex === STEP_COUNT - 1;
   const primaryLabel = isLastStep ? 'Mulai Jelajahi! 🎉' : 'Selanjutnya →';
+  const isStepOneModal = currentStep.id === 1;
+  const isCompactViewport = typeof window !== 'undefined' && window.innerWidth <= 1100;
+  const shouldUseBlurBackdrop = isStepOneModal || (isCompactViewport && currentStep.id === 4);
+  const shouldShowHighlight = !isStepOneModal;
+  const mergedHighlightStyle = shouldUseBlurBackdrop
+    ? {
+        ...highlightStyle,
+        boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.36)',
+      }
+    : highlightStyle;
 
   return (
     <div className="dashboard-tour-layer" role="dialog" aria-modal="true" aria-label="Panduan pertama Dashboard">
-      <div className="dashboard-tour-highlight" style={highlightStyle} />
+      {shouldUseBlurBackdrop && <div className="dashboard-tour-backdrop-blur" aria-hidden="true" />}
+      {shouldShowHighlight && <div className="dashboard-tour-highlight" style={mergedHighlightStyle} />}
 
       <div key={currentStep.id} className="dashboard-tour-callout" style={calloutPosition}>
         <p className="dashboard-tour-progress">Langkah {stepIndex + 1} dari {STEP_COUNT}</p>
