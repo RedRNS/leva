@@ -25,6 +25,8 @@ export default function ProfileView() {
   const [notif2, setNotif2] = useState(true);
   const [notif3, setNotif3] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
+  const [showJurusanChangeModal, setShowJurusanChangeModal] = useState(false);
+  const [pendingSaveMode, setPendingSaveMode] = useState(null);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [pendingLeaveTarget, setPendingLeaveTarget] = useState(null);
   const [hoveredStat, setHoveredStat] = useState('');
@@ -104,8 +106,30 @@ export default function ProfileView() {
     }
   };
 
+  const requestProfileSave = (mode = 'save') => {
+    const previousJurusan = initialProfileRef.current.form.jurusan;
+    const hasJurusanChanged = form.jurusan !== previousJurusan;
+
+    if (hasJurusanChanged) {
+      setPendingSaveMode(mode);
+      setShowJurusanChangeModal(true);
+      return false;
+    }
+
+    const saveSuccess = commitProfileChanges();
+    if (!saveSuccess) return false;
+
+    if (mode === 'save-and-leave') {
+      setProfileHasUnsavedChanges(false);
+      continueLeaveAfterDecision();
+      setPendingLeaveTarget(null);
+    }
+
+    return true;
+  };
+
   const handleSave = () => {
-    commitProfileChanges();
+    requestProfileSave('save');
   };
 
   const resetProfileDraft = () => {
@@ -134,6 +158,18 @@ export default function ProfileView() {
     setUser(null);
     setShowResetModal(false);
     setActiveView('onboarding', { force: true });
+  };
+
+  const handleStatCardClick = (label) => {
+    if (label === 'Tasks Selesai') {
+      setActiveTask(null);
+      setActiveView('chat');
+      return;
+    }
+
+    if (label === 'Tools Tersimpan') {
+      setActiveView('library');
+    }
   };
 
   const hasUnsavedProfileChanges =
@@ -228,13 +264,31 @@ export default function ProfileView() {
   };
 
   const handleSaveAndLeave = () => {
+    setShowUnsavedModal(false);
+    requestProfileSave('save-and-leave');
+  };
+
+  const handleCancelJurusanChange = () => {
+    const previousJurusan = initialProfileRef.current.form.jurusan;
+
+    setForm((prev) => ({ ...prev, jurusan: previousJurusan }));
+    setShowJurusanChangeModal(false);
+    setPendingSaveMode(null);
+  };
+
+  const handleConfirmJurusanChange = () => {
+    const saveMode = pendingSaveMode;
     const saveSuccess = commitProfileChanges();
     if (!saveSuccess) return;
 
-    setShowUnsavedModal(false);
-    setProfileHasUnsavedChanges(false);
-    continueLeaveAfterDecision();
-    setPendingLeaveTarget(null);
+    setShowJurusanChangeModal(false);
+    setPendingSaveMode(null);
+
+    if (saveMode === 'save-and-leave') {
+      setProfileHasUnsavedChanges(false);
+      continueLeaveAfterDecision();
+      setPendingLeaveTarget(null);
+    }
   };
 
   const handleDiscardAndLeave = () => {
@@ -375,7 +429,6 @@ export default function ProfileView() {
               icon: 'clipboard',
               val: 12,
               label: 'Tasks Selesai',
-              clickTo: 'chat',
               aria: 'Lihat riwayat task di Chat dan Task',
               trendText: '↑ 3 dari minggu lalu',
               trendColor: '#059669',
@@ -384,7 +437,6 @@ export default function ProfileView() {
               icon: 'book',
               val: savedTools.length,
               label: 'Tools Tersimpan',
-              clickTo: 'library',
               aria: 'Lihat daftar tools tersimpan di Library',
               trendText: '↓ 1 dari minggu lalu',
               trendColor: '#DC2626',
@@ -393,67 +445,47 @@ export default function ProfileView() {
               icon: 'calendar-clock',
               val: 8,
               label: 'Hari Berturut-turut',
-              clickTo: null,
+              aria: 'Lihat progres streak harian',
               trendText: '- sama dengan minggu lalu',
               trendColor: '#64748B',
             },
           ].map(stat => {
-            const isClickable = !!stat.clickTo;
+            const isHovered = hoveredStat === stat.label;
             const statTooltipText = stat.label === 'Hari Berturut-turut'
               ? 'Jumlah hari berturut-turut kamu menggunakan Leva.'
               : '';
             const baseStyle = {
               textAlign: 'center',
               padding: '16px 10px',
-              background: 'var(--color-bg)',
+              background: isHovered ? '#FFFFFF' : 'var(--color-bg)',
               borderRadius: 12,
-              border: isClickable && hoveredStat === stat.label ? '1px solid #DDD8FF' : '1px solid transparent',
-              cursor: isClickable ? 'pointer' : 'default',
-              transition: 'all 0.2s',
+              border: isHovered ? '1px solid #DDD8FF' : '1px solid transparent',
+              cursor: 'pointer',
+              boxShadow: isHovered ? '0 10px 24px rgba(108,99,255,0.14)' : '0 2px 8px rgba(15,23,42,0.06)',
+              transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
+              transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background-color 0.18s ease',
             };
-
-            if (isClickable) {
-              return (
-                <button
-                  key={stat.label}
-                  type="button"
-                  aria-label={stat.aria || stat.label}
-                  onClick={() => setActiveView(stat.clickTo)}
-                  style={baseStyle}
-                  onMouseEnter={() => setHoveredStat(stat.label)}
-                  onMouseLeave={() => setHoveredStat('')}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}><AppIcon name={stat.icon} size={22} /></div>
-                  <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--color-primary)' }}>{stat.val}</div>
-                  <div
-                    style={{
-                      fontSize: 12,
-                      color: hoveredStat === stat.label ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-                      marginTop: 2,
-                      textDecoration: 'underline',
-                      textDecorationColor: 'rgba(108,99,255,0.35)',
-                    }}
-                  >
-                    {stat.label}
-                  </div>
-                  <div style={{ marginTop: 4, fontSize: 11, fontWeight: 600, color: stat.trendColor }}>
-                    {stat.trendText}
-                  </div>
-                </button>
-              );
-            }
-
             return (
-              <div key={stat.label} className={statTooltipText ? 'tooltip-host tooltip-block' : undefined} data-tooltip={statTooltipText || undefined} style={baseStyle}>
+              <button
+                key={stat.label}
+                type="button"
+                aria-label={stat.aria || stat.label}
+                className={statTooltipText ? 'tooltip-host tooltip-block' : undefined}
+                data-tooltip={statTooltipText || undefined}
+                onClick={() => handleStatCardClick(stat.label)}
+                style={baseStyle}
+                onMouseEnter={() => setHoveredStat(stat.label)}
+                onMouseLeave={() => setHoveredStat('')}
+              >
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}><AppIcon name={stat.icon} size={22} /></div>
-                <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--color-primary)' }}>{stat.val}</div>
-                <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginTop: 2 }}>
+                <div style={{ fontSize: 24, fontWeight: 800, color: isHovered ? 'var(--color-primary)' : 'var(--color-text-primary)' }}>{stat.val}</div>
+                <div style={{ fontSize: 12, color: isHovered ? 'var(--color-primary)' : 'var(--color-text-secondary)', marginTop: 2 }}>
                   {stat.label}
                 </div>
                 <div style={{ marginTop: 4, fontSize: 11, fontWeight: 600, color: stat.trendColor }}>
                   {stat.trendText}
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -511,7 +543,7 @@ export default function ProfileView() {
       {showResetModal && (
         <Modal title="Reset Semua Data?" onClose={() => setShowResetModal(false)}>
           <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
-            Semua data profil, riwayat tugas, dan library tools akan dihapus. Tindakan ini tidak bisa dibatalkan.
+            Semua data termasuk riwayat tugas, library tools, dan pengaturan akan dihapus. Aksi ini tidak bisa dibatalkan.
           </p>
           <div style={{ display: 'flex', gap: 10 }}>
             <button className="btn-ghost" onClick={() => setShowResetModal(false)} style={{ flex: 1 }}>
@@ -531,7 +563,23 @@ export default function ProfileView() {
                 padding: '10px 16px',
               }}
             >
-              Reset
+              Hapus Semua Data
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {showJurusanChangeModal && (
+        <Modal title="Ubah Jurusan?" onClose={handleCancelJurusanChange}>
+          <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
+            Mengubah jurusan dari <strong>{initialProfileRef.current.form.jurusan}</strong> ke <strong>{form.jurusan}</strong> akan memengaruhi rekomendasi tools di Dashboard. Lanjutkan?
+          </p>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button className="btn-ghost" onClick={handleCancelJurusanChange} style={{ flex: 1 }}>
+              Batal
+            </button>
+            <button className="btn-primary" onClick={handleConfirmJurusanChange} style={{ flex: 1 }}>
+              Ya, Ubah
             </button>
           </div>
         </Modal>

@@ -132,11 +132,13 @@ body {
 }
 
 button {
-  transition: transform 0.1s ease;
+  transition: transform 100ms ease, filter 100ms ease;
 }
 
 button:active {
   transform: scale(0.97);
+  filter: brightness(0.95);
+  transition: transform 100ms ease, filter 100ms ease !important;
 }
 
 /* Badge styles */

@@ -264,8 +264,8 @@ function RightPanel({ task, isOpen, onSave, savedToolNames, onCopyTips, copiedTi
 
           {/* Tips Penggunaan */}
           <div style={{
-            background: 'var(--color-accent-light)',
-            border: '1px solid rgba(245,158,11,0.3)',
+            background: '#FEF3C7',
+            border: '1px solid #F59E0B',
             borderRadius: 12, padding: '14px 14px', marginBottom: 16,
           }}>
             <p style={{ margin: '0 0 8px', fontSize: 12, fontWeight: 700, color: '#92400E' }}>

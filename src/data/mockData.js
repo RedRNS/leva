@@ -14,31 +14,31 @@ export const mockSubTasks = [
   {
     id: 1, title: "Cari Topik", status: "done", estimasi: "1–2 hari", kategori: "Research",
     deskripsi: "Langkah pertama dan sangat krusial adalah mencari topik. Topik yang kamu pilih harus selinear dengan jurusan Teknik Informatika yang kamu ambil dan memiliki novelty yang jelas. Pastikan topik bisa dijawab dengan penelitian yang kamu mampu lakukan dalam rentang waktu skripsi.",
-    tips: "Coba tanya ke Perplexity AI: 'Berikan 5 topik skripsi terkini di bidang machine learning untuk mahasiswa S1 Teknik Informatika yang bisa diselesaikan dalam 6 bulan'",
+    tips: "Gunakan Perplexity AI untuk riset cepat: minta 5 topik skripsi terbaru, lalu lanjutkan dengan prompt 'sertakan gap riset dan minimal 3 sumber 2022-2026' agar topik lebih tajam.",
     toolIds: [1, 3, 7],
   },
   {
     id: 2, title: "Cari Referensi atau Jurnal Terkait", status: "next", estimasi: "3–5 hari", kategori: "Academic",
     deskripsi: "Setelah topik ditentukan, kamu perlu mengumpulkan minimal 20–30 referensi dari jurnal ilmiah terindeks (Scopus, IEEE, ACM). Prioritaskan jurnal yang diterbitkan 5 tahun terakhir untuk memastikan relevansi dan kebaruan.",
-    tips: "Di Scite.ai, masukkan judul topikmu dan klik 'Find Related Papers' untuk menemukan paper yang saling mengutip secara kontekstual.",
+    tips: "Di Scite.ai, pakai fitur Smart Citations untuk cek apakah paper 'supporting' atau 'contrasting', lalu prioritaskan referensi yang paling sering didukung untuk fondasi teorimu.",
     toolIds: [1, 3, 9],
   },
   {
     id: 3, title: "Menulis Draft", status: "next", estimasi: "2–4 minggu", kategori: "Writing",
     deskripsi: "Mulai dengan outline terlebih dahulu sebelum menulis draft penuh. Fokus pada BAB I (Pendahuluan) dan BAB II (Tinjauan Pustaka) dulu. Jangan fokus pada kesempurnaan di tahap ini — yang penting ide mengalir.",
-    tips: "Gunakan Notion AI untuk membuat template struktur BAB I. Ketik: 'Buatkan kerangka BAB 1 skripsi tentang [topikmu] dengan format akademik Indonesia'",
+    tips: "Gunakan Notion AI untuk menyusun kerangka BAB, lalu cek kejelasan kalimat di Grammarly agar draft tetap akademik, runtut, dan minim repetisi sejak awal.",
     toolIds: [5, 6, 2],
   },
   {
     id: 4, title: "Parafrase", status: "next", estimasi: "3–5 hari", kategori: "Writing",
     deskripsi: "Setelah draft selesai, pastikan setiap kalimat yang bersumber dari referensi sudah diparafrase dengan baik agar tidak terdeteksi sebagai plagiarisme. Parafrase bukan sekadar mengganti kata, tapi menyampaikan ulang ide dengan struktur kalimat yang berbeda.",
-    tips: "Gunakan QuillBot (mode Formal) untuk membantu parafrase, lalu edit ulang agar sesuai konteks. Hindari langsung copy-paste hasilnya.",
+    tips: "Pakai QuillBot mode Formal untuk variasi struktur kalimat, lalu revisi manual agar istilah teknis tetap akurat. Hindari copy-paste mentah agar gaya tulis tetap konsisten.",
     toolIds: [5],
   },
   {
     id: 5, title: "Cek Similaritas", status: "next", estimasi: "1 hari", kategori: "Academic",
     deskripsi: "Sebelum submit ke dosen pembimbing, wajib cek similaritas menggunakan Turnitin atau tools serupa. Target persentase similaritas untuk skripsi Teknik Informatika umumnya di bawah 20%. Jika lebih, identifikasi bagian merah dan parafrase ulang.",
-    tips: "Gunakan akun kampus kamu untuk akses Turnitin. Alternatif gratis: Copyleaks atau PlagScan untuk cek awal sebelum submit resmi.",
+    tips: "Cek dulu dengan Copyleaks/PlagScan untuk skrining awal, lalu validasi final di Turnitin akun kampus. Fokus perbaikan pada blok teks merah yang panjang dan sitasi yang belum rapi.",
     toolIds: [3],
   },
 ];
