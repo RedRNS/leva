@@ -52,6 +52,13 @@ export default function Sidebar() {
     setActiveView('chat');
   };
 
+  const handleOpenTutorial = () => {
+    const didNavigate = setActiveView('dashboard');
+    if (!didNavigate) return;
+
+    window.dispatchEvent(new CustomEvent('leva:open-dashboard-tour'));
+  };
+
   return (
     <>
       <aside className="sidebar-desktop" style={{
@@ -145,6 +152,14 @@ export default function Sidebar() {
             style={{ width: '100%', background: 'transparent', border: 'none', textAlign: 'left' }}
           >
             <span style={{ display: 'flex' }}><AppIcon name="settings" size={16} /></span> Settings
+          </button>
+          <button
+            type="button"
+            className="sidebar-item"
+            onClick={handleOpenTutorial}
+            style={{ width: '100%', background: 'transparent', border: 'none', textAlign: 'left' }}
+          >
+            <span style={{ display: 'flex' }}><AppIcon name="sparkles" size={16} /></span> Lihat Tutorial
           </button>
         </nav>
 

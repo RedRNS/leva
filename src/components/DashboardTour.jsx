@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 const TOUR_COMPLETED_KEY = 'leva_tour_completed_v2';
+const TOUR_REOPEN_EVENT = 'leva:open-dashboard-tour';
 const STEP_COUNT = 4;
 
 const TOUR_STEPS = [
@@ -102,6 +103,7 @@ export default function DashboardTour({ isActive }) {
   const [isOpen, setIsOpen] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState(null);
+  const pendingReopenRef = useRef(false);
 
   const currentStep = TOUR_STEPS[stepIndex];
 
@@ -118,9 +120,20 @@ export default function DashboardTour({ isActive }) {
     setIsOpen(false);
   };
 
+  const openTourFromStart = () => {
+    setStepIndex(0);
+    setIsOpen(true);
+  };
+
   useEffect(() => {
     if (!isActive) {
       setIsOpen(false);
+      return;
+    }
+
+    if (pendingReopenRef.current) {
+      pendingReopenRef.current = false;
+      openTourFromStart();
       return;
     }
 
@@ -139,6 +152,20 @@ export default function DashboardTour({ isActive }) {
     }, 320);
 
     return () => clearTimeout(timer);
+  }, [isActive]);
+
+  useEffect(() => {
+    const handleReopenTour = () => {
+      if (isActive) {
+        openTourFromStart();
+        return;
+      }
+
+      pendingReopenRef.current = true;
+    };
+
+    window.addEventListener(TOUR_REOPEN_EVENT, handleReopenTour);
+    return () => window.removeEventListener(TOUR_REOPEN_EVENT, handleReopenTour);
   }, [isActive]);
 
   useEffect(() => {

@@ -298,6 +298,10 @@ export default function DashboardView() {
     : mockTools.filter(t => t.category === activeFilter);
   const savedToolNames = new Set(savedTools.map((tool) => tool.name.toLowerCase()));
 
+  const handleReplayTour = () => {
+    window.dispatchEvent(new CustomEvent('leva:open-dashboard-tour'));
+  };
+
   if (!mounted) return (
     <div className="main-content view-enter" style={{ padding: '32px 36px' }}>
       {[200, 300, 100].map((w, i) => (
@@ -333,18 +337,44 @@ export default function DashboardView() {
           }}>
             <AppIcon name="refresh" size={12} /> Diperbarui otomatis setiap hari
           </span>
+          <div style={{ marginTop: 8 }}>
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={handleReplayTour}
+              style={{
+                padding: '6px 12px',
+                fontSize: 12,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+              }}
+            >
+              <AppIcon name="sparkles" size={12} /> Lihat Tour Lagi
+            </button>
+          </div>
         </div>
       </div>
 
       {/* UI/UX Fix: Step 7 — Display as many choices as possible (grid vs scroll). Drop-down untuk sorting meminimalisir pencarian manual. Survei: 52,5% kesulitan temukan referensi tersimpan. */}
       {/* -- Featured Tools (responsive grid) */}
       <section data-tour="dashboard-featured-tools" style={{ marginBottom: 36 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-          <AppIcon name="flame" size={18} />
-          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Tools Pilihan Hari Ini</h2>
-          <span style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginLeft: 4 }}>
-            - dipilihkan khusus untuk {jurusan}
-          </span>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <AppIcon name="flame" size={18} />
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Tools Pilihan Hari Ini</h2>
+            <span style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginLeft: 4 }}>
+              - dipilihkan khusus untuk {jurusan}
+            </span>
+          </div>
+          <button
+            type="button"
+            className="btn-ghost"
+            onClick={handleReplayTour}
+            style={{ padding: '7px 12px', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          >
+            <AppIcon name="sparkles" size={12} /> Mulai Tutorial
+          </button>
         </div>
         {visibleFeaturedTools.length > 0 ? (
           <div className="tool-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
