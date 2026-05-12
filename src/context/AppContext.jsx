@@ -29,6 +29,9 @@ export function AppProvider({ children }) {
   // UX sound effect preference
   const [soundEnabled, setSoundEnabled] = useState(true);
 
+  // High contrast mode preference
+  const [highContrast, setHighContrast] = useState(false);
+
   const showToast = (message, type = 'info') => {
     const normalizedType = String(type || 'info').toLowerCase();
 
@@ -124,6 +127,8 @@ export function AppProvider({ children }) {
         dismissToast,
         soundEnabled,
         setSoundEnabled,
+        highContrast,
+        setHighContrast,
         saveToolToLibrary,
         removeToolFromLibrary,
       }}

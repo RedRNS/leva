@@ -6,7 +6,7 @@ import AppIcon from '../components/AppIcon';
 
 const PRIORITY_FILTERS = ['Semua', 'Prioritas Tinggi', 'Sangat Bagus', 'Coba Nanti'];
 const CATEGORY_FILTERS = ['Semua', 'Research', 'Writing', 'Coding', 'Data', 'Academic', 'Productivity'];
-const SORT_OPTIONS = [
+              { label: 'Sangat Bagus', val: savedTools.filter(t => t.priorityKey === 'good').length, icon: 'star' },
   { value: 'latest', label: 'Terbaru disimpan' },
   { value: 'oldest', label: 'Terlama disimpan' },
   { value: 'rating', label: 'Rating tertinggi' },
@@ -31,10 +31,10 @@ const INDONESIAN_MONTH_MAP = {
 
 const pricingMeta = (pricingType) => {
   const map = {
-    free: { label: 'Free', bg: '#DCFCE7', color: '#15803D' },
-    freemium: { label: 'Freemium', bg: '#FEF3C7', color: '#B45309' },
-    paid: { label: 'Berbayar', bg: '#FEE2E2', color: '#B91C1C' },
-    opensource: { label: 'Open-source', bg: '#DBEAFE', color: '#1D4ED8' },
+    free: { label: 'Gratis', bg: '#059669', color: '#FFFFFF', icon: 'check' },
+    freemium: { label: 'Freemium', bg: '#7C3AED', color: '#FFFFFF', icon: 'sparkles' },
+    paid: { label: 'Berbayar', bg: '#DC2626', color: '#FFFFFF', icon: 'warning' },
+    opensource: { label: 'Open Source', bg: '#1E40AF', color: '#FFFFFF', icon: 'link' },
   };
 
   return map[pricingType] || map.freemium;
@@ -58,14 +58,15 @@ const parseSavedAtToTimestamp = (savedAt, fallback = 0) => {
 // Badge component for priority
 function PriorityBadge({ priorityKey, label }) {
   const styles = {
-    high:  { background: '#FEE2E2', color: '#DC2626' },
-    good:  { background: '#D1FAE5', color: '#059669' },
-    later: { background: '#DBEAFE', color: '#2563EB' },
+    high:  { background: '#B45309', color: '#FFFFFF', icon: 'flame' },
+    good:  { background: '#0078D4', color: '#FFFFFF', icon: 'star' },
+    later: { background: '#6B7280', color: '#FFFFFF', icon: 'clock' },
   };
   const s = styles[priorityKey] || styles.later;
   return (
-    <span style={{ ...s, fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999, whiteSpace: 'nowrap' }}>
-      {label}
+    <span style={{ ...s, fontSize: 12, fontWeight: 700, padding: '4px 10px', borderRadius: 999, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+      <span aria-hidden="true" style={{ display: 'flex' }}><AppIcon name={s.icon} size={16} color="#FFFFFF" /></span>
+      <span>{label}</span>
     </span>
   );
 }
@@ -74,7 +75,8 @@ function PricingBadge({ pricingType }) {
   const pricing = pricingMeta(pricingType);
 
   return (
-    <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: pricing.bg, color: pricing.color, whiteSpace: 'nowrap' }}>
+    <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: pricing.bg, color: pricing.color, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+      <span aria-hidden="true" style={{ display: 'flex' }}><AppIcon name={pricing.icon} size={16} color={pricing.color} /></span>
       {pricing.label}
     </span>
   );
@@ -83,14 +85,20 @@ function PricingBadge({ pricingType }) {
 // Saved Tool Card
 function SavedToolCard({ tool, onDelete }) {
   const [expanded, setExpanded] = useState(false);
+  const priorityBarColor = tool.priorityKey === 'high'
+    ? '#B45309'
+    : tool.priorityKey === 'good'
+      ? '#0078D4'
+      : '#6B7280';
 
   return (
     <div
       className="card"
-      style={{ padding: '18px 20px', transition: 'transform 0.2s, box-shadow 0.2s' }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.1)'; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)'; }}
+      style={{ padding: '18px 20px', transition: 'transform 0.2s, box-shadow 0.2s', position: 'relative', overflow: 'hidden' }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.1)'; e.currentTarget.style.background = '#F5F3FF'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)'; e.currentTarget.style.background = 'var(--color-surface)'; }}
     >
+      <span aria-hidden="true" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: priorityBarColor }} />
       {/* Top row */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
         <div>
@@ -127,7 +135,7 @@ function SavedToolCard({ tool, onDelete }) {
         {tool.keywords.map(kw => (
           <span
             key={kw}
-            style={{ fontSize: 11, padding: '2px 8px', background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 6, color: 'var(--color-text-secondary)' }}
+            style={{ fontSize: 11, padding: '2px 8px', background: '#EDE9FF', border: '1px solid #D7D2FF', borderRadius: 6, color: 'var(--color-primary)' }}
           >
             #{kw}
           </span>
@@ -313,8 +321,16 @@ export default function LibraryView() {
 
       {isLibraryEmpty ? (
         <div style={{ minHeight: 420, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '24px 12px' }}>
-          <div style={{ width: 84, height: 84, borderRadius: 20, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
-            <AppIcon name="folder" size={44} color="#94A3B8" />
+          <div style={{ width: 120, height: 90, borderRadius: 18, background: '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, border: '1px solid var(--color-border)' }}>
+            <svg width="90" height="60" viewBox="0 0 90 60" role="img" aria-label="Ilustrasi rak buku kosong">
+              <rect x="6" y="10" width="78" height="40" rx="8" fill="#FFFFFF" stroke="#6C47FF" strokeWidth="1.5" />
+              <rect x="14" y="18" width="16" height="24" rx="3" fill="#F5F5F5" stroke="#6C47FF" strokeWidth="1.5" />
+              <rect x="34" y="18" width="16" height="24" rx="3" fill="#F5F5F5" stroke="#6C47FF" strokeWidth="1.5" />
+              <rect x="54" y="18" width="16" height="24" rx="3" fill="#F5F5F5" stroke="#6C47FF" strokeWidth="1.5" />
+              <circle cx="76" cy="32" r="9" fill="#6C47FF" />
+              <line x1="76" y1="27" x2="76" y2="37" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="71" y1="32" x2="81" y2="32" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
           </div>
           <h3 style={{ margin: '0 0 10px', fontSize: 24, fontWeight: 800, color: 'var(--color-text-primary)' }}>
             Library-mu masih kosong

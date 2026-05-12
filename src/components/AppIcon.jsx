@@ -1,7 +1,9 @@
 import {
   ArrowLeft,
   ArrowRight,
+  BarChart3,
   Bell,
+  Bookmark,
   BookOpen,
   Bot,
   Calendar,
@@ -12,6 +14,7 @@ import {
   Circle,
   ClipboardList,
   Clock3,
+  Code,
   Copy,
   ExternalLink,
   Flame,
@@ -25,6 +28,7 @@ import {
   LoaderCircle,
   LogOut,
   MessageCircle,
+  Moon,
   Newspaper,
   Paperclip,
   Pencil,
@@ -36,10 +40,12 @@ import {
   Settings,
   Sparkles,
   SquareKanban,
+  Star,
   Trash2,
   Undo2,
   User,
   TriangleAlert,
+  Volume2,
   X,
 } from 'lucide-react';
 
@@ -47,7 +53,9 @@ const ICONS = {
   'arrow-left': ArrowLeft,
   'arrow-right': ArrowRight,
   bell: Bell,
+  'bar-chart': BarChart3,
   book: BookOpen,
+  bookmark: Bookmark,
   bot: Bot,
   calendar: Calendar,
   'calendar-clock': CalendarClock,
@@ -56,12 +64,14 @@ const ICONS = {
   google: Chrome,
   clipboard: ClipboardList,
   clock: Clock3,
+  code: Code,
   copy: Copy,
   dashboard: Grid2x2,
   'external-link': ExternalLink,
   flame: Flame,
   folder: FolderKanban,
   'graduation-cap': GraduationCap,
+  grid: Grid2x2,
   home: House,
   lamp: Lamp,
   library: Library,
@@ -69,6 +79,7 @@ const ICONS = {
   loader: LoaderCircle,
   logout: LogOut,
   message: MessageCircle,
+  moon: Moon,
   news: Newspaper,
   info: CircleAlert,
   // UI/UX Fix: Step 6 — ikon paperclip dipakai untuk affordance upload file yang familiar.
@@ -80,16 +91,27 @@ const ICONS = {
   send: Send,
   settings: Settings,
   sparkles: Sparkles,
+  star: Star,
   task: SquareKanban,
   trash: Trash2,
   undo: Undo2,
   user: User,
+  volume: Volume2,
   warning: TriangleAlert,
   // UI/UX Fix: Step 7 — ikon close dipakai pada chip agar kontrol remove file mudah dipahami.
   x: X,
 };
 
-export default function AppIcon({ name, size = 18, color = 'currentColor', strokeWidth = 1.8, className }) {
+export default function AppIcon({ name, size = 18, color = 'currentColor', strokeWidth = 1.5, className, filled = false, ...rest }) {
   const Icon = ICONS[name] || Circle;
-  return <Icon size={size} color={color} strokeWidth={strokeWidth} className={className} />;
+  return (
+    <Icon
+      size={size}
+      color={color}
+      strokeWidth={strokeWidth}
+      fill={filled ? color : 'none'}
+      className={className}
+      {...rest}
+    />
+  );
 }

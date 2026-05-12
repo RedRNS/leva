@@ -11,7 +11,7 @@ const NAV_ITEMS = [
 ];
 
 export default function Sidebar() {
-  const { user, activeView, setActiveView, setActiveTask, historyTasks, soundEnabled, setSoundEnabled } = useApp();
+  const { user, activeView, setActiveView, setActiveTask, historyTasks, soundEnabled, setSoundEnabled, highContrast, setHighContrast } = useApp();
   const [showSettings, setShowSettings] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [notif, setNotif]       = useState(true);
@@ -246,34 +246,43 @@ export default function Sidebar() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
 
             {/* Toggle row helper */}
-            {[
-              { label: 'Dark Mode', sublabel: 'Ganti tema ke gelap', val: darkMode, set: setDarkMode },
-              { label: 'Notifikasi Daily Discovery', sublabel: 'Reminder tools baru setiap hari', val: notif, set: setNotif },
-              { label: 'Efek Suara', sublabel: 'Putar suara saat menyelesaikan tugas', val: soundEnabled, set: setSoundEnabled },
+            [
+              { label: 'Dark Mode', sublabel: 'Ganti tema ke gelap', icon: 'moon', val: darkMode, set: setDarkMode },
+              { label: 'Mode Kontras Tinggi', sublabel: 'Teks lebih tegas dan border lebih jelas', icon: 'settings', val: highContrast, set: setHighContrast },
+              { label: 'Pengingat Harian', sublabel: 'Ingatkan tools AI baru setiap hari', icon: 'bell', val: notif, set: setNotif },
+              { label: 'Efek Suara', sublabel: 'Putar suara saat menyelesaikan tugas', icon: 'volume', val: soundEnabled, set: setSoundEnabled },
             ].map(item => (
               <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)' }}>{item.label}</p>
-                  <p style={{ margin: 0, fontSize: 12, color: 'var(--color-text-secondary)' }}>{item.sublabel}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ display: 'flex' }}><AppIcon name={item.icon} size={20} aria-hidden="true" /></span>
+                  <div>
+                    <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)' }}>{item.label}</p>
+                    <p style={{ margin: 0, fontSize: 12, color: 'var(--color-text-secondary)' }}>{item.sublabel}</p>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  aria-label={`Toggle ${item.label}`}
-                  aria-pressed={item.val}
-                  onClick={() => item.set(v => !v)}
-                  style={{
-                    width: 44, height: 24, borderRadius: 12, cursor: 'pointer',
-                    background: item.val ? 'var(--color-primary)' : 'var(--color-border)',
-                    position: 'relative', transition: 'background 0.2s',
-                    border: 'none',
-                  }}
-                >
-                  <div style={{
-                    position: 'absolute', top: 3, left: item.val ? 22 : 3,
-                    width: 18, height: 18, borderRadius: '50%', background: '#fff',
-                    transition: 'left 0.2s',
-                  }} />
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: item.val ? 'var(--color-primary)' : 'var(--color-text-secondary)' }}>
+                    {item.val ? 'Aktif' : 'Nonaktif'}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label={`Ubah ${item.label}`}
+                    aria-pressed={item.val}
+                    onClick={() => item.set(v => !v)}
+                    style={{
+                      width: 44, height: 24, borderRadius: 12, cursor: 'pointer',
+                      background: item.val ? 'var(--color-primary)' : 'var(--color-disabled)',
+                      position: 'relative', transition: 'background 0.2s',
+                      border: 'none',
+                    }}
+                  >
+                    <div style={{
+                      position: 'absolute', top: 3, left: item.val ? 22 : 3,
+                      width: 18, height: 18, borderRadius: '50%', background: '#fff',
+                      transition: 'left 0.2s',
+                    }} />
+                  </button>
+                </div>
               </div>
             ))}
 

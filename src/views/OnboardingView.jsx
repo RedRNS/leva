@@ -6,22 +6,21 @@ import { playSoundEffect } from '../utils/sound';
 const JURUSAN_OPTIONS = [
   'Teknik Informatika',
   'Sistem Informasi',
-  'Sains Data',
-  'Rekayasa Perangkat Lunak',
   'Teknik Elektro',
+  'Teknik Sipil',
   'Teknik Mesin',
-  'Ilmu Komunikasi',
-  'Psikologi',
-  'Hukum',
-  'Kedokteran',
   'Manajemen',
   'Akuntansi',
-  'Desain Komunikasi Visual',
-  'Sastra Inggris',
-  'Ilmu Politik',
-  'Farmasi',
-  'Arsitektur',
-  'Teknik Sipil',
+  'Ilmu Komunikasi',
+  'Administrasi Bisnis',
+  'Matematika',
+  'Fisika',
+  'Kimia',
+  'Biologi',
+  'Hukum',
+  'Psikologi',
+  'Pendidikan',
+  'Sosiologi',
 ];
 
 const SEMESTER_OPTIONS = Array.from({ length: 8 }, (_, i) => `${i + 1}`);
@@ -368,6 +367,18 @@ export default function OnboardingView() {
             <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--color-text-secondary)' }}>
               Leva butuh sedikit info untuk mempersonalisasi pengalaman belajarmu.
             </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '0 0 16px' }}>
+              <svg width="120" height="80" viewBox="0 0 120 80" role="img" aria-label="Ilustrasi alur Leva">
+                <rect x="1" y="1" width="118" height="78" rx="12" fill="#F5F5F5" stroke="#6C47FF" strokeWidth="1.5" />
+                <circle cx="30" cy="32" r="10" fill="#FFFFFF" stroke="#6C47FF" strokeWidth="1.5" />
+                <rect x="20" y="44" width="24" height="12" rx="6" fill="#FFFFFF" stroke="#6C47FF" strokeWidth="1.5" />
+                <rect x="58" y="26" width="34" height="22" rx="4" fill="#FFFFFF" stroke="#6C47FF" strokeWidth="1.5" />
+                <line x1="58" y1="34" x2="92" y2="34" stroke="#6C47FF" strokeWidth="1.5" />
+                <circle cx="98" cy="26" r="7" fill="#6C47FF" />
+                <line x1="98" y1="20" x2="98" y2="32" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" />
+                <line x1="92" y1="26" x2="104" y2="26" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </div>
 
             <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-primary)', display: 'block', marginBottom: 6 }}>
               Nama lengkap kamu
@@ -402,7 +413,9 @@ export default function OnboardingView() {
                 padding: '13px',
                 marginTop: 20,
                 fontSize: 15,
-                opacity: isStep1Complete ? 1 : 0.6,
+                background: isStep1Complete ? 'var(--color-primary)' : 'var(--color-disabled)',
+                color: isStep1Complete ? '#fff' : '#9CA3AF',
+                opacity: isStep1Complete ? 1 : 1,
                 cursor: isStep1Complete ? 'pointer' : 'not-allowed',
               }}
             >
@@ -453,9 +466,19 @@ export default function OnboardingView() {
         {step === 2 && (
           <div>
             <h2 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 700 }}>Info Akademik Kamu</h2>
-            <p style={{ margin: '0 0 24px', fontSize: 14, color: '#4B5563' }}>
+            <p style={{ margin: '0 0 24px', fontSize: 14, color: '#6B7280' }}>
               Ini membantu Leva merekomendasikan tools yang paling relevan untukmu.
             </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '0 0 16px' }}>
+              <svg width="120" height="80" viewBox="0 0 120 80" role="img" aria-label="Ilustrasi alur Leva">
+                <rect x="1" y="1" width="118" height="78" rx="12" fill="#F5F5F5" stroke="#6C47FF" strokeWidth="1.5" />
+                <rect x="14" y="20" width="34" height="24" rx="4" fill="#FFFFFF" stroke="#6C47FF" strokeWidth="1.5" />
+                <rect x="18" y="24" width="26" height="4" rx="2" fill="#6C47FF" />
+                <circle cx="74" cy="36" r="10" fill="#FFFFFF" stroke="#6C47FF" strokeWidth="1.5" />
+                <rect x="64" y="48" width="20" height="10" rx="5" fill="#FFFFFF" stroke="#6C47FF" strokeWidth="1.5" />
+                <path d="M92 22 L96 30 L104 30 L98 36 L100 44 L92 39 L84 44 L86 36 L80 30 L88 30 Z" fill="#6C47FF" />
+              </svg>
+            </div>
 
             {/* Jurusan */}
             <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Jurusan</label>
@@ -606,6 +629,9 @@ export default function OnboardingView() {
                 );
               })}
             </div>
+            <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>
+              Sistem perkuliahan S1 reguler di Indonesia = 8 semester
+            </p>
             {errText('semester')}
 
             {/* Bahasa */}
@@ -613,7 +639,7 @@ export default function OnboardingView() {
               <span>Preferensi Bahasa</span>
               <span
                 className="tooltip-host tooltip-help-icon"
-                data-tooltip="Pilih bahasa yang kamu inginkan untuk rekomendasi tools dan tips dari Leva."
+                data-tooltip="Bahasa antarmuka dan rekomendasi tools Leva akan mengikuti pilihan ini."
                 aria-label="Info preferensi bahasa"
                 tabIndex={0}
               >
@@ -643,6 +669,9 @@ export default function OnboardingView() {
                 </button>
               ))}
             </div>
+            <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>
+              Bahasa antarmuka dan rekomendasi tools Leva akan mengikuti pilihan ini.
+            </p>
 
             <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
               <button className="btn-ghost" onClick={() => goToPreviousStep(1)} style={{ flex: 1, padding: '13px' }}>
@@ -658,7 +687,9 @@ export default function OnboardingView() {
                   flex: 2,
                   padding: '13px',
                   fontSize: 15,
-                  opacity: isStep2Complete ? 1 : 0.6,
+                  background: isStep2Complete ? 'var(--color-primary)' : 'var(--color-disabled)',
+                  color: isStep2Complete ? '#fff' : '#9CA3AF',
+                  opacity: isStep2Complete ? 1 : 1,
                   cursor: isStep2Complete ? 'pointer' : 'not-allowed',
                   transition: 'filter 0.2s ease',
                 }}

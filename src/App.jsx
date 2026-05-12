@@ -21,7 +21,7 @@ const isTypingTarget = (target) => {
 };
 
 function AppInner() {
-  const { activeView, toasts, dismissToast, setActiveView, setActiveTask } = useApp();
+  const { activeView, toasts, dismissToast, setActiveView, setActiveTask, highContrast, setHighContrast } = useApp();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
@@ -39,6 +39,10 @@ function AppInner() {
   useEffect(() => {
     preloadSoundEffects();
   }, []);
+
+  useEffect(() => {
+    document.body.classList.toggle('high-contrast', highContrast);
+  }, [highContrast]);
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
@@ -64,6 +68,12 @@ function AppInner() {
         return;
       }
 
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && key === 'h') {
+        event.preventDefault();
+        setHighContrast((prev) => !prev);
+        return;
+      }
+
       if (!event.ctrlKey && !event.metaKey && !event.altKey && key === '/') {
         event.preventDefault();
         window.dispatchEvent(new CustomEvent('leva:focus-sidebar-search'));
@@ -80,7 +90,7 @@ function AppInner() {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [activeView, setActiveTask, setActiveView]);
+  }, [activeView, setActiveTask, setActiveView, setHighContrast]);
 
   function MobileBottomNav() {
     const { activeView: mobileActiveView, setActiveView } = useApp();

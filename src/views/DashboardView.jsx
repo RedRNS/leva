@@ -15,10 +15,10 @@ const tagClass = (cat) => {
 
 const pricingMeta = (pricingType) => {
   const map = {
-    free: { label: 'Free', bg: '#DCFCE7', color: '#15803D' },
-    freemium: { label: 'Freemium', bg: '#FEF3C7', color: '#B45309' },
-    paid: { label: 'Berbayar', bg: '#FEE2E2', color: '#B91C1C' },
-    opensource: { label: 'Open-source', bg: '#DBEAFE', color: '#1D4ED8' },
+    free: { label: 'Gratis', bg: '#059669', color: '#FFFFFF', icon: 'check' },
+    freemium: { label: 'Freemium', bg: '#7C3AED', color: '#FFFFFF', icon: 'sparkles' },
+    paid: { label: 'Berbayar', bg: '#DC2626', color: '#FFFFFF', icon: 'warning' },
+    opensource: { label: 'Open Source', bg: '#1E40AF', color: '#FFFFFF', icon: 'link' },
   };
 
   return map[pricingType] || map.free;
@@ -30,6 +30,7 @@ function PricingBadge({ pricingType }) {
     free: 'Sepenuhnya gratis untuk digunakan',
     freemium: 'Fitur dasar gratis, fitur premium berbayar',
     paid: 'Memerlukan langganan berbayar untuk akses penuh',
+    opensource: 'Kode sumber terbuka dan bebas digunakan',
   };
   const tooltipText = tooltipByType[pricingType] || '';
 
@@ -43,8 +44,12 @@ function PricingBadge({ pricingType }) {
           borderRadius: 999,
           background: price.bg,
           color: price.color,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6,
         }}
       >
+        <span aria-hidden="true" style={{ display: 'flex' }}><AppIcon name={price.icon} size={16} color={price.color} /></span>
         {price.label}
       </span>
     </span>
@@ -152,15 +157,18 @@ function FeaturedToolCard({ tool, onSave, isSaved }) {
             padding: '8px',
             fontSize: 12,
             borderRadius: 10,
-            border: isSaved ? '1px solid #CBD5E1' : 'none',
-            background: isSaved ? '#E2E8F0' : 'var(--color-primary-light)',
-            color: isSaved ? '#64748B' : 'var(--color-primary)',
+            border: isSaved ? '1px solid #C4B5FD' : '1px solid #D7D2FF',
+            background: isSaved ? '#EDE9FE' : '#fff',
+            color: 'var(--color-primary)',
             fontWeight: 600,
             cursor: isSaved ? 'not-allowed' : 'pointer',
           }}
         >
           {/* UI/UX Fix: Step 6 — Output device harus memberi respond jelas ke aksi user. Step 7 — Aksi destruktif (hapus) harus ada safeguard/konfirmasi. Survei: 52,5% user sulit temukan referensi. */}
-          {isSaved ? 'Tersimpan ✓' : 'Simpan'}
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <AppIcon name="bookmark" size={16} color="var(--color-primary)" filled={isSaved} aria-hidden="true" />
+            {isSaved ? 'Tersimpan ✓' : 'Simpan'}
+          </span>
         </button>
         <a
           href={`https://${tool.url}`} target="_blank" rel="noreferrer"
@@ -244,9 +252,9 @@ function SmallToolCard({ tool, onSave, isSaved }) {
           onClick={handleSave}
           title="Simpan ke Library"
           style={{
-            background: isSaved ? '#E2E8F0' : 'var(--color-primary-light)',
-            color: isSaved ? '#64748B' : 'var(--color-primary)',
-            border: isSaved ? '1px solid #CBD5E1' : '1px solid #D7D2FF',
+            background: isSaved ? '#EDE9FE' : '#fff',
+            color: 'var(--color-primary)',
+            border: isSaved ? '1px solid #C4B5FD' : '1px solid #D7D2FF',
             borderRadius: 8,
             padding: '5px 9px',
             cursor: isSaved ? 'not-allowed' : 'pointer',
@@ -254,7 +262,10 @@ function SmallToolCard({ tool, onSave, isSaved }) {
             fontWeight: 700,
           }}
         >
-          {isSaved ? 'Tersimpan ✓' : 'Simpan'}
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <AppIcon name="bookmark" size={16} color="var(--color-primary)" filled={isSaved} aria-hidden="true" />
+            {isSaved ? 'Tersimpan ✓' : 'Simpan'}
+          </span>
         </button>
       </div>
       <p style={{ margin: '0 0 10px', fontSize: 12, color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
@@ -284,18 +295,31 @@ export default function DashboardView() {
   const jurusan   = user ? user.jurusan : 'Teknik Informatika';
 
   const hour = new Date().getHours();
-  const greeting = hour < 11 ? 'Selamat pagi' : hour < 15 ? 'Selamat siang' : hour < 18 ? 'Selamat sore' : 'Selamat malam';
-  const greetIcon = hour < 11 ? 'lamp' : hour < 15 ? 'refresh' : hour < 18 ? 'calendar' : 'sparkles';
+  const greetingMeta = hour >= 5 && hour < 11
+    ? { text: 'Selamat pagi', emoji: '☀️' }
+    : hour >= 11 && hour < 15
+      ? { text: 'Selamat siang', emoji: '🌤️' }
+      : hour >= 15 && hour < 18
+        ? { text: 'Selamat sore', emoji: '🌅' }
+        : { text: 'Selamat malam', emoji: '🌙' };
 
-  const today = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const locale = user && user.bahasa === 'English' ? 'en-US' : 'id-ID';
+  const today = new Date().toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
   const FILTERS = ['Semua', 'Research', 'Writing', 'Coding', 'Data', 'Academic', 'Productivity'];
 
-  const featuredTools = mockTools;
+  const jurusanTools = mockTools.filter((tool) => {
+    if (!jurusan) return true;
+    if (!Array.isArray(tool.jurusan) || tool.jurusan.length === 0) return true;
+    return tool.jurusan.includes('Semua') || tool.jurusan.includes(jurusan);
+  });
+  const baseTools = jurusanTools.length ? jurusanTools : mockTools;
+
+  const featuredTools = baseTools;
   const visibleFeaturedTools = showAllFeatured ? featuredTools : featuredTools.slice(0, 6);
   const filteredTools = activeFilter === 'Semua'
-    ? mockTools
-    : mockTools.filter(t => t.category === activeFilter);
+    ? baseTools
+    : baseTools.filter(t => t.category === activeFilter);
   const savedToolNames = new Set(savedTools.map((tool) => tool.name.toLowerCase()));
 
   const handleReplayTour = () => {
@@ -322,10 +346,10 @@ export default function DashboardView() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
-            {greeting}, {firstName}! <AppIcon name={greetIcon} size={20} />
+            {greetingMeta.text}, {firstName}! <span role="img" aria-label="sapaan waktu">{greetingMeta.emoji}</span>
           </h1>
           <p style={{ margin: '6px 0 0', fontSize: 14, color: 'var(--color-text-secondary)' }}>
-            Ini rekomendasi tools AI hari ini yang relevan untuk <strong>{jurusan}</strong> kamu.
+            Dipilihkan khusus untuk <strong>{jurusan}</strong> kamu.
           </p>
         </div>
         <div style={{ textAlign: 'right' }}>

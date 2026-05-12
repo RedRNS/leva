@@ -8,12 +8,12 @@ import { playSoundEffect } from '../utils/sound';
 // --- Tag color helper
 const tagStyle = (cat) => {
   const map = {
-    Research:     { bg: '#EDE9FE', color: '#7C3AED' },
-    Writing:      { bg: '#FEF9C3', color: '#A16207' },
-    Coding:       { bg: '#DBEAFE', color: '#1D4ED8' },
-    Data:         { bg: '#DCFCE7', color: '#15803D' },
-    Academic:     { bg: '#FFE4E6', color: '#BE123C' },
-    Productivity: { bg: '#F0FDFA', color: '#0F766E' },
+    Research:     { bg: '#DBEAFE', color: '#1E40AF' },
+    Writing:      { bg: '#FEF3C7', color: '#92400E' },
+    Coding:       { bg: '#D1FAE5', color: '#065F46' },
+    Data:         { bg: '#E0F2FE', color: '#1E3A5F' },
+    Academic:     { bg: '#EDE9FF', color: '#7C3AED' },
+    Productivity: { bg: '#F3E8FF', color: '#6B21A8' },
   };
   return map[cat] || { bg: '#F1F5F9', color: '#64748B' };
 };
@@ -76,6 +76,8 @@ function SubTaskCard({ task, index, isExpanded, onToggle, onMarkDone, onSaveTool
   const tools = mockTools.filter(t => task.toolIds.includes(t.id));
   const ts = tagStyle(task.kategori);
   const [isHeaderHovered, setIsHeaderHovered] = useState(false);
+  const isDone = task.status === 'done';
+  const isActive = !isDone && isExpanded;
 
   const headerBgColor = isExpanded
     ? 'var(--color-primary-light)'
@@ -109,14 +111,18 @@ function SubTaskCard({ task, index, isExpanded, onToggle, onMarkDone, onSaveTool
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {/* Step number */}
-          <div style={{
-            width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-            background: task.status === 'done' ? 'var(--color-secondary)' : 'var(--color-primary-light)',
-            color: task.status === 'done' ? '#fff' : 'var(--color-primary)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 12, fontWeight: 700,
-          }}>
-            {task.status === 'done' ? <AppIcon name="check" size={14} color="#fff" /> : index + 1}
+          <div
+            aria-label={isDone ? 'Subtask selesai' : isActive ? 'Subtask aktif' : 'Subtask belum dimulai'}
+            style={{
+              width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+              background: isDone ? 'var(--color-secondary)' : isActive ? 'var(--color-primary-light)' : 'transparent',
+              border: isDone ? 'none' : `2px solid ${isActive ? 'var(--color-primary)' : 'var(--color-border)'}`,
+              color: isDone ? '#fff' : isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 12, fontWeight: 700,
+            }}
+          >
+            {isDone ? <AppIcon name="check" size={14} color="#fff" aria-hidden="true" /> : (isActive ? index + 1 : null)}
           </div>
           <span style={{ fontWeight: 600, fontSize: 15, color: 'var(--color-text-primary)' }}>
             {task.title}
@@ -124,7 +130,7 @@ function SubTaskCard({ task, index, isExpanded, onToggle, onMarkDone, onSaveTool
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {task.status === 'done'
-            ? <span className={`badge-done ${isDoneJustNow ? 'badge-done-pop' : ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>Done <AppIcon name="check" size={12} color="#fff" /></span>
+            ? <span className={`badge-done ${isDoneJustNow ? 'badge-done-pop' : ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>Selesai <AppIcon name="check" size={12} color="var(--color-success)" /></span>
             : (
               <span
                 className="badge-next tooltip-host"
@@ -248,14 +254,15 @@ function RightPanel({ task, isOpen, onSave, savedToolNames, onCopyTips, copiedTi
                     justifyContent: 'center',
                     gap: 6,
                     borderRadius: 10,
-                    border: isSaved ? '1px solid #86EFAC' : 'none',
-                    background: isSaved ? '#DCFCE7' : 'var(--color-primary-light)',
-                    color: isSaved ? '#15803D' : 'var(--color-primary)',
+                    border: isSaved ? '1px solid #C4B5FD' : '1px solid #D7D2FF',
+                    background: isSaved ? '#EDE9FE' : '#fff',
+                    color: 'var(--color-primary)',
                     fontWeight: 600,
                     cursor: isSaved ? 'not-allowed' : 'pointer',
                   }}
                 >
-                  <AppIcon name={isSaved ? 'check' : 'book'} size={12} /> {isSaved ? '✓ Tersimpan' : 'Simpan ke Library'}
+                  <AppIcon name="bookmark" size={16} color="var(--color-primary)" filled={isSaved} aria-hidden="true" />
+                  {isSaved ? 'Tersimpan ✓' : 'Simpan ke Library'}
                 </button>
               </div>
               );
@@ -269,7 +276,10 @@ function RightPanel({ task, isOpen, onSave, savedToolNames, onCopyTips, copiedTi
             borderRadius: 12, padding: '14px 14px', marginBottom: 16,
           }}>
             <p style={{ margin: '0 0 8px', fontSize: 12, fontWeight: 700, color: '#92400E' }}>
-              CARA MENGGUNAKAN TOOL INI
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <AppIcon name="lamp" size={14} color="#92400E" aria-hidden="true" />
+                CARA MENGGUNAKAN TOOL INI
+              </span>
             </p>
             <p style={{ margin: 0, fontSize: 12, color: '#78350F', lineHeight: 1.6 }}>
               {task.tips}
@@ -738,6 +748,7 @@ export default function ChatWorkspaceView() {
   const completedCount = subTasks.filter(t => t.status === 'done').length;
   const progressPct    = subTasks.length ? Math.round((completedCount / subTasks.length) * 100) : 0;
   const allTasksDone = subTasks.length > 0 && completedCount === subTasks.length;
+  const activeStepIndex = subTasks.length ? Math.min(completedCount + 1, subTasks.length) : 0;
   const quickPromptChips = useMemo(() => {
     const normalizedJurusan = jurusan.trim().toLowerCase();
 
@@ -800,7 +811,9 @@ export default function ChatWorkspaceView() {
               alignItems: 'center', justifyContent: 'center',
               padding: '40px 20px', minHeight: 'calc(100vh - 100px)',
             }}>
-              <div style={{ display: 'flex', marginBottom: 16 }}><AppIcon name="sparkles" size={40} /></div>
+              <div style={{ display: 'flex', marginBottom: 16 }}>
+                <AppIcon name="sparkles" size={64} className="sparkle-pulse" aria-hidden="true" />
+              </div>
               <h2 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 700, textAlign: 'center' }}>
                 Hei, {firstName}! Ceritakan tugasmu hari ini.
               </h2>
@@ -1020,12 +1033,74 @@ export default function ChatWorkspaceView() {
                   <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>{taskTitle}</h2>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <p style={{ margin: '0 0 6px', fontSize: 12, opacity: 0.75 }}>{completedCount}/{subTasks.length} selesai</p>
-                  <div style={{ width: 100, height: 6, background: 'rgba(255,255,255,0.25)', borderRadius: 3 }}>
-                    <div style={{ width: `${progressPct}%`, height: '100%', background: '#fff', borderRadius: 3, transition: 'width 0.5s ease-in-out' }} />
+                  <p style={{ margin: '0 0 6px', fontSize: 12, opacity: 0.85 }}>
+                    {completedCount}/{subTasks.length} selesai ({progressPct}%)
+                  </p>
+                  <div
+                    role="progressbar"
+                    aria-label="Progres task"
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={progressPct}
+                    style={{ width: 110, height: 8, background: 'rgba(255,255,255,0.25)', borderRadius: 6 }}
+                  >
+                    <div
+                      style={{
+                        width: `${progressPct}%`,
+                        height: '100%',
+                        background: 'var(--color-secondary)',
+                        backgroundImage: 'repeating-linear-gradient(45deg, rgba(255,255,255,0.5) 0, rgba(255,255,255,0.5) 6px, rgba(255,255,255,0.1) 6px, rgba(255,255,255,0.1) 12px)',
+                        borderRadius: 6,
+                        transition: 'width 0.5s ease-in-out',
+                      }}
+                    />
                   </div>
                 </div>
               </div>
+
+              {/* Step Indicator */}
+              {subTasks.length > 0 && (
+                <div style={{ marginBottom: 20, padding: '12px 16px', border: '1px solid var(--color-border)', borderRadius: 14, background: 'var(--color-surface)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                    {subTasks.map((task, index) => {
+                      const isDone = task.status === 'done';
+                      const isActive = task.id === expandedId;
+                      const circleStyle = {
+                        width: 28,
+                        height: 28,
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 12,
+                        fontWeight: 700,
+                        background: isDone ? 'var(--color-secondary)' : isActive ? 'var(--color-primary-light)' : 'transparent',
+                        border: isDone ? 'none' : `2px solid ${isActive ? 'var(--color-primary)' : 'var(--color-border)'}`,
+                        color: isDone ? '#fff' : isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                      };
+                      const labelColor = isDone ? 'var(--color-text-primary)' : isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)';
+                      return (
+                        <div key={task.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, minWidth: 90 }}>
+                            <div className={isActive ? 'step-pulse' : undefined} style={circleStyle}>
+                              {isDone ? <AppIcon name="check" size={14} color="#fff" aria-hidden="true" /> : index + 1}
+                            </div>
+                            <span style={{ fontSize: 11, color: labelColor, textAlign: 'center', lineHeight: 1.2 }}>
+                              {task.title}
+                            </span>
+                          </div>
+                          {index < subTasks.length - 1 && (
+                            <div aria-hidden="true" style={{ width: 24, height: 2, background: isDone ? 'var(--color-secondary)' : 'var(--color-border)' }} />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p style={{ margin: '8px 0 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>
+                    Langkah {activeStepIndex} dari {subTasks.length}
+                  </p>
+                </div>
+              )}
 
               {/* Subtask List */}
               {subTasks.map((task, i) => (

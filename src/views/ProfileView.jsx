@@ -316,25 +316,31 @@ export default function ProfileView() {
     )
     : null;
 
-  const Toggle = ({ val, set }) => (
-    <button
-      type="button"
-      aria-pressed={val}
-      onClick={() => set(v => !v)}
-      style={{
-        width: 44,
-        height: 24,
-        borderRadius: 12,
-        cursor: 'pointer',
-        background: val ? 'var(--color-primary)' : 'var(--color-border)',
-        position: 'relative',
-        transition: 'background 0.2s',
-        flexShrink: 0,
-        border: 'none',
-      }}
-    >
-      <div style={{ position: 'absolute', top: 3, left: val ? 22 : 3, width: 18, height: 18, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
-    </button>
+  const Toggle = ({ val, set, label }) => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span style={{ fontSize: 11, fontWeight: 700, color: val ? 'var(--color-primary)' : 'var(--color-text-secondary)' }}>
+        {val ? 'Aktif' : 'Nonaktif'}
+      </span>
+      <button
+        type="button"
+        aria-pressed={val}
+        aria-label={label ? `Ubah ${label}` : 'Ubah status'}
+        onClick={() => set(v => !v)}
+        style={{
+          width: 44,
+          height: 24,
+          borderRadius: 12,
+          cursor: 'pointer',
+          background: val ? 'var(--color-primary)' : 'var(--color-disabled)',
+          position: 'relative',
+          transition: 'background 0.2s',
+          flexShrink: 0,
+          border: 'none',
+        }}
+      >
+        <div style={{ position: 'absolute', top: 3, left: val ? 22 : 3, width: 18, height: 18, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
+      </button>
+    </div>
   );
 
   const initial = (form.name || 'R').charAt(0).toUpperCase();
@@ -431,7 +437,8 @@ export default function ProfileView() {
               label: 'Tasks Selesai',
               aria: 'Lihat riwayat task di Chat dan Task',
               trendText: '↑ 3 dari minggu lalu',
-              trendColor: '#059669',
+              trendColor: '#065F46',
+              graphic: 'sparkline',
             },
             {
               icon: 'book',
@@ -439,7 +446,8 @@ export default function ProfileView() {
               label: 'Tools Tersimpan',
               aria: 'Lihat daftar tools tersimpan di Library',
               trendText: '↓ 1 dari minggu lalu',
-              trendColor: '#DC2626',
+              trendColor: '#991B1B',
+              graphic: 'sparkline',
             },
             {
               icon: 'calendar-clock',
@@ -447,7 +455,8 @@ export default function ProfileView() {
               label: 'Hari Berturut-turut',
               aria: 'Lihat progres streak harian',
               trendText: '- sama dengan minggu lalu',
-              trendColor: '#64748B',
+              trendColor: '#6B7280',
+              graphic: 'streak',
             },
           ].map(stat => {
             const isHovered = hoveredStat === stat.label;
@@ -482,6 +491,26 @@ export default function ProfileView() {
                 <div style={{ fontSize: 12, color: isHovered ? 'var(--color-primary)' : 'var(--color-text-secondary)', marginTop: 2 }}>
                   {stat.label}
                 </div>
+                {stat.graphic === 'sparkline' && (
+                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: 6 }}>
+                    <svg width="50" height="16" viewBox="0 0 50 16" role="img" aria-label="Tren 4 minggu">
+                      <rect x="0" y="6" width="6" height="10" rx="2" fill="#6C47FF" />
+                      <rect x="10" y="2" width="6" height="14" rx="2" fill="#6C47FF" />
+                      <rect x="20" y="8" width="6" height="8" rx="2" fill="#6C47FF" />
+                      <rect x="30" y="4" width="6" height="12" rx="2" fill="#6C47FF" />
+                      <rect x="40" y="1" width="6" height="15" rx="2" fill="#6C47FF" />
+                    </svg>
+                  </div>
+                )}
+                {stat.graphic === 'streak' && (
+                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: 6 }}>
+                    <svg width="50" height="16" viewBox="0 0 50 16" role="img" aria-label="Streak 7 hari">
+                      {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+                        <rect key={i} x={i * 7} y="2" width="6" height="12" rx="2" fill={i < 5 ? '#6C47FF' : '#E2E8F0'} />
+                      ))}
+                    </svg>
+                  </div>
+                )}
                 <div style={{ marginTop: 4, fontSize: 11, fontWeight: 600, color: stat.trendColor }}>
                   {stat.trendText}
                 </div>
@@ -505,7 +534,7 @@ export default function ProfileView() {
               <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{item.label}</p>
               <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>{item.sub}</p>
             </div>
-            <Toggle val={item.val} set={item.set} />
+            <Toggle val={item.val} set={item.set} label={item.label} />
           </div>
         ))}
       </div>
