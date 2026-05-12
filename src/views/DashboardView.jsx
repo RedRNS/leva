@@ -15,7 +15,7 @@ const tagClass = (cat) => {
 
 const pricingMeta = (pricingType) => {
   const map = {
-    free: { label: 'Gratis', bg: '#059669', color: '#FFFFFF', icon: 'check' },
+    free: { label: 'Gratis', bg: '#047857', color: '#FFFFFF', icon: 'check' },
     freemium: { label: 'Freemium', bg: '#7C3AED', color: '#FFFFFF', icon: 'sparkles' },
     paid: { label: 'Berbayar', bg: '#DC2626', color: '#FFFFFF', icon: 'warning' },
     opensource: { label: 'Open Source', bg: '#1E40AF', color: '#FFFFFF', icon: 'link' },

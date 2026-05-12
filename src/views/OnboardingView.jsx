@@ -43,7 +43,7 @@ export default function OnboardingView() {
 
   const step3ConfettiPieces = useMemo(
     () => Array.from({ length: 24 }, (_, index) => {
-      const colors = ['#6C63FF', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4'];
+      const colors = ['#6C47FF', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4'];
       return {
         id: `step3-confetti-${index}`,
         left: `${(index * 11) % 100}%`,
@@ -301,7 +301,7 @@ export default function OnboardingView() {
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'linear-gradient(135deg, #6C63FF 0%, #8B5CF6 50%, #A78BFA 100%)',
+      background: 'linear-gradient(135deg, #6C47FF 0%, #8B5CF6 50%, #A78BFA 100%)',
       padding: 20,
     }}>
       <div className="card" style={{ width: '100%', maxWidth: 460, padding: 36, position: 'relative', overflow: 'hidden' }}>
@@ -364,7 +364,7 @@ export default function OnboardingView() {
         {step === 1 && (
           <div>
             <h2 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 700 }}>Hei! Perkenalkan dirimu dulu</h2>
-            <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--color-text-secondary)' }}>
+            <p style={{ margin: '0 0 24px', fontSize: 14, color: '#6B7280' }}>
               Leva butuh sedikit info untuk mempersonalisasi pengalaman belajarmu.
             </p>
             <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '0 0 16px' }}>
@@ -413,9 +413,10 @@ export default function OnboardingView() {
                 padding: '13px',
                 marginTop: 20,
                 fontSize: 15,
-                background: isStep1Complete ? 'var(--color-primary)' : 'var(--color-disabled)',
-                color: isStep1Complete ? '#fff' : '#9CA3AF',
-                opacity: isStep1Complete ? 1 : 1,
+                background: isStep1Complete ? 'var(--color-primary)' : '#D1D5DB',
+                color: isStep1Complete ? '#FFFFFF' : '#9CA3AF',
+                border: 'none',
+                opacity: isStep1Complete ? 1 : 0.6,
                 cursor: isStep1Complete ? 'pointer' : 'not-allowed',
               }}
             >
@@ -687,9 +688,10 @@ export default function OnboardingView() {
                   flex: 2,
                   padding: '13px',
                   fontSize: 15,
-                  background: isStep2Complete ? 'var(--color-primary)' : 'var(--color-disabled)',
-                  color: isStep2Complete ? '#fff' : '#9CA3AF',
-                  opacity: isStep2Complete ? 1 : 1,
+                  background: isStep2Complete ? 'var(--color-primary)' : '#D1D5DB',
+                  color: isStep2Complete ? '#FFFFFF' : '#9CA3AF',
+                  border: 'none',
+                  opacity: isStep2Complete ? 1 : 0.6,
                   cursor: isStep2Complete ? 'pointer' : 'not-allowed',
                   transition: 'filter 0.2s ease',
                 }}

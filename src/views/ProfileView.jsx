@@ -331,7 +331,7 @@ export default function ProfileView() {
           height: 24,
           borderRadius: 12,
           cursor: 'pointer',
-          background: val ? 'var(--color-primary)' : 'var(--color-disabled)',
+          background: val ? 'var(--color-primary)' : 'var(--color-border)',
           position: 'relative',
           transition: 'background 0.2s',
           flexShrink: 0,

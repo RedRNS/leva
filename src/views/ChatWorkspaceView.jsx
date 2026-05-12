@@ -8,12 +8,12 @@ import { playSoundEffect } from '../utils/sound';
 // --- Tag color helper
 const tagStyle = (cat) => {
   const map = {
-    Research:     { bg: '#DBEAFE', color: '#1E40AF' },
-    Writing:      { bg: '#FEF3C7', color: '#92400E' },
-    Coding:       { bg: '#D1FAE5', color: '#065F46' },
-    Data:         { bg: '#E0F2FE', color: '#1E3A5F' },
-    Academic:     { bg: '#EDE9FF', color: '#7C3AED' },
-    Productivity: { bg: '#F3E8FF', color: '#6B21A8' },
+    Research:     { bg: '#EDE9FE', color: '#7C3AED' },
+    Writing:      { bg: '#FEF9C3', color: '#A16207' },
+    Coding:       { bg: '#DBEAFE', color: '#1D4ED8' },
+    Data:         { bg: '#DCFCE7', color: '#15803D' },
+    Academic:     { bg: '#FFE4E6', color: '#BE123C' },
+    Productivity: { bg: '#F0FDFA', color: '#0F766E' },
   };
   return map[cat] || { bg: '#F1F5F9', color: '#64748B' };
 };
@@ -130,7 +130,7 @@ function SubTaskCard({ task, index, isExpanded, onToggle, onMarkDone, onSaveTool
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {task.status === 'done'
-            ? <span className={`badge-done ${isDoneJustNow ? 'badge-done-pop' : ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>Selesai <AppIcon name="check" size={12} color="var(--color-success)" /></span>
+            ? <span className={`badge-done ${isDoneJustNow ? 'badge-done-pop' : ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>Selesai <AppIcon name="check" size={12} color="var(--color-secondary)" /></span>
             : (
               <span
                 className="badge-next tooltip-host"
@@ -352,7 +352,7 @@ export default function ChatWorkspaceView() {
 
   const completionConfettiPieces = useMemo(
     () => Array.from({ length: 28 }, (_, index) => {
-      const colors = ['#6C63FF', '#10B981', '#F59E0B', '#14B8A6', '#EC4899', '#3B82F6'];
+      const colors = ['#6C47FF', '#10B981', '#F59E0B', '#14B8A6', '#EC4899', '#3B82F6'];
       return {
         id: `completion-confetti-${index}`,
         left: `${(index * 9) % 100}%`,

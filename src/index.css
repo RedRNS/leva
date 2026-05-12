@@ -9,28 +9,18 @@
   --color-primary-dark: #5535CC;
   --color-secondary: #065F46;
   --color-secondary-light: #D1FAE5;
-  --color-accent: #F59E0B;
+  --color-accent: #92400E;
   --color-accent-light: #FEF3C7;
   --color-bg: #F5F5F5;
   --color-surface: #FFFFFF;
   --color-text-primary: #111827;
   --color-text-secondary: #374151;
-  --color-text-muted: #6B7280;
-  --color-border: #E5E7EB;
+  --color-border: #D1D5DB;
   --color-sidebar: #1A1A2E;
   --color-sidebar-hover: #2A2A42;
   --color-sidebar-active: #6C47FF;
-  --color-sidebar-text: #E5E7EB;
-  --color-sidebar-text-muted: #9CA3AF;
-  --color-disabled: #D1D5DB;
-  --color-success: #065F46;
-  --color-success-light: #D1FAE5;
-  --color-warning: #92400E;
-  --color-warning-light: #FEF3C7;
-  --color-error: #991B1B;
-  --color-error-light: #FEE2E2;
-  --color-info: #1E40AF;
-  --color-info-light: #DBEAFE;
+  --color-sidebar-text: #CBD5E1;
+  --color-sidebar-text-muted: #6B7280;
 }
 
 * {
@@ -179,8 +169,8 @@ button:active {
 
 /* Badge styles */
 .badge-done {
-  background: var(--color-success-light);
-  color: var(--color-success);
+  background: var(--color-secondary-light);
+  color: var(--color-secondary);
   font-size: 13px;
   font-weight: 600;
   padding: 3px 10px;
@@ -244,10 +234,10 @@ button:active {
 
 @keyframes subtaskGlowGreen {
   0% {
-    box-shadow: 0 0 0 rgba(6, 95, 70, 0);
+    box-shadow: 0 0 0 rgba(16, 185, 129, 0);
   }
   45% {
-    box-shadow: 0 0 0 3px rgba(6, 95, 70, 0.28), 0 10px 22px rgba(6, 95, 70, 0.18);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.28), 0 10px 22px rgba(16, 185, 129, 0.18);
   }
   100% {
     box-shadow: 0 2px 12px rgba(0,0,0,0.06);
@@ -255,7 +245,7 @@ button:active {
 }
 
 .badge-next {
-  background: #FFFFFF;
+  background: var(--color-primary-light);
   color: var(--color-primary);
   border: 1px solid #D7D2FF;
   font-size: 12px;
@@ -264,24 +254,24 @@ button:active {
   border-radius: 999px;
 }
 .badge-priority-high {
-  background: #FEE2E2;
-  color: #DC2626;
+  background: #B45309;
+  color: #FFFFFF;
   font-size: 12px;
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 999px;
 }
 .badge-priority-good {
-  background: var(--color-secondary-light);
-  color: #059669;
+  background: #0078D4;
+  color: #FFFFFF;
   font-size: 12px;
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 999px;
 }
 .badge-priority-later {
-  background: #DBEAFE;
-  color: #2563EB;
+  background: #6B7280;
+  color: #FFFFFF;
   font-size: 12px;
   font-weight: 600;
   padding: 2px 8px;
@@ -357,7 +347,7 @@ body.high-contrast select {
 .tag-research { background: #DBEAFE; color: #1E40AF; }
 .tag-writing  { background: #FEF3C7; color: #92400E; }
 .tag-coding   { background: #D1FAE5; color: #065F46; }
-.tag-data     { background: #E0F2FE; color: #1E3A5F; }
+.tag-data     { background: #DBEAFE; color: #1E3A5F; }
 .tag-academic { background: #EDE9FF; color: #7C3AED; }
 .tag-productivity { background: #F3E8FF; color: #6B21A8; }
 

@@ -271,7 +271,7 @@ export default function Sidebar() {
                     onClick={() => item.set(v => !v)}
                     style={{
                       width: 44, height: 24, borderRadius: 12, cursor: 'pointer',
-                      background: item.val ? 'var(--color-primary)' : 'var(--color-disabled)',
+                      background: item.val ? 'var(--color-primary)' : 'var(--color-border)',
                       position: 'relative', transition: 'background 0.2s',
                       border: 'none',
                     }}

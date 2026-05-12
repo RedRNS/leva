@@ -31,7 +31,7 @@ const INDONESIAN_MONTH_MAP = {
 
 const pricingMeta = (pricingType) => {
   const map = {
-    free: { label: 'Gratis', bg: '#059669', color: '#FFFFFF', icon: 'check' },
+    free: { label: 'Gratis', bg: '#047857', color: '#FFFFFF', icon: 'check' },
     freemium: { label: 'Freemium', bg: '#7C3AED', color: '#FFFFFF', icon: 'sparkles' },
     paid: { label: 'Berbayar', bg: '#DC2626', color: '#FFFFFF', icon: 'warning' },
     opensource: { label: 'Open Source', bg: '#1E40AF', color: '#FFFFFF', icon: 'link' },
@@ -135,7 +135,7 @@ function SavedToolCard({ tool, onDelete }) {
         {tool.keywords.map(kw => (
           <span
             key={kw}
-            style={{ fontSize: 11, padding: '2px 8px', background: '#EDE9FF', border: '1px solid #D7D2FF', borderRadius: 6, color: 'var(--color-primary)' }}
+            style={{ fontSize: 11, padding: '2px 8px', background: '#EDE9FF', border: '1px solid #D7D2FF', borderRadius: 6, color: '#6C47FF' }}
           >
             #{kw}
           </span>
