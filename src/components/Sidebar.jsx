@@ -246,7 +246,7 @@ export default function Sidebar() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
 
             {/* Toggle row helper */}
-            [
+            {[
               { label: 'Dark Mode', sublabel: 'Ganti tema ke gelap', icon: 'moon', val: darkMode, set: setDarkMode },
               { label: 'Mode Kontras Tinggi', sublabel: 'Teks lebih tegas dan border lebih jelas', icon: 'settings', val: highContrast, set: setHighContrast },
               { label: 'Pengingat Harian', sublabel: 'Ingatkan tools AI baru setiap hari', icon: 'bell', val: notif, set: setNotif },

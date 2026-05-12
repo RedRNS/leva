@@ -6,7 +6,7 @@ import AppIcon from '../components/AppIcon';
 
 const PRIORITY_FILTERS = ['Semua', 'Prioritas Tinggi', 'Sangat Bagus', 'Coba Nanti'];
 const CATEGORY_FILTERS = ['Semua', 'Research', 'Writing', 'Coding', 'Data', 'Academic', 'Productivity'];
-              { label: 'Sangat Bagus', val: savedTools.filter(t => t.priorityKey === 'good').length, icon: 'star' },
+const SORT_OPTIONS = [
   { value: 'latest', label: 'Terbaru disimpan' },
   { value: 'oldest', label: 'Terlama disimpan' },
   { value: 'rating', label: 'Rating tertinggi' },

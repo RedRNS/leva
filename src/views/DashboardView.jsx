@@ -361,22 +361,6 @@ export default function DashboardView() {
           }}>
             <AppIcon name="refresh" size={12} /> Diperbarui otomatis setiap hari
           </span>
-          <div style={{ marginTop: 8 }}>
-            <button
-              type="button"
-              className="btn-ghost"
-              onClick={handleReplayTour}
-              style={{
-                padding: '6px 12px',
-                fontSize: 12,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-              }}
-            >
-              <AppIcon name="sparkles" size={12} /> Lihat Tour Lagi
-            </button>
-          </div>
         </div>
       </div>
 

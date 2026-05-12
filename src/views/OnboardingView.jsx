@@ -367,18 +367,6 @@ export default function OnboardingView() {
             <p style={{ margin: '0 0 24px', fontSize: 14, color: '#6B7280' }}>
               Leva butuh sedikit info untuk mempersonalisasi pengalaman belajarmu.
             </p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '0 0 16px' }}>
-              <svg width="120" height="80" viewBox="0 0 120 80" role="img" aria-label="Ilustrasi alur Leva">
-                <rect x="1" y="1" width="118" height="78" rx="12" fill="#F5F5F5" stroke="#6C47FF" strokeWidth="1.5" />
-                <circle cx="30" cy="32" r="10" fill="#FFFFFF" stroke="#6C47FF" strokeWidth="1.5" />
-                <rect x="20" y="44" width="24" height="12" rx="6" fill="#FFFFFF" stroke="#6C47FF" strokeWidth="1.5" />
-                <rect x="58" y="26" width="34" height="22" rx="4" fill="#FFFFFF" stroke="#6C47FF" strokeWidth="1.5" />
-                <line x1="58" y1="34" x2="92" y2="34" stroke="#6C47FF" strokeWidth="1.5" />
-                <circle cx="98" cy="26" r="7" fill="#6C47FF" />
-                <line x1="98" y1="20" x2="98" y2="32" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" />
-                <line x1="92" y1="26" x2="104" y2="26" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-            </div>
 
             <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-primary)', display: 'block', marginBottom: 6 }}>
               Nama lengkap kamu
@@ -470,16 +458,6 @@ export default function OnboardingView() {
             <p style={{ margin: '0 0 24px', fontSize: 14, color: '#6B7280' }}>
               Ini membantu Leva merekomendasikan tools yang paling relevan untukmu.
             </p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '0 0 16px' }}>
-              <svg width="120" height="80" viewBox="0 0 120 80" role="img" aria-label="Ilustrasi alur Leva">
-                <rect x="1" y="1" width="118" height="78" rx="12" fill="#F5F5F5" stroke="#6C47FF" strokeWidth="1.5" />
-                <rect x="14" y="20" width="34" height="24" rx="4" fill="#FFFFFF" stroke="#6C47FF" strokeWidth="1.5" />
-                <rect x="18" y="24" width="26" height="4" rx="2" fill="#6C47FF" />
-                <circle cx="74" cy="36" r="10" fill="#FFFFFF" stroke="#6C47FF" strokeWidth="1.5" />
-                <rect x="64" y="48" width="20" height="10" rx="5" fill="#FFFFFF" stroke="#6C47FF" strokeWidth="1.5" />
-                <path d="M92 22 L96 30 L104 30 L98 36 L100 44 L92 39 L84 44 L86 36 L80 30 L88 30 Z" fill="#6C47FF" />
-              </svg>
-            </div>
 
             {/* Jurusan */}
             <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Jurusan</label>
