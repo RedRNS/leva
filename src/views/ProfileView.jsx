@@ -17,6 +17,8 @@ export default function ProfileView() {
     setHistoryTasks,
     soundEnabled,
     setSoundEnabled,
+    highContrast,
+    setHighContrast,
     setProfileHasUnsavedChanges,
     showToast,
   } = useApp();
@@ -24,6 +26,7 @@ export default function ProfileView() {
   const [notif1, setNotif1] = useState(true);
   const [notif2, setNotif2] = useState(true);
   const [notif3, setNotif3] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
   const [showJurusanChangeModal, setShowJurusanChangeModal] = useState(false);
   const [pendingSaveMode, setPendingSaveMode] = useState(null);
@@ -384,7 +387,7 @@ export default function ProfileView() {
           <div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
               <div>
-                <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 5 }}>Nama</label>
+                <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 5 }}>Nama Lengkap</label>
                 <input
                   value={form.name}
                   onChange={e => update('name', e.target.value)}
@@ -530,6 +533,23 @@ export default function ProfileView() {
           { label: 'Pembaruan Tool Baru', sub: 'Tools baru sesuai jurusanmu', val: notif3, set: setNotif3 },
         ].map((item, i, arr) => (
           <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--color-border)' : 'none' }}>
+            <div>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{item.label}</p>
+              <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>{item.sub}</p>
+            </div>
+            <Toggle val={item.val} set={item.set} label={item.label} />
+          </div>
+        ))}
+      </div>
+
+      {/* -- Display Preferences */}
+      <div className="card" style={{ padding: '20px 24px', marginBottom: 20 }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}><AppIcon name="moon" size={16} /> Tampilan & Aksesibilitas</h3>
+        {[
+          { label: 'Dark Mode', sub: 'Mode gelap untuk fokus malam hari', val: darkMode, set: setDarkMode },
+          { label: 'Kontras Tinggi', sub: 'Tingkatkan kontras untuk aksesibilitas', val: highContrast, set: setHighContrast },
+        ].map((item, i, arr) => (
+          <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--color-border)' : 'none' }}>
             <div>
               <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{item.label}</p>
               <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>{item.sub}</p>

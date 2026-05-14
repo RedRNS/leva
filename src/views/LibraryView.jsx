@@ -6,6 +6,7 @@ import AppIcon from '../components/AppIcon';
 
 const PRIORITY_FILTERS = ['Semua', 'Prioritas Tinggi', 'Sangat Bagus', 'Coba Nanti'];
 const CATEGORY_FILTERS = ['Semua', 'Research', 'Writing', 'Coding', 'Data', 'Academic', 'Productivity'];
+const PRIORITY_OPTIONS = PRIORITY_FILTERS.filter((item) => item !== 'Semua');
 const SORT_OPTIONS = [
   { value: 'latest', label: 'Terbaru disimpan' },
   { value: 'oldest', label: 'Terlama disimpan' },
@@ -13,6 +14,12 @@ const SORT_OPTIONS = [
   { value: 'az', label: 'A-Z' },
   { value: 'za', label: 'Z-A' },
 ];
+
+const PRIORITY_META = {
+  'Prioritas Tinggi': { key: 'high' },
+  'Sangat Bagus': { key: 'good' },
+  'Coba Nanti': { key: 'later' },
+};
 
 const INDONESIAN_MONTH_MAP = {
   jan: 0,
@@ -186,7 +193,7 @@ export default function LibraryView() {
   const [sortBy, setSortBy] = useState('latest');
   const [showAddModal, setShowAddModal] = useState(false);
   const [toolToDelete, setToolToDelete] = useState(null);
-  const [newTool, setNewTool] = useState({ name: '', url: '', note: '', category: 'Research' });
+  const [newTool, setNewTool] = useState({ name: '', url: '', note: '', category: 'Research', priority: 'Sangat Bagus' });
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -262,12 +269,13 @@ export default function LibraryView() {
 
   const handleAddTool = () => {
     if (!newTool.name.trim() || !newTool.url.trim()) return;
+    const priorityConfig = PRIORITY_META[newTool.priority] || PRIORITY_META['Sangat Bagus'];
     const entry = {
       id: Date.now(),
       name: newTool.name,
       url: newTool.url.replace(/^https?:\/\//, ''),
-      priority: 'Sangat Bagus',
-      priorityKey: 'good',
+      priority: newTool.priority,
+      priorityKey: priorityConfig.key,
       pricingType: 'freemium',
       category: newTool.category,
       keywords: [newTool.category.toLowerCase(), 'ai tools', 'manual'],
@@ -278,7 +286,7 @@ export default function LibraryView() {
       note: newTool.note,
     };
     setSavedTools(prev => [entry, ...prev]);
-    setNewTool({ name: '', url: '', note: '', category: 'Research' });
+    setNewTool({ name: '', url: '', note: '', category: 'Research', priority: 'Sangat Bagus' });
     setShowAddModal(false);
   };
 
@@ -486,7 +494,7 @@ export default function LibraryView() {
 
       {/* Add Tool Modal */}
       {showAddModal && (
-        <Modal title="Tambah Tool Baru" onClose={() => setShowAddModal(false)}>
+        <Modal title="Tambah Tool Manual" onClose={() => setShowAddModal(false)}>
           <div>
             <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Nama Tool *</label>
             <input value={newTool.name} onChange={e => setNewTool(p => ({ ...p, name: e.target.value }))} placeholder="Contoh: Perplexity AI" style={inputStyle} />
@@ -496,16 +504,50 @@ export default function LibraryView() {
             <select value={newTool.category} onChange={e => setNewTool(p => ({ ...p, category: e.target.value }))} style={{ ...inputStyle }}>
               {CATEGORY_FILTERS.filter(f => f !== 'Semua').map(c => <option key={c} value={c}>{c}</option>)}
             </select>
+            <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Prioritas</label>
+            <div style={{ display: 'grid', gap: 8, marginBottom: 12 }}>
+              {PRIORITY_OPTIONS.map((priority) => {
+                const isActive = newTool.priority === priority;
+                return (
+                  <label
+                    key={priority}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      padding: '8px 10px',
+                      borderRadius: 8,
+                      border: `1px solid ${isActive ? '#C4B5FD' : 'var(--color-border)'}`,
+                      background: isActive ? 'var(--color-primary-light)' : '#fff',
+                      cursor: 'pointer',
+                      fontSize: 13,
+                      fontWeight: isActive ? 600 : 500,
+                      color: isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="priority"
+                      value={priority}
+                      checked={isActive}
+                      onChange={(event) => setNewTool((prev) => ({ ...prev, priority: event.target.value }))}
+                      style={{ accentColor: 'var(--color-primary)' }}
+                    />
+                    <span>{priority}</span>
+                  </label>
+                );
+              })}
+            </div>
             <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Catatan (opsional)</label>
             <textarea value={newTool.note} onChange={e => setNewTool(p => ({ ...p, note: e.target.value }))} placeholder="Untuk apa tool ini?" rows={3} style={{ ...inputStyle, resize: 'none' }} />
             <p style={{ fontSize: 12, color: 'var(--color-text-secondary)', margin: '0 0 16px' }}>
-              Leva akan otomatis menganalisis dan memberikan label prioritas serta keywords.
+              Detail ini bisa kamu ubah lagi kapan saja dari kartu tool di Library.
             </p>
             <div style={{ display: 'flex', gap: 10 }}>
               <button className="btn-ghost" onClick={() => setShowAddModal(false)} style={{ flex: 1 }}>Batal</button>
               <button className="btn-primary" onClick={handleAddTool} style={{ flex: 2 }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                  <AppIcon name="plus" size={14} color="#fff" /> Tambah & Generate Label
+                  <AppIcon name="check" size={14} color="#fff" /> Simpan Tool
                 </span>
               </button>
             </div>
@@ -514,9 +556,9 @@ export default function LibraryView() {
       )}
 
       {toolToDelete && (
-        <Modal title="Hapus Tool?" onClose={() => setToolToDelete(null)}>
+        <Modal title="Hapus Tool" onClose={() => setToolToDelete(null)}>
           <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
-            Apakah kamu yakin ingin menghapus {toolToDelete.name} dari library?
+            Hapus {toolToDelete.name} dari library?
           </p>
           <div style={{ display: 'flex', gap: 10 }}>
             <button className="btn-ghost" onClick={() => setToolToDelete(null)} style={{ flex: 1 }}>

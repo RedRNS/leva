@@ -171,17 +171,15 @@ function FeaturedToolCard({ tool, onSave, isSaved }) {
             flex: 1,
             height: 44,
             borderRadius: 8,
-            color: isSaved ? '#6B7280' : 'var(--color-primary)',
-            borderColor: isSaved ? '#E5E7EB' : 'var(--color-primary)',
-            background: '#fff',
-            cursor: isSaved ? 'not-allowed' : 'pointer',
+            color: isSaved ? '#6C47FF' : 'var(--color-primary)',
+            border: `1px solid ${isSaved ? '#D7D2FF' : 'var(--color-primary)'}`,
+            background: isSaved ? '#EDE9FF' : '#fff',
+            cursor: isSaved ? 'default' : 'pointer',
+            opacity: 1,
           }}
         >
           {/* UI/UX Fix: Step 6 — Output device harus memberi respond jelas ke aksi user. Step 7 — Aksi destruktif (hapus) harus ada safeguard/konfirmasi. Survei: 52,5% user sulit temukan referensi. */}
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            <AppIcon name="bookmark" size={16} color="var(--color-primary)" filled={isSaved} aria-hidden="true" />
-            {isSaved ? 'Tersimpan ✓' : 'Simpan'}
-          </span>
+          {isSaved ? 'Tersimpan ✓' : 'Simpan ☆'}
         </button>
         <a
           href={`https://${tool.url}`} target="_blank" rel="noreferrer"
@@ -290,16 +288,14 @@ function SmallToolCard({ tool, onSave, isSaved }) {
             flex: 1,
             height: 44,
             borderRadius: 8,
-            color: isSaved ? '#6B7280' : 'var(--color-primary)',
-            borderColor: isSaved ? '#E5E7EB' : 'var(--color-primary)',
-            background: '#fff',
-            cursor: isSaved ? 'not-allowed' : 'pointer',
+            color: isSaved ? '#6C47FF' : 'var(--color-primary)',
+            border: `1px solid ${isSaved ? '#D7D2FF' : 'var(--color-primary)'}`,
+            background: isSaved ? '#EDE9FF' : '#fff',
+            cursor: isSaved ? 'default' : 'pointer',
+            opacity: 1,
           }}
         >
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            <AppIcon name="bookmark" size={16} color="var(--color-primary)" filled={isSaved} aria-hidden="true" />
-            {isSaved ? 'Tersimpan ✓' : 'Simpan'}
-          </span>
+          {isSaved ? 'Tersimpan ✓' : 'Simpan ☆'}
         </button>
         <a
           href={`https://${tool.url}`} target="_blank" rel="noreferrer"

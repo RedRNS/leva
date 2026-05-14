@@ -1133,9 +1133,9 @@ export default function ChatWorkspaceView() {
                   borderRadius: 16, padding: '24px', textAlign: 'center', marginTop: 16, color: '#fff',
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}><AppIcon name="check" size={40} color="#fff" /></div>
-                  <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700 }}>Semua task selesai!</h3>
+                  <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700 }}>🎉 Task Selesai!</h3>
                   <p style={{ margin: 0, fontSize: 14, opacity: 0.9 }}>
-                    Kerja bagus, {firstName}! Kamu berhasil menyelesaikan semua langkah untuk "{taskTitle}".
+                    Kamu berhasil menyelesaikan: {taskTitle}
                   </p>
                 </div>
               )}
@@ -1220,14 +1220,14 @@ export default function ChatWorkspaceView() {
             <div className="completion-icon-wrap">
               <AppIcon name="check" size={44} color="#fff" />
             </div>
-            <h3 className="completion-title">🎉 Selamat! Semua subtask selesai!</h3>
-            <p className="completion-subtitle">Kerja bagus, {firstName}! Kamu telah menyelesaikan {taskTitle}.</p>
+            <h3 className="completion-title">🎉 Task Selesai!</h3>
+            <p className="completion-subtitle">Kamu berhasil menyelesaikan: {taskTitle}</p>
             <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
               <button ref={completionPrimaryActionRef} className="btn-primary" onClick={handleViewSummary} style={{ flex: 1 }}>
                 Lihat Ringkasan
               </button>
               <button className="btn-ghost" onClick={handleStartNewTask} style={{ flex: 1 }}>
-                Mulai Task Baru
+                Kembali ke Chat
               </button>
             </div>
           </div>
