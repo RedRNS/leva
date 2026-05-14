@@ -15,9 +15,9 @@ const tagClass = (cat) => {
 
 const pricingMeta = (pricingType) => {
   const map = {
-    free: { label: 'Gratis', bg: '#047857', color: '#FFFFFF', icon: 'check' },
-    freemium: { label: 'Freemium', bg: '#7C3AED', color: '#FFFFFF', icon: 'sparkles' },
-    paid: { label: 'Berbayar', bg: '#DC2626', color: '#FFFFFF', icon: 'warning' },
+    free: { label: 'Gratis', bg: '#065F46', color: '#FFFFFF', icon: 'check' },
+    freemium: { label: 'Freemium', bg: '#6C47FF', color: '#FFFFFF', icon: 'sparkles' },
+    paid: { label: 'Berbayar', bg: '#991B1B', color: '#FFFFFF', icon: 'warning' },
     opensource: { label: 'Open Source', bg: '#1E40AF', color: '#FFFFFF', icon: 'link' },
   };
 
@@ -38,10 +38,11 @@ function PricingBadge({ pricingType }) {
     <span className={tooltipText ? 'tooltip-host' : undefined} data-tooltip={tooltipText || undefined} style={{ display: 'inline-flex' }}>
       <span
         style={{
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: 700,
-          padding: '3px 9px',
-          borderRadius: 999,
+          padding: '0 10px',
+          height: 24,
+          borderRadius: 12,
           background: price.bg,
           color: price.color,
           display: 'inline-flex',
@@ -75,9 +76,9 @@ function ToolTooltip({ tool, show }) {
 // --- Star rating display
 function StarRating({ rating }) {
   return (
-    <span style={{ fontSize: 12, color: '#F59E0B', fontWeight: 600 }}>
+    <span style={{ fontSize: 14, color: '#F59E0B', fontWeight: 600 }}>
       {'★'.repeat(Math.floor(rating))}{'☆'.repeat(5 - Math.floor(rating))}
-      <span style={{ color: 'var(--color-text-secondary)', fontWeight: 400, marginLeft: 4 }}>{rating}</span>
+      <span style={{ color: 'var(--color-text-secondary)', fontWeight: 400, marginLeft: 6 }}>{rating}</span>
     </span>
   );
 }
@@ -122,7 +123,7 @@ function FeaturedToolCard({ tool, onSave, isSaved }) {
     <div
       className="card"
       style={{
-        width: '100%', minWidth: 0, padding: 22,
+        width: '100%', minWidth: 0, padding: 24,
         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
         cursor: 'default',
         position: 'relative',
@@ -133,34 +134,46 @@ function FeaturedToolCard({ tool, onSave, isSaved }) {
     >
       <ToolTooltip tool={tool} show={showTooltip} />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <span className={tagClass(tool.category)}>{tool.category}</span>
         <PricingBadge pricingType={tool.pricingType} />
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6, gap: 10 }}>
-        <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>{tool.name}</h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, gap: 12 }}>
+        <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--color-text-primary)' }}>{tool.name}</h3>
         <span style={{ display: 'flex', flexShrink: 0 }}><AppIcon name={tool.iconKey} size={24} /></span>
       </div>
 
-      <p style={{ margin: '0 0 10px', fontSize: 13, color: 'var(--color-text-secondary)', lineHeight: 1.55 }}>
+      <p
+        style={{
+          margin: '0 0 8px',
+          fontSize: 14,
+          color: 'var(--color-text-secondary)',
+          lineHeight: 1.6,
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+        }}
+      >
         {tool.desc}
       </p>
-      <StarRating rating={tool.rating} />
+      <div style={{ marginBottom: 16 }}>
+        <StarRating rating={tool.rating} />
+      </div>
 
-      <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+      <div style={{ display: 'flex', gap: 8 }}>
         <button
           disabled={isSaved}
           onClick={handleSave}
+          className="btn-secondary"
           style={{
             flex: 1,
-            padding: '8px',
-            fontSize: 12,
-            borderRadius: 10,
-            border: isSaved ? '1px solid #C4B5FD' : '1px solid #D7D2FF',
-            background: isSaved ? '#EDE9FE' : '#fff',
-            color: 'var(--color-primary)',
-            fontWeight: 600,
+            height: 44,
+            borderRadius: 8,
+            color: isSaved ? '#6B7280' : 'var(--color-primary)',
+            borderColor: isSaved ? '#E5E7EB' : 'var(--color-primary)',
+            background: '#fff',
             cursor: isSaved ? 'not-allowed' : 'pointer',
           }}
         >
@@ -172,15 +185,19 @@ function FeaturedToolCard({ tool, onSave, isSaved }) {
         </button>
         <a
           href={`https://${tool.url}`} target="_blank" rel="noreferrer"
+          className="btn-primary"
           style={{
-            flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'var(--color-primary)', color: '#fff',
-            borderRadius: 10, fontSize: 12, fontWeight: 600, textDecoration: 'none',
-            padding: '8px', transition: 'background 0.2s',
+            flex: 1,
+            height: 44,
+            borderRadius: 8,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textDecoration: 'none',
           }}
         >
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            Buka <AppIcon name="external-link" size={14} color="#fff" />
+            Buka ↗ <AppIcon name="external-link" size={14} color="#fff" />
           </span>
         </a>
       </div>
@@ -228,7 +245,7 @@ function SmallToolCard({ tool, onSave, isSaved }) {
     <div
       className="card"
       style={{
-        padding: 16, transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        padding: 24, transition: 'transform 0.2s ease, box-shadow 0.2s ease',
         position: 'relative',
         overflow: 'visible',
       }}
@@ -237,29 +254,46 @@ function SmallToolCard({ tool, onSave, isSaved }) {
     >
       <ToolTooltip tool={tool} show={showTooltip} />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <span className={tagClass(tool.category)}>{tool.category}</span>
         <PricingBadge pricingType={tool.pricingType} />
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ display: 'flex' }}><AppIcon name={tool.iconKey} size={20} /></span>
-          <span style={{ fontWeight: 700, fontSize: 14 }}>{tool.name}</span>
-        </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, gap: 12 }}>
+        <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--color-text-primary)' }}>{tool.name}</h3>
+        <span style={{ display: 'flex', flexShrink: 0 }}><AppIcon name={tool.iconKey} size={20} /></span>
+      </div>
+      <p
+        style={{
+          margin: '0 0 8px',
+          fontSize: 14,
+          color: 'var(--color-text-secondary)',
+          lineHeight: 1.6,
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+        }}
+      >
+        {tool.desc}
+      </p>
+      <div style={{ marginBottom: 16 }}>
+        <StarRating rating={tool.rating} />
+      </div>
+      <div style={{ display: 'flex', gap: 8 }}>
         <button
           disabled={isSaved}
           onClick={handleSave}
           title="Simpan ke Library"
+          className="btn-secondary"
           style={{
-            background: isSaved ? '#EDE9FE' : '#fff',
-            color: 'var(--color-primary)',
-            border: isSaved ? '1px solid #C4B5FD' : '1px solid #D7D2FF',
+            flex: 1,
+            height: 44,
             borderRadius: 8,
-            padding: '5px 9px',
+            color: isSaved ? '#6B7280' : 'var(--color-primary)',
+            borderColor: isSaved ? '#E5E7EB' : 'var(--color-primary)',
+            background: '#fff',
             cursor: isSaved ? 'not-allowed' : 'pointer',
-            fontSize: 11,
-            fontWeight: 700,
           }}
         >
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
@@ -267,13 +301,23 @@ function SmallToolCard({ tool, onSave, isSaved }) {
             {isSaved ? 'Tersimpan ✓' : 'Simpan'}
           </span>
         </button>
-      </div>
-      <p style={{ margin: '0 0 10px', fontSize: 12, color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
-        {tool.desc}
-      </p>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-secondary)' }}>{tool.url}</span>
-        <StarRating rating={tool.rating} />
+        <a
+          href={`https://${tool.url}`} target="_blank" rel="noreferrer"
+          className="btn-primary"
+          style={{
+            flex: 1,
+            height: 44,
+            borderRadius: 8,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textDecoration: 'none',
+          }}
+        >
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            Buka ↗ <AppIcon name="external-link" size={14} color="#fff" />
+          </span>
+        </a>
       </div>
     </div>
   );
@@ -327,37 +371,37 @@ export default function DashboardView() {
   };
 
   if (!mounted) return (
-    <div className="main-content view-enter" style={{ padding: '32px 36px' }}>
+    <div className="main-content view-enter" style={{ maxWidth: 1120, margin: '0 auto' }}>
       {[200, 300, 100].map((w, i) => (
-        <div key={i} style={{ height: 20, width: w, background: 'var(--color-border)', borderRadius: 8, marginBottom: 10, animation: 'pulse 1.5s infinite' }} />
+        <div key={i} style={{ height: 20, width: w, background: 'var(--color-border)', borderRadius: 8, marginBottom: 8, animation: 'pulse 1.5s infinite' }} />
       ))}
       <div style={{ display: 'flex', gap: 16, marginTop: 24 }}>
         {[1, 2, 3, 4].map(i => (
-          <div key={i} style={{ width: 260, height: 200, background: 'var(--color-border)', borderRadius: 16, animation: 'pulse 1.5s infinite' }} />
+          <div key={i} style={{ width: 256, height: 200, background: 'var(--color-border)', borderRadius: 12, animation: 'pulse 1.5s infinite' }} />
         ))}
       </div>
     </div>
   );
 
   return (
-    <div className="main-content view-enter" style={{ padding: '32px 36px', maxWidth: 1100, margin: '0 auto' }}>
+    <div className="main-content view-enter" style={{ maxWidth: 1120, margin: '0 auto' }}>
 
       {/* -- Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
-            {greetingMeta.text}, {firstName}! <span role="img" aria-label="sapaan waktu">{greetingMeta.emoji}</span>
+          <h1 style={{ margin: 0, fontSize: 28, fontWeight: 700, color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            {greetingMeta.text}, <strong>{firstName}</strong>! <span role="img" aria-label="sapaan waktu">{greetingMeta.emoji}</span>
           </h1>
-          <p style={{ margin: '6px 0 0', fontSize: 14, color: 'var(--color-text-secondary)' }}>
+          <p style={{ margin: '8px 0 0', fontSize: 14, color: '#6B7280' }}>
             Dipilihkan khusus untuk <strong>{jurusan}</strong> kamu.
           </p>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <p style={{ margin: 0, fontSize: 13, color: 'var(--color-text-secondary)' }}>{today}</p>
+          <p style={{ margin: 0, fontSize: 14, color: '#6B7280' }}>{today}</p>
           <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 4, fontSize: 11, fontWeight: 600,
+            display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 8, fontSize: 12, fontWeight: 600,
             background: 'var(--color-secondary-light)', color: 'var(--color-secondary)',
-            padding: '3px 10px', borderRadius: 999,
+            padding: '0 10px', height: 24, borderRadius: 12,
           }}>
             <AppIcon name="refresh" size={12} /> Diperbarui otomatis setiap hari
           </span>
@@ -366,20 +410,30 @@ export default function DashboardView() {
 
       {/* UI/UX Fix: Step 7 — Display as many choices as possible (grid vs scroll). Drop-down untuk sorting meminimalisir pencarian manual. Survei: 52,5% kesulitan temukan referensi tersimpan. */}
       {/* -- Featured Tools (responsive grid) */}
-      <section data-tour="dashboard-featured-tools" style={{ marginBottom: 36 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+      <section data-tour="dashboard-featured-tools" style={{ marginBottom: 32 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <AppIcon name="flame" size={18} />
-            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Tools Pilihan Hari Ini</h2>
-            <span style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginLeft: 4 }}>
-              - dipilihkan khusus untuk {jurusan}
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--color-text-secondary)' }}>Tools Pilihan Hari Ini</h2>
+            <span style={{
+              fontSize: 12,
+              fontWeight: 600,
+              background: 'var(--color-primary-light)',
+              color: 'var(--color-primary)',
+              height: 24,
+              borderRadius: 12,
+              padding: '0 10px',
+              display: 'inline-flex',
+              alignItems: 'center',
+            }}>
+              Untuk {jurusan}
             </span>
           </div>
           <button
             type="button"
             className="btn-ghost"
             onClick={handleReplayTour}
-            style={{ padding: '7px 12px', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 6 }}
+            style={{ padding: '0 12px', height: 44, fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 6 }}
           >
             <AppIcon name="sparkles" size={12} /> Mulai Tutorial
           </button>
@@ -396,11 +450,11 @@ export default function DashboardView() {
             ))}
           </div>
         ) : (
-          <div className="card" style={{ padding: '26px 22px', textAlign: 'center' }}>
-            <p style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--color-text-primary)' }}>
+          <div className="card" style={{ padding: 24, textAlign: 'center' }}>
+            <p style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700, color: 'var(--color-text-primary)' }}>
               Belum ada rekomendasi tools baru hari ini. Cek kembali besok!
             </p>
-            <p style={{ margin: '0 0 12px', fontSize: 13, color: 'var(--color-text-secondary)' }}>
+            <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--color-text-secondary)' }}>
               Sementara itu, jelajahi tools yang sudah kamu simpan di Library.
             </p>
             <button
@@ -413,11 +467,11 @@ export default function DashboardView() {
           </div>
         )}
         {!showAllFeatured && featuredTools.length > 6 && visibleFeaturedTools.length > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
             <button
               className="btn-ghost"
               onClick={() => setShowAllFeatured(true)}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '9px 14px' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, height: 44 }}
             >
               Lihat Semua <AppIcon name="arrow-right" size={14} />
             </button>
@@ -426,13 +480,13 @@ export default function DashboardView() {
       </section>
 
       {/* -- Filter Tabs */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+      <div className="dashboard-filter-tabs" style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', position: 'sticky', top: 0, zIndex: 2, background: 'var(--color-bg)', padding: '8px 0 16px' }}>
         {FILTERS.map(f => (
           <button
             key={f}
             onClick={() => setActiveFilter(f)}
             style={{
-              padding: '6px 16px', borderRadius: 999, fontSize: 13, fontWeight: 500,
+              padding: '8px 16px', borderRadius: 999, fontSize: 13, fontWeight: 600,
               cursor: 'pointer', border: 'none', transition: 'all 0.2s',
               background: activeFilter === f ? 'var(--color-primary)' : 'var(--color-surface)',
               color: activeFilter === f ? '#fff' : 'var(--color-text-secondary)',
@@ -445,13 +499,13 @@ export default function DashboardView() {
       </div>
 
       {/* -- All Tools Grid */}
-      <section style={{ marginBottom: 36 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+      <section style={{ marginBottom: 32 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
           <AppIcon name="news" size={18} />
-          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Semua Tools Hari Ini</h2>
+          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--color-text-secondary)' }}>Semua Tools Hari Ini</h2>
           <span style={{
             fontSize: 12, fontWeight: 600, background: 'var(--color-primary-light)',
-            color: 'var(--color-primary)', padding: '2px 8px', borderRadius: 999,
+            color: 'var(--color-primary)', padding: '0 10px', height: 24, borderRadius: 12, display: 'inline-flex', alignItems: 'center',
           }}>
             {filteredTools.length} tools
           </span>
@@ -467,7 +521,7 @@ export default function DashboardView() {
           ))}
         </div>
         {filteredTools.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--color-text-secondary)' }}>
+          <div style={{ textAlign: 'center', padding: '32px 24px', color: 'var(--color-text-secondary)' }}>
             <span style={{ display: 'inline-flex' }}><AppIcon name="search" size={36} /></span>
             <p>Tidak ada tool untuk kategori ini.</p>
           </div>
@@ -478,20 +532,20 @@ export default function DashboardView() {
       <div style={{
         background: 'var(--color-primary-light)',
         border: '1px solid rgba(108,99,255,0.2)',
-        borderRadius: 16, padding: '20px 24px',
+        borderRadius: 12, padding: '24px',
         display: 'flex', alignItems: 'center', gap: 16,
       }}>
         <span style={{ display: 'flex', flexShrink: 0 }}><AppIcon name="lamp" size={28} /></span>
         <div style={{ flex: 1 }}>
-          <p style={{ margin: 0, fontWeight: 600, fontSize: 14 }}>Tips Produktivitas Hari Ini</p>
-          <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
+          <p style={{ margin: 0, fontWeight: 600, fontSize: 14, color: 'var(--color-text-secondary)' }}>Tips Produktivitas Hari Ini</p>
+          <p style={{ margin: '8px 0 0', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
             Coba ceritakan tugasmu ke Leva: <em>"Bantu aku buat literature review topik X untuk jurusan {jurusan}"</em> dan Leva akan otomatis memecahnya jadi langkah-langkah kecil plus merekomendasikan tools terbaik!
           </p>
         </div>
         <button
           className="btn-primary"
           onClick={() => setActiveView('chat')}
-          style={{ flexShrink: 0, whiteSpace: 'nowrap', padding: '10px 18px', fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          style={{ flexShrink: 0, whiteSpace: 'nowrap', height: 44, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 6 }}
         >
           Coba Sekarang <AppIcon name="arrow-right" size={14} color="#fff" />
         </button>

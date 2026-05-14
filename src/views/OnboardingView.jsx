@@ -270,9 +270,12 @@ export default function OnboardingView() {
 
   // -- Shared input style
   const inputStyle = (hasError) => ({
-    width: '100%', padding: '12px 14px',
-    border: `1.5px solid ${hasError ? '#DC2626' : 'var(--color-border)'}`,
-    borderRadius: 10, fontSize: 14,
+    width: '100%',
+    padding: '12px 16px',
+    height: 48,
+    border: `1px solid ${hasError ? '#DC2626' : '#E5E7EB'}`,
+    borderRadius: 8,
+    fontSize: 14,
     outline: 'none', color: 'var(--color-text-primary)',
     background: '#fff',
     transition: 'border 0.2s, box-shadow 0.2s',
@@ -302,9 +305,9 @@ export default function OnboardingView() {
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: 'linear-gradient(135deg, #6C47FF 0%, #8B5CF6 50%, #A78BFA 100%)',
-      padding: 20,
+      padding: 24,
     }}>
-      <div className="card" style={{ width: '100%', maxWidth: 460, padding: 36, position: 'relative', overflow: 'hidden' }}>
+      <div className="card" style={{ width: '100%', maxWidth: 464, padding: 24, position: 'relative', overflow: 'hidden' }}>
 
         {step === 3 && showStep3Confetti && (
           <div className="onboarding-confetti-layer" aria-hidden="true">
@@ -326,21 +329,21 @@ export default function OnboardingView() {
         <div className={`onboarding-step-panel ${stepAnimationClass}`}>
 
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}><AppIcon name="sparkles" size={30} /></div>
+        <div style={{ textAlign: 'center', marginBottom: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}><AppIcon name="sparkles" size={30} /></div>
           <span style={{ fontSize: 26, fontWeight: 800, color: 'var(--color-primary)', letterSpacing: '-0.5px' }}>
             Leva
           </span>
-          <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--color-text-secondary)' }}>
+          <p style={{ margin: '8px 0 0', fontSize: 12, color: '#6B7280' }}>
             Your Cognitive Lever for Academic Excellence
           </p>
-          <p style={{ margin: '3px 0 0', fontSize: 13, color: '#4B5563', fontWeight: 600 }}>
+          <p style={{ margin: '4px 0 0', fontSize: 12, color: '#6B7280', fontWeight: 600 }}>
             Asisten Akademik Cerdasmu
           </p>
         </div>
 
         {/* Step Dots */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 28 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 8 }}>
           {[1, 2, 3].map(s => (
             <span
               key={s}
@@ -359,16 +362,21 @@ export default function OnboardingView() {
             </span>
           ))}
         </div>
+        <p style={{ margin: '0 0 16px', textAlign: 'center', fontSize: 12, color: 'var(--color-text-peripheral)' }}>
+          Step {step} dari 3
+        </p>
 
         {/* --- STEP 1 --- */}
         {step === 1 && (
           <div>
-            <h2 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 700 }}>Hei! Perkenalkan dirimu dulu</h2>
-            <p style={{ margin: '0 0 24px', fontSize: 14, color: '#6B7280' }}>
+            <h2 style={{ margin: '0 0 8px', fontSize: 24, fontWeight: 700, textAlign: 'center', color: '#111827' }}>
+              Hei! Perkenalkan dirimu dulu
+            </h2>
+            <p style={{ margin: '0 0 24px', fontSize: 14, color: '#6B7280', textAlign: 'center' }}>
               Leva butuh sedikit info untuk mempersonalisasi pengalaman belajarmu.
             </p>
 
-            <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-primary)', display: 'block', marginBottom: 6 }}>
+            <label style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)', display: 'block', marginBottom: 4 }}>
               Nama lengkap kamu
             </label>
             <input
@@ -398,9 +406,11 @@ export default function OnboardingView() {
               aria-disabled={!isStep1Complete}
               style={{
                 width: '100%',
-                padding: '13px',
-                marginTop: 20,
-                fontSize: 15,
+                height: 48,
+                padding: '0 16px',
+                marginTop: 24,
+                fontSize: 14,
+                borderRadius: 8,
                 background: isStep1Complete ? 'var(--color-primary)' : '#D1D5DB',
                 color: isStep1Complete ? '#FFFFFF' : '#9CA3AF',
                 border: 'none',
@@ -408,12 +418,12 @@ export default function OnboardingView() {
                 cursor: isStep1Complete ? 'pointer' : 'not-allowed',
               }}
             >
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                 Lanjut <AppIcon name="arrow-right" size={14} color="#fff" />
               </span>
             </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '16px 0 12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '16px 0' }}>
               <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
               <span style={{ fontSize: 12, color: 'var(--color-text-secondary)', fontWeight: 600 }}>atau</span>
               <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
@@ -424,13 +434,14 @@ export default function OnboardingView() {
               onClick={handleGoogleContinue}
               style={{
                 width: '100%',
-                padding: '12px 14px',
-                marginTop: 2,
-                borderRadius: 10,
-                border: '1px solid #D1D5DB',
+                height: 48,
+                padding: '0 16px',
+                marginTop: 0,
+                borderRadius: 8,
+                border: '1px solid #E5E7EB',
                 background: '#fff',
                 color: '#374151',
-                fontSize: 13,
+                fontSize: 14,
                 fontWeight: 600,
                 cursor: 'pointer',
                 display: 'inline-flex',
@@ -454,13 +465,15 @@ export default function OnboardingView() {
         {/* --- STEP 2 --- */}
         {step === 2 && (
           <div>
-            <h2 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 700 }}>Info Akademik Kamu</h2>
-            <p style={{ margin: '0 0 24px', fontSize: 14, color: '#6B7280' }}>
+            <h2 style={{ margin: '0 0 8px', fontSize: 24, fontWeight: 700, textAlign: 'center', color: '#111827' }}>
+              Info Akademik Kamu
+            </h2>
+            <p style={{ margin: '0 0 24px', fontSize: 14, color: '#6B7280', textAlign: 'center' }}>
               Ini membantu Leva merekomendasikan tools yang paling relevan untukmu.
             </p>
 
             {/* Jurusan */}
-            <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Jurusan</label>
+            <label style={{ fontSize: 14, fontWeight: 600, display: 'block', marginBottom: 4 }}>Jurusan</label>
             {/* UI/UX Fix: Step 7 — Combo box menggabungkan text entry + list box untuk pencarian cepat. Radio button grid menampilkan semua opsi sekaligus (display as many choices as possible). */}
             <div ref={jurusanBoxRef} style={{ position: 'relative' }}>
               <input
@@ -484,7 +497,7 @@ export default function OnboardingView() {
                 aria-controls="jurusan-combobox-list"
                 aria-autocomplete="list"
                 aria-invalid={!!errors.jurusan}
-                style={{ ...inputStyle(!!errors.jurusan), paddingRight: 66 }}
+                style={{ ...inputStyle(!!errors.jurusan), paddingRight: 64 }}
               />
 
               {jurusanQuery && (
@@ -494,7 +507,7 @@ export default function OnboardingView() {
                   aria-label="Reset jurusan"
                   style={{
                     position: 'absolute',
-                    right: 34,
+                    right: 32,
                     top: '50%',
                     transform: 'translateY(-50%)',
                     border: 'none',
@@ -509,7 +522,7 @@ export default function OnboardingView() {
                 </button>
               )}
 
-              <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-secondary)', pointerEvents: 'none', display: 'flex' }}>
+              <span style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-secondary)', pointerEvents: 'none', display: 'flex' }}>
                 <AppIcon name="chevron-down" size={14} />
               </span>
 
@@ -521,12 +534,12 @@ export default function OnboardingView() {
                     position: 'absolute',
                     left: 0,
                     right: 0,
-                    top: 'calc(100% + 6px)',
+                    top: 'calc(100% + 8px)',
                     border: '1px solid var(--color-border)',
-                    borderRadius: 10,
+                    borderRadius: 8,
                     background: '#fff',
                     boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-                    maxHeight: 210,
+                    maxHeight: 208,
                     overflowY: 'auto',
                     zIndex: 20,
                   }}
@@ -552,9 +565,9 @@ export default function OnboardingView() {
                             border: 'none',
                             background: isHighlighted ? 'var(--color-primary-light)' : '#fff',
                             color: isHighlighted ? 'var(--color-primary)' : 'var(--color-text-primary)',
-                            padding: '10px 12px',
+                            padding: '8px 16px',
                             cursor: 'pointer',
-                            fontSize: 13,
+                            fontSize: 14,
                           }}
                         >
                           {jurusan}
@@ -565,13 +578,13 @@ export default function OnboardingView() {
                 </div>
               )}
             </div>
-            <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>
+            <p style={{ margin: '8px 0 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>
               Ketik nama jurusanmu untuk mencari lebih cepat
             </p>
             {errText('jurusan')}
 
             {/* Semester */}
-            <label style={{ fontSize: 13, fontWeight: 600, display: 'block', margin: '16px 0 8px' }}>Semester</label>
+            <label style={{ fontSize: 14, fontWeight: 600, display: 'block', margin: '16px 0 8px' }}>Semester</label>
             <div className="onboarding-semester-grid" role="radiogroup" aria-label="Pilih semester" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
               {SEMESTER_OPTIONS.map((semester, index) => {
                 const isSelected = form.semester === semester;
@@ -586,13 +599,14 @@ export default function OnboardingView() {
                     onKeyDown={(event) => handleSemesterKeyDown(event, index)}
                     onClick={() => update('semester', semester)}
                     style={{
-                      padding: '10px 8px',
-                      borderRadius: 10,
+                      height: 40,
+                      padding: '0 8px',
+                      borderRadius: 8,
                       border: `1.5px solid ${isSelected ? 'var(--color-primary)' : 'var(--color-border)'}`,
                       background: isSelected ? 'var(--color-primary)' : '#fff',
                       color: isSelected ? '#fff' : 'var(--color-text-secondary)',
                       cursor: 'pointer',
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: 600,
                       transition: 'all 0.2s',
                     }}
@@ -608,13 +622,13 @@ export default function OnboardingView() {
                 );
               })}
             </div>
-            <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>
+            <p style={{ margin: '8px 0 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>
               Sistem perkuliahan S1 reguler di Indonesia = 8 semester
             </p>
             {errText('semester')}
 
             {/* Bahasa */}
-            <label style={{ fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6, margin: '16px 0 8px' }}>
+            <label style={{ fontSize: 14, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 8, margin: '16px 0 8px' }}>
               <span>Preferensi Bahasa</span>
               <span
                 className="tooltip-host tooltip-help-icon"
@@ -625,7 +639,7 @@ export default function OnboardingView() {
                 ?
               </span>
             </label>
-            <div role="radiogroup" aria-label="Preferensi bahasa" style={{ display: 'flex', gap: 10 }}>
+            <div role="radiogroup" aria-label="Preferensi bahasa" style={{ display: 'flex', gap: 8 }}>
               {['Indonesia', 'English'].map((lang, index) => (
                 <button
                   key={lang}
@@ -637,7 +651,7 @@ export default function OnboardingView() {
                   onClick={() => update('bahasa', lang)}
                   onKeyDown={(event) => handleBahasaKeyDown(event, index)}
                   style={{
-                    flex: 1, padding: '10px', borderRadius: 10, fontSize: 14, fontWeight: 500,
+                    flex: 1, height: 40, padding: '0 8px', borderRadius: 8, fontSize: 14, fontWeight: 500,
                     cursor: 'pointer', transition: 'all 0.2s',
                     background: form.bahasa === lang ? 'var(--color-primary)' : 'var(--color-bg)',
                     color: form.bahasa === lang ? '#fff' : 'var(--color-text-secondary)',
@@ -648,13 +662,13 @@ export default function OnboardingView() {
                 </button>
               ))}
             </div>
-            <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>
+            <p style={{ margin: '8px 0 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>
               Bahasa antarmuka dan rekomendasi tools Leva akan mengikuti pilihan ini.
             </p>
 
             <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
-              <button className="btn-ghost" onClick={() => goToPreviousStep(1)} style={{ flex: 1, padding: '13px' }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <button className="btn-secondary" onClick={() => goToPreviousStep(1)} style={{ flex: 1, height: 48, borderRadius: 8 }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                   <AppIcon name="arrow-left" size={14} /> Kembali
                 </span>
               </button>
@@ -664,8 +678,10 @@ export default function OnboardingView() {
                 aria-disabled={!isStep2Complete}
                 style={{
                   flex: 2,
-                  padding: '13px',
-                  fontSize: 15,
+                  height: 48,
+                  padding: '0 16px',
+                  fontSize: 14,
+                  borderRadius: 8,
                   background: isStep2Complete ? 'var(--color-primary)' : '#D1D5DB',
                   color: isStep2Complete ? '#FFFFFF' : '#9CA3AF',
                   border: 'none',
@@ -680,7 +696,7 @@ export default function OnboardingView() {
                   if (isStep2Complete) event.currentTarget.style.filter = 'none';
                 }}
               >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                   Lanjut <AppIcon name="arrow-right" size={14} color="#fff" />
                 </span>
               </button>
@@ -691,55 +707,60 @@ export default function OnboardingView() {
         {/* --- STEP 3 --- */}
         {step === 3 && (
           <div style={{ textAlign: 'center' }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}><AppIcon name="graduation-cap" size={56} /></div>
-            <h2 style={{ margin: '0 0 12px', fontSize: 22, fontWeight: 700, lineHeight: 1.35 }}>
+            <div aria-hidden="true" style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 16 }}>
+              {['#6C47FF', '#F59E0B', '#10B981', '#8B5CF6', '#EC4899'].map((color, idx) => (
+                <span key={color + idx} style={{ width: 8, height: 8, borderRadius: '50%', background: color, opacity: 0.7 }} />
+              ))}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}><AppIcon name="graduation-cap" size={48} /></div>
+            <h2 style={{ margin: '0 0 16px', fontSize: 24, fontWeight: 700, lineHeight: 1.35, color: '#111827' }}>
               Siap, <span style={{ color: 'var(--color-primary)' }}>{form.name.split(' ')[0]}</span>!
             </h2>
-            <p style={{ margin: '0 0 20px', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
+            <p style={{ margin: '0 0 24px', fontSize: 14, color: '#6B7280', lineHeight: 1.6 }}>
               Kamu mahasiswa jurusan <strong>{form.jurusan}</strong>, semester <strong>{form.semester}</strong>.<br />
               Leva siap jadi asisten akademikmu. Mulai jelajahi sekarang!
             </p>
 
             {/* Summary card */}
             <div style={{
-              background: 'var(--color-primary-light)', borderRadius: 12,
-              padding: '14px 18px', marginBottom: 24, textAlign: 'left',
+              background: '#F9FAFB', borderRadius: 8,
+              padding: 16, marginBottom: 24, textAlign: 'left',
             }}>
               {[
                 { label: 'Nama',    val: form.name },
                 { label: 'Jurusan', val: form.jurusan },
                 { label: 'Semester',val: `Semester ${form.semester}` },
                 { label: 'Bahasa',  val: form.bahasa },
-              ].map(row => (
-                <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '5px 0', borderBottom: '1px solid rgba(108,99,255,0.15)' }}>
-                  <span style={{ color: 'var(--color-text-secondary)' }}>{row.label}</span>
-                  <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{row.val}</span>
+              ].map((row, index, arr) => (
+                <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, padding: '12px 0', borderBottom: index < arr.length - 1 ? '1px solid #E5E7EB' : 'none' }}>
+                  <span style={{ color: '#6B7280' }}>{row.label}</span>
+                  <span style={{ fontWeight: 600, color: '#111827' }}>{row.val}</span>
                 </div>
               ))}
             </div>
 
-            <p style={{ margin: '-8px 0 18px', fontSize: 13, color: '#6B7280', fontStyle: 'italic' }}>
+            <p style={{ margin: '0 0 16px', fontSize: 12, color: '#6B7280', fontStyle: 'italic' }}>
               Tenang, data ini bisa kamu ubah kapan saja di halaman Profil.
             </p>
 
             <button
               onClick={handleStart}
               style={{
-                width: '100%', padding: '14px', borderRadius: 12, border: 'none',
-                background: 'var(--color-secondary)', color: '#fff',
-                fontSize: 16, fontWeight: 700, cursor: 'pointer',
+                width: '100%', height: 48, padding: '0 16px', borderRadius: 8, border: 'none',
+                background: '#065F46', color: '#fff',
+                fontSize: 14, fontWeight: 700, cursor: 'pointer',
                 transition: 'all 0.2s',
               }}
               onMouseEnter={e => e.currentTarget.style.background = '#059669'}
               onMouseLeave={e => e.currentTarget.style.background = 'var(--color-secondary)'}
             >
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                 Masuk ke Dashboard <AppIcon name="arrow-right" size={14} color="#fff" />
               </span>
             </button>
 
-            <button className="btn-ghost" onClick={() => goToPreviousStep(2)} style={{ width: '100%', marginTop: 10 }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <button className="btn-secondary" onClick={() => goToPreviousStep(2)} style={{ width: '100%', height: 48, marginTop: 16 }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                 <AppIcon name="arrow-left" size={14} /> Edit Data
               </span>
             </button>
