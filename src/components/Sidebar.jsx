@@ -104,7 +104,7 @@ export default function Sidebar() {
             ref={searchInputRef}
             value={searchVal}
             onChange={e => setSearchVal(e.target.value)}
-            placeholder="Cari riwayat... (Ctrl+K)"
+            placeholder="Search history... (Ctrl+K)"
             style={{
               width: '100%', background: 'rgba(255,255,255,0.07)',
               border: '1px solid rgba(255,255,255,0.1)',
@@ -118,14 +118,14 @@ export default function Sidebar() {
         {activeView === 'dashboard' && searchVal.trim().length > 0 && filteredHistory.length === 0 && (
           <div style={{ marginTop: -6, marginBottom: 14, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 10px' }}>
             <p style={{ margin: 0, fontSize: 12, color: 'var(--color-sidebar-text)', lineHeight: 1.5 }}>
-              Tidak ada riwayat tugas yang cocok. Coba kata kunci lain atau mulai tugas baru.
+              No task history matches your search. Try different keywords or start a new task.
             </p>
             <button
               type="button"
               onClick={handleNewChat}
               style={{ marginTop: 8, border: 'none', background: 'transparent', color: '#C4B5FD', fontSize: 12, fontWeight: 700, cursor: 'pointer', padding: 0 }}
             >
-              Mulai Chat Baru →
+              Start New Chat →
             </button>
           </div>
         )}
@@ -159,7 +159,7 @@ export default function Sidebar() {
             onClick={handleOpenTutorial}
             style={{ width: '100%', background: 'transparent', border: 'none', textAlign: 'left' }}
           >
-            <span style={{ display: 'flex' }}><AppIcon name="sparkles" size={16} /></span> Lihat Tutorial
+            <span style={{ display: 'flex' }}><AppIcon name="sparkles" size={16} /></span> View Tutorial
           </button>
         </nav>
 
@@ -169,7 +169,7 @@ export default function Sidebar() {
         {/* History */}
         <div style={{ flex: 1, overflowY: 'auto' }}>
           <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-sidebar-text-muted)', letterSpacing: '0.08em', marginBottom: 8, paddingLeft: 4 }}>
-            RIWAYAT TUGAS
+            TASK HISTORY
           </p>
           {filteredHistory.map(task => (
             <button
@@ -234,7 +234,7 @@ export default function Sidebar() {
               {user ? user.name : 'Renisa Mahardika'}
             </p>
             <p style={{ margin: 0, fontSize: 11, color: 'var(--color-sidebar-text-muted)' }}>
-              {user ? `${user.jurusan} · Sem ${user.semester}` : 'Teknik Informatika · Sem 6'}
+              {user ? `${user.jurusan} · Sem ${user.semester}` : 'Computer Science · Sem 6'}
             </p>
           </div>
         </button>
@@ -242,15 +242,15 @@ export default function Sidebar() {
 
       {/* Settings Modal */}
       {showSettings && (
-        <Modal title="Pengaturan" onClose={() => setShowSettings(false)}>
+        <Modal title="Settings" onClose={() => setShowSettings(false)}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
 
             {/* Toggle row helper */}
             {[
-              { label: 'Dark Mode', sublabel: 'Ganti tema ke gelap', icon: 'moon', val: darkMode, set: setDarkMode },
-              { label: 'Mode Kontras Tinggi', sublabel: 'Teks lebih tegas dan border lebih jelas', icon: 'settings', val: highContrast, set: setHighContrast },
-              { label: 'Pengingat Harian', sublabel: 'Ingatkan tools AI baru setiap hari', icon: 'bell', val: notif, set: setNotif },
-              { label: 'Efek Suara', sublabel: 'Putar suara saat menyelesaikan tugas', icon: 'volume', val: soundEnabled, set: setSoundEnabled },
+              { label: 'Dark Mode', sublabel: 'Switch to dark theme', icon: 'moon', val: darkMode, set: setDarkMode },
+              { label: 'High Contrast Mode', sublabel: 'Bolder text and clearer borders', icon: 'settings', val: highContrast, set: setHighContrast },
+              { label: 'Daily Reminders', sublabel: 'Get reminded about new AI tools daily', icon: 'bell', val: notif, set: setNotif },
+              { label: 'Sound Effects', sublabel: 'Play sounds when completing tasks', icon: 'volume', val: soundEnabled, set: setSoundEnabled },
             ].map(item => (
               <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -262,11 +262,11 @@ export default function Sidebar() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: 11, fontWeight: 700, color: item.val ? 'var(--color-primary)' : 'var(--color-text-secondary)' }}>
-                    {item.val ? 'Aktif' : 'Nonaktif'}
+                    {item.val ? 'On' : 'Off'}
                   </span>
                   <button
                     type="button"
-                    aria-label={`Ubah ${item.label}`}
+                    aria-label={`Toggle ${item.label}`}
                     aria-pressed={item.val}
                     onClick={() => item.set(v => !v)}
                     style={{
@@ -289,11 +289,11 @@ export default function Sidebar() {
             <div style={{ height: 1, background: 'var(--color-border)' }} />
 
             <p style={{ margin: 0, fontSize: 12, color: 'var(--color-text-secondary)', textAlign: 'center' }}>
-              Leva v1.0.0 · Dibuat untuk Hackathon
+              Leva v1.0.0 · Made for Hackathon
             </p>
 
             <button className="btn-primary" onClick={() => setShowSettings(false)} style={{ width: '100%' }}>
-              Tutup
+              Close
             </button>
           </div>
         </Modal>

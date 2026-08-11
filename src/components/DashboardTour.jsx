@@ -8,29 +8,29 @@ const TOUR_STEPS = [
   {
     id: 1,
     target: 'dashboard-featured-tools',
-    title: '👋 Selamat datang di Leva!',
-    message: "Ini tools AI yang kami pilihkan khusus untukmu setiap hari. Klik 'Simpan' untuk menyimpan ke Library-mu.",
+    title: '👋 Welcome to Leva!',
+    message: "These are AI tools we've handpicked for you every day. Click 'Save' to add them to your Library.",
     placement: 'bottom',
   },
   {
     id: 2,
     target: 'sidebar-chat',
-    title: '💬 Mulai dari sini!',
-    message: 'Ceritakan tugasmu dan Leva akan memecahnya jadi langkah-langkah kecil, lengkap dengan rekomendasi tools AI.',
+    title: '💬 Start here!',
+    message: 'Tell us about your task and Leva will break it down into small steps, complete with AI tool recommendations.',
     placement: 'right',
   },
   {
     id: 3,
     target: 'sidebar-library',
-    title: '📚 Koleksi Tools-mu',
-    message: 'Semua tools yang kamu simpan akan tersimpan rapi di sini. Kamu bisa cari, filter, dan kelola kapan saja.',
+    title: '📚 Your Tool Collection',
+    message: 'All the tools you save will be neatly stored here. You can search, filter, and manage them anytime.',
     placement: 'right',
   },
   {
     id: 4,
     target: 'sidebar-new-chat',
-    title: '🚀 Siap memulai?',
-    message: "Klik 'New Chat' kapan saja untuk memulai tugas baru. Selamat belajar!",
+    title: '🚀 Ready to begin?',
+    message: "Click 'New Chat' anytime to start a new task. Happy learning!",
     placement: 'bottom',
   },
 ];
@@ -227,7 +227,7 @@ export default function DashboardTour({ isActive }) {
       };
 
   const isLastStep = stepIndex === STEP_COUNT - 1;
-  const primaryLabel = isLastStep ? 'Mulai Jelajahi! 🎉' : 'Selanjutnya →';
+  const primaryLabel = isLastStep ? 'Start Exploring! 🎉' : 'Next →';
   const isStepOneModal = currentStep.id === 1;
   const isCompactViewport = typeof window !== 'undefined' && window.innerWidth <= 1100;
   const shouldUseBlurBackdrop = isStepOneModal || (isCompactViewport && currentStep.id === 4);
@@ -240,12 +240,12 @@ export default function DashboardTour({ isActive }) {
     : highlightStyle;
 
   return (
-    <div className="dashboard-tour-layer" role="dialog" aria-modal="true" aria-label="Panduan pertama Dashboard">
+    <div className="dashboard-tour-layer" role="dialog" aria-modal="true" aria-label="Dashboard first-time guide">
       {shouldUseBlurBackdrop && <div className="dashboard-tour-backdrop-blur" aria-hidden="true" />}
       {shouldShowHighlight && <div className="dashboard-tour-highlight" style={mergedHighlightStyle} />}
 
       <div key={currentStep.id} className="dashboard-tour-callout" style={calloutPosition}>
-        <p className="dashboard-tour-progress">Langkah {stepIndex + 1} dari {STEP_COUNT}</p>
+        <p className="dashboard-tour-progress">Step {stepIndex + 1} of {STEP_COUNT}</p>
         <h3 className="dashboard-tour-title">{currentStep.title}</h3>
         <p className="dashboard-tour-body">{currentStep.message}</p>
 
@@ -253,7 +253,7 @@ export default function DashboardTour({ isActive }) {
           {primaryLabel}
         </button>
         <button type="button" className="dashboard-tour-skip" onClick={closeTour}>
-          Lewati Tour
+          Skip Tour
         </button>
       </div>
     </div>

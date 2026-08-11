@@ -15,9 +15,9 @@ const tagClass = (cat) => {
 
 const pricingMeta = (pricingType) => {
   const map = {
-    free: { label: 'Gratis', bg: '#065F46', color: '#FFFFFF', icon: 'check' },
+    free: { label: 'Free', bg: '#065F46', color: '#FFFFFF', icon: 'check' },
     freemium: { label: 'Freemium', bg: '#6C47FF', color: '#FFFFFF', icon: 'sparkles' },
-    paid: { label: 'Berbayar', bg: '#991B1B', color: '#FFFFFF', icon: 'warning' },
+    paid: { label: 'Paid', bg: '#991B1B', color: '#FFFFFF', icon: 'warning' },
     opensource: { label: 'Open Source', bg: '#1E40AF', color: '#FFFFFF', icon: 'link' },
   };
 
@@ -27,10 +27,10 @@ const pricingMeta = (pricingType) => {
 function PricingBadge({ pricingType }) {
   const price = pricingMeta(pricingType);
   const tooltipByType = {
-    free: 'Sepenuhnya gratis untuk digunakan',
-    freemium: 'Fitur dasar gratis, fitur premium berbayar',
-    paid: 'Memerlukan langganan berbayar untuk akses penuh',
-    opensource: 'Kode sumber terbuka dan bebas digunakan',
+    free: 'Completely free to use',
+    freemium: 'Basic features free, premium features paid',
+    paid: 'Requires a paid subscription for full access',
+    opensource: 'Open source code, free to use',
   };
   const tooltipText = tooltipByType[pricingType] || '';
 
@@ -63,7 +63,7 @@ function ToolTooltip({ tool, show }) {
 
   return (
     <div className={`tool-tooltip ${show ? 'visible' : ''}`}>
-      {/* UI/UX Fix: Step 7 — Tooltip/balloon tip sebagai presentation control untuk info harga. Survei: 33,9% user terbentur paywall; Persona Bima butuh filter harga instan. */}
+      {/* UI/UX Fix: Step 7 — Tooltip/balloon tip as presentation control for pricing info. Survey: 33.9% users hit paywall; Persona Bima needs instant pricing filter. */}
       <p className="tool-tooltip-title">{tool.name}</p>
       <p className="tool-tooltip-line">Status: <strong style={{ color: price.color }}>{price.label}</strong></p>
       <p className="tool-tooltip-line">Website: {tool.url}</p>
@@ -178,8 +178,8 @@ function FeaturedToolCard({ tool, onSave, isSaved }) {
             opacity: 1,
           }}
         >
-          {/* UI/UX Fix: Step 6 — Output device harus memberi respond jelas ke aksi user. Step 7 — Aksi destruktif (hapus) harus ada safeguard/konfirmasi. Survei: 52,5% user sulit temukan referensi. */}
-          {isSaved ? 'Tersimpan ✓' : 'Simpan ☆'}
+          {/* UI/UX Fix: Step 6 — Output device must give clear response to user actions. Step 7 — Destructive actions (delete) must have safeguard/confirmation. Survey: 52.5% users had difficulty finding saved references. */}
+          {isSaved ? 'Saved ✓' : 'Save ☆'}
         </button>
         <a
           href={`https://${tool.url}`} target="_blank" rel="noreferrer"
@@ -195,7 +195,7 @@ function FeaturedToolCard({ tool, onSave, isSaved }) {
           }}
         >
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            Buka ↗ <AppIcon name="external-link" size={14} color="#fff" />
+            Open ↗ <AppIcon name="external-link" size={14} color="#fff" />
           </span>
         </a>
       </div>
@@ -282,7 +282,7 @@ function SmallToolCard({ tool, onSave, isSaved }) {
         <button
           disabled={isSaved}
           onClick={handleSave}
-          title="Simpan ke Library"
+          title="Save to Library"
           className="btn-secondary"
           style={{
             flex: 1,
@@ -295,7 +295,7 @@ function SmallToolCard({ tool, onSave, isSaved }) {
             opacity: 1,
           }}
         >
-          {isSaved ? 'Tersimpan ✓' : 'Simpan ☆'}
+          {isSaved ? 'Saved ✓' : 'Save ☆'}
         </button>
         <a
           href={`https://${tool.url}`} target="_blank" rel="noreferrer"
@@ -311,7 +311,7 @@ function SmallToolCard({ tool, onSave, isSaved }) {
           }}
         >
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            Buka ↗ <AppIcon name="external-link" size={14} color="#fff" />
+            Open ↗ <AppIcon name="external-link" size={14} color="#fff" />
           </span>
         </a>
       </div>
@@ -322,7 +322,8 @@ function SmallToolCard({ tool, onSave, isSaved }) {
 // --- Main Dashboard View
 export default function DashboardView() {
   const { user, saveToolToLibrary, setActiveView, savedTools } = useApp();
-  const [activeFilter, setActiveFilter] = useState('Semua');
+  const [activeFilter, setActiveFilter] = useState('All');
+  const [activePricingFilter, setActivePricingFilter] = useState('All');
   const [mounted, setMounted] = useState(false);
   const [showAllFeatured, setShowAllFeatured] = useState(false);
 
@@ -332,34 +333,53 @@ export default function DashboardView() {
   }, []);
 
   const firstName = user ? user.name.split(' ')[0] : 'Renisa';
-  const jurusan   = user ? user.jurusan : 'Teknik Informatika';
+  const jurusan   = user ? user.jurusan : 'Computer Science';
 
   const hour = new Date().getHours();
   const greetingMeta = hour >= 5 && hour < 11
-    ? { text: 'Selamat pagi', emoji: '☀️' }
+    ? { text: 'Good morning', emoji: '☀️' }
     : hour >= 11 && hour < 15
-      ? { text: 'Selamat siang', emoji: '🌤️' }
+      ? { text: 'Good afternoon', emoji: '🌤️' }
       : hour >= 15 && hour < 18
-        ? { text: 'Selamat sore', emoji: '🌅' }
-        : { text: 'Selamat malam', emoji: '🌙' };
+        ? { text: 'Good evening', emoji: '🌅' }
+        : { text: 'Good night', emoji: '🌙' };
 
   const locale = user && user.bahasa === 'English' ? 'en-US' : 'id-ID';
   const today = new Date().toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-  const FILTERS = ['Semua', 'Research', 'Writing', 'Coding', 'Data', 'Academic', 'Productivity'];
+  const FILTERS = ['All', 'Research', 'Writing', 'Coding', 'Data', 'Academic', 'Productivity'];
 
   const jurusanTools = mockTools.filter((tool) => {
     if (!jurusan) return true;
-    if (!Array.isArray(tool.jurusan) || tool.jurusan.length === 0) return true;
-    return tool.jurusan.includes('Semua') || tool.jurusan.includes(jurusan);
+    if (!Array.isArray(tool.major) || tool.major.length === 0) return true;
+    return tool.major.includes('All') || tool.major.includes(jurusan);
   });
   const baseTools = jurusanTools.length ? jurusanTools : mockTools;
 
-  const featuredTools = baseTools;
-  const visibleFeaturedTools = showAllFeatured ? featuredTools : featuredTools.slice(0, 6);
-  const filteredTools = activeFilter === 'Semua'
+  const pricingCounts = {
+    All: baseTools.length,
+    free: baseTools.filter(t => t.pricingType === 'free').length,
+    freemium: baseTools.filter(t => t.pricingType === 'freemium').length,
+    paid: baseTools.filter(t => t.pricingType === 'paid').length,
+  };
+
+  const PRICING_FILTERS = [
+    { key: 'All', label: 'All Pricing', count: pricingCounts.All, activeBg: 'var(--color-primary)', color: '#6C47FF' },
+    { key: 'free', label: 'Free', count: pricingCounts.free, activeBg: '#047857', color: '#047857', icon: 'check' },
+    { key: 'freemium', label: 'Freemium', count: pricingCounts.freemium, activeBg: '#6C47FF', color: '#6C47FF', icon: 'sparkles' },
+    { key: 'paid', label: 'Paid', count: pricingCounts.paid, activeBg: '#DC2626', color: '#DC2626', icon: 'warning' },
+  ];
+
+  const featuredTools = activePricingFilter === 'All'
     ? baseTools
-    : baseTools.filter(t => t.category === activeFilter);
+    : baseTools.filter(t => t.pricingType === activePricingFilter);
+  const visibleFeaturedTools = showAllFeatured ? featuredTools : featuredTools.slice(0, 6);
+  
+  const filteredTools = baseTools.filter(t => {
+    const matchCategory = activeFilter === 'All' || t.category === activeFilter;
+    const matchPricing = activePricingFilter === 'All' || t.pricingType === activePricingFilter;
+    return matchCategory && matchPricing;
+  });
   const savedToolNames = new Set(savedTools.map((tool) => tool.name.toLowerCase()));
 
   const handleReplayTour = () => {
@@ -386,10 +406,10 @@ export default function DashboardView() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 28, fontWeight: 700, color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
-            {greetingMeta.text}, <strong>{firstName}</strong>! <span role="img" aria-label="sapaan waktu">{greetingMeta.emoji}</span>
+            {greetingMeta.text}, <strong>{firstName}</strong>! <span role="img" aria-label="time greeting">{greetingMeta.emoji}</span>
           </h1>
           <p style={{ margin: '8px 0 0', fontSize: 14, color: '#6B7280' }}>
-            Dipilihkan khusus untuk <strong>{jurusan}</strong> kamu.
+            Handpicked for your <strong>{jurusan}</strong> major.
           </p>
         </div>
         <div style={{ textAlign: 'right' }}>
@@ -399,18 +419,18 @@ export default function DashboardView() {
             background: 'var(--color-secondary-light)', color: 'var(--color-secondary)',
             padding: '0 10px', height: 24, borderRadius: 12,
           }}>
-            <AppIcon name="refresh" size={12} /> Diperbarui otomatis setiap hari
+            <AppIcon name="refresh" size={12} /> Auto-updated daily
           </span>
         </div>
       </div>
 
-      {/* UI/UX Fix: Step 7 — Display as many choices as possible (grid vs scroll). Drop-down untuk sorting meminimalisir pencarian manual. Survei: 52,5% kesulitan temukan referensi tersimpan. */}
+      {/* UI/UX Fix: Step 7 — Display as many choices as possible (grid vs scroll). Drop-down for sorting minimizes manual search. Survey: 52.5% difficulty finding saved references. */}
       {/* -- Featured Tools (responsive grid) */}
       <section data-tour="dashboard-featured-tools" style={{ marginBottom: 32 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <AppIcon name="flame" size={18} />
-            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--color-text-secondary)' }}>Tools Pilihan Hari Ini</h2>
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--color-text-secondary)' }}>Today's Featured Tools</h2>
             <span style={{
               fontSize: 12,
               fontWeight: 600,
@@ -422,7 +442,7 @@ export default function DashboardView() {
               display: 'inline-flex',
               alignItems: 'center',
             }}>
-              Untuk {jurusan}
+              For {jurusan}
             </span>
           </div>
           <button
@@ -431,7 +451,7 @@ export default function DashboardView() {
             onClick={handleReplayTour}
             style={{ padding: '0 12px', height: 44, fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 6 }}
           >
-            <AppIcon name="sparkles" size={12} /> Mulai Tutorial
+            <AppIcon name="sparkles" size={12} /> Start Tutorial
           </button>
         </div>
         {visibleFeaturedTools.length > 0 ? (
@@ -448,17 +468,17 @@ export default function DashboardView() {
         ) : (
           <div className="card" style={{ padding: 24, textAlign: 'center' }}>
             <p style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700, color: 'var(--color-text-primary)' }}>
-              Belum ada rekomendasi tools baru hari ini. Cek kembali besok!
+              No new tool recommendations today. Check back tomorrow!
             </p>
             <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--color-text-secondary)' }}>
-              Sementara itu, jelajahi tools yang sudah kamu simpan di Library.
+              In the meantime, explore tools you've already saved to your Library.
             </p>
             <button
               type="button"
               onClick={() => setActiveView('library')}
               style={{ border: 'none', background: 'transparent', color: 'var(--color-primary)', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
             >
-              Buka Library →
+              Open Library →
             </button>
           </div>
         )}
@@ -469,36 +489,84 @@ export default function DashboardView() {
               onClick={() => setShowAllFeatured(true)}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, height: 44 }}
             >
-              Lihat Semua <AppIcon name="arrow-right" size={14} />
+              View All <AppIcon name="arrow-right" size={14} />
             </button>
           </div>
         )}
       </section>
 
-      {/* -- Filter Tabs */}
-      <div className="dashboard-filter-tabs" style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', position: 'sticky', top: 0, zIndex: 2, background: 'var(--color-bg)', padding: '8px 0 16px' }}>
-        {FILTERS.map(f => (
-          <button
-            key={f}
-            onClick={() => setActiveFilter(f)}
-            style={{
-              padding: '8px 16px', borderRadius: 999, fontSize: 13, fontWeight: 600,
-              cursor: 'pointer', border: 'none', transition: 'all 0.2s',
-              background: activeFilter === f ? 'var(--color-primary)' : 'var(--color-surface)',
-              color: activeFilter === f ? '#fff' : 'var(--color-text-secondary)',
-              boxShadow: activeFilter === f ? '0 2px 8px rgba(108,99,255,0.3)' : '0 1px 4px rgba(0,0,0,0.07)',
-            }}
-          >
-            {f}
-          </button>
-        ))}
+      {/* -- Filter Control Area: Category & Pricing */}
+      <div style={{ position: 'sticky', top: 0, zIndex: 2, background: 'var(--color-bg)', padding: '8px 0 16px', marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {/* Category Tabs */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text-secondary)', minWidth: 70 }}>Category:</span>
+          <div className="dashboard-filter-tabs" style={{ display: 'flex', gap: 6, flexWrap: 'wrap', flex: 1 }}>
+            {FILTERS.map(f => (
+              <button
+                key={f}
+                onClick={() => setActiveFilter(f)}
+                style={{
+                  padding: '6px 14px', borderRadius: 999, fontSize: 13, fontWeight: 600,
+                  cursor: 'pointer', border: 'none', transition: 'all 0.2s',
+                  background: activeFilter === f ? 'var(--color-primary)' : 'var(--color-surface)',
+                  color: activeFilter === f ? '#fff' : 'var(--color-text-secondary)',
+                  boxShadow: activeFilter === f ? '0 2px 8px rgba(108,99,255,0.3)' : '0 1px 4px rgba(0,0,0,0.07)',
+                }}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Pricing Tabs */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text-secondary)', minWidth: 70 }}>Pricing:</span>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', flex: 1 }}>
+            {PRICING_FILTERS.map(p => {
+              const isSelected = activePricingFilter === p.key;
+              return (
+                <button
+                  key={p.key}
+                  onClick={() => setActivePricingFilter(p.key)}
+                  style={{
+                    padding: '6px 14px', borderRadius: 999, fontSize: 13, fontWeight: 600,
+                    cursor: 'pointer', transition: 'all 0.2s',
+                    border: isSelected ? 'none' : `1px solid ${p.color}40`,
+                    background: isSelected ? p.activeBg : 'var(--color-surface)',
+                    color: isSelected ? '#fff' : 'var(--color-text-primary)',
+                    boxShadow: isSelected ? '0 2px 8px rgba(0,0,0,0.15)' : '0 1px 4px rgba(0,0,0,0.05)',
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                  }}
+                >
+                  {p.icon && (
+                    <span aria-hidden="true" style={{ display: 'flex' }}>
+                      <AppIcon name={p.icon} size={14} color={isSelected ? '#fff' : p.color} />
+                    </span>
+                  )}
+                  {p.label}
+                  <span style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    padding: '1px 6px',
+                    borderRadius: 999,
+                    background: isSelected ? 'rgba(255,255,255,0.25)' : `${p.color}18`,
+                    color: isSelected ? '#fff' : p.color,
+                  }}>
+                    {p.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* -- All Tools Grid */}
       <section style={{ marginBottom: 32 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
           <AppIcon name="news" size={18} />
-          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--color-text-secondary)' }}>Semua Tools Hari Ini</h2>
+          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--color-text-secondary)' }}>All Tools Today</h2>
           <span style={{
             fontSize: 12, fontWeight: 600, background: 'var(--color-primary-light)',
             color: 'var(--color-primary)', padding: '0 10px', height: 24, borderRadius: 12, display: 'inline-flex', alignItems: 'center',
@@ -519,7 +587,7 @@ export default function DashboardView() {
         {filteredTools.length === 0 && (
           <div style={{ textAlign: 'center', padding: '32px 24px', color: 'var(--color-text-secondary)' }}>
             <span style={{ display: 'inline-flex' }}><AppIcon name="search" size={36} /></span>
-            <p>Tidak ada tool untuk kategori ini.</p>
+            <p>No tools found for the selected category and pricing filter.</p>
           </div>
         )}
       </section>
@@ -533,9 +601,9 @@ export default function DashboardView() {
       }}>
         <span style={{ display: 'flex', flexShrink: 0 }}><AppIcon name="lamp" size={28} /></span>
         <div style={{ flex: 1 }}>
-          <p style={{ margin: 0, fontWeight: 600, fontSize: 14, color: 'var(--color-text-secondary)' }}>Tips Produktivitas Hari Ini</p>
+          <p style={{ margin: 0, fontWeight: 600, fontSize: 14, color: 'var(--color-text-secondary)' }}>Today's Productivity Tip</p>
           <p style={{ margin: '8px 0 0', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
-            Coba ceritakan tugasmu ke Leva: <em>"Bantu aku buat literature review topik X untuk jurusan {jurusan}"</em> dan Leva akan otomatis memecahnya jadi langkah-langkah kecil plus merekomendasikan tools terbaik!
+            Try telling Leva about your task: <em>"Help me write a literature review on topic X for my {jurusan} major"</em> and Leva will automatically break it into small steps plus recommend the best tools!
           </p>
         </div>
         <button
@@ -543,7 +611,7 @@ export default function DashboardView() {
           onClick={() => setActiveView('chat')}
           style={{ flexShrink: 0, whiteSpace: 'nowrap', height: 44, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 6 }}
         >
-          Coba Sekarang <AppIcon name="arrow-right" size={14} color="#fff" />
+          Try Now <AppIcon name="arrow-right" size={14} color="#fff" />
         </button>
       </div>
     </div>

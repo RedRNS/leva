@@ -3,24 +3,24 @@ import { useApp } from '../context/AppContext';
 import AppIcon from '../components/AppIcon';
 import { playSoundEffect } from '../utils/sound';
 
-const JURUSAN_OPTIONS = [
-  'Teknik Informatika',
-  'Sistem Informasi',
-  'Teknik Elektro',
-  'Teknik Sipil',
-  'Teknik Mesin',
-  'Manajemen',
-  'Akuntansi',
-  'Ilmu Komunikasi',
-  'Administrasi Bisnis',
-  'Matematika',
-  'Fisika',
-  'Kimia',
-  'Biologi',
-  'Hukum',
-  'Psikologi',
-  'Pendidikan',
-  'Sosiologi',
+const MAJOR_OPTIONS = [
+  'Computer Science',
+  'Information Systems',
+  'Electrical Engineering',
+  'Civil Engineering',
+  'Mechanical Engineering',
+  'Management',
+  'Accounting',
+  'Communication Studies',
+  'Business Administration',
+  'Mathematics',
+  'Physics',
+  'Chemistry',
+  'Biology',
+  'Law',
+  'Psychology',
+  'Education',
+  'Sociology',
 ];
 
 const SEMESTER_OPTIONS = Array.from({ length: 8 }, (_, i) => `${i + 1}`);
@@ -32,12 +32,12 @@ export default function OnboardingView() {
   const [errors, setErrors] = useState({});
   const [stepAnimationClass, setStepAnimationClass] = useState('');
   const [showStep3Confetti, setShowStep3Confetti] = useState(false);
-  const [jurusanQuery, setJurusanQuery] = useState('');
-  const [isJurusanOpen, setIsJurusanOpen] = useState(false);
-  const [jurusanHighlightIndex, setJurusanHighlightIndex] = useState(-1);
+  const [majorQuery, setMajorQuery] = useState('');
+  const [isMajorOpen, setIsMajorOpen] = useState(false);
+  const [majorHighlightIndex, setMajorHighlightIndex] = useState(-1);
   const nameInputRef = useRef(null);
-  const jurusanBoxRef = useRef(null);
-  const jurusanInputRef = useRef(null);
+  const majorBoxRef = useRef(null);
+  const majorInputRef = useRef(null);
   const semesterChipRefs = useRef([]);
   const bahasaToggleRefs = useRef([]);
 
@@ -55,26 +55,26 @@ export default function OnboardingView() {
     []
   );
 
-  const filteredJurusan = useMemo(() => {
-    const normalizedQuery = jurusanQuery.trim().toLowerCase();
-    if (!normalizedQuery) return JURUSAN_OPTIONS;
-    return JURUSAN_OPTIONS.filter((option) => option.toLowerCase().includes(normalizedQuery));
-  }, [jurusanQuery]);
+  const filteredMajors = useMemo(() => {
+    const normalizedQuery = majorQuery.trim().toLowerCase();
+    if (!normalizedQuery) return MAJOR_OPTIONS;
+    return MAJOR_OPTIONS.filter((option) => option.toLowerCase().includes(normalizedQuery));
+  }, [majorQuery]);
 
   useEffect(() => {
     if (!form.jurusan) {
-      setJurusanQuery('');
+      setMajorQuery('');
       return;
     }
 
-    setJurusanQuery(form.jurusan);
+    setMajorQuery(form.jurusan);
   }, [form.jurusan]);
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
-      if (!jurusanBoxRef.current?.contains(event.target)) {
-        setIsJurusanOpen(false);
-        setJurusanHighlightIndex(-1);
+      if (!majorBoxRef.current?.contains(event.target)) {
+        setIsMajorOpen(false);
+        setMajorHighlightIndex(-1);
       }
     };
 
@@ -99,7 +99,7 @@ export default function OnboardingView() {
       return;
     }
 
-    /* UI/UX Fix: Step 6 — Output device speaker (sound feedback) untuk positive reinforcement. Micro-animations memberikan reward psikologis, mendukung habit loop. 47,5% user bekerja larut malam — dopamine hit kecil membantu. */
+    /* UI/UX Fix: Step 6 — Speaker output device (sound feedback) for positive reinforcement. Micro-animations provide psychological rewards, supporting the habit loop. 47.5% of users work late at night — small dopamine hits help. */
     if (soundEnabled) playSoundEffect('chime');
     setShowStep3Confetti(true);
 
@@ -109,8 +109,8 @@ export default function OnboardingView() {
 
   useEffect(() => {
     const handleGlobalEscape = () => {
-      setIsJurusanOpen(false);
-      setJurusanHighlightIndex(-1);
+      setIsMajorOpen(false);
+      setMajorHighlightIndex(-1);
     };
 
     window.addEventListener('leva:escape', handleGlobalEscape);
@@ -122,58 +122,58 @@ export default function OnboardingView() {
     setErrors(e => ({ ...e, [key]: '' }));
   };
 
-  const selectJurusan = (jurusan) => {
-    update('jurusan', jurusan);
-    setJurusanQuery(jurusan);
-    setIsJurusanOpen(false);
-    setJurusanHighlightIndex(-1);
+  const selectMajor = (major) => {
+    update('jurusan', major);
+    setMajorQuery(major);
+    setIsMajorOpen(false);
+    setMajorHighlightIndex(-1);
   };
 
-  const clearJurusan = () => {
+  const clearMajor = () => {
     update('jurusan', '');
-    setJurusanQuery('');
-    setIsJurusanOpen(false);
-    setJurusanHighlightIndex(-1);
-    jurusanInputRef.current?.focus();
+    setMajorQuery('');
+    setIsMajorOpen(false);
+    setMajorHighlightIndex(-1);
+    majorInputRef.current?.focus();
   };
 
-  const handleJurusanTyping = (value) => {
-    setJurusanQuery(value);
-    setIsJurusanOpen(true);
-    setJurusanHighlightIndex(0);
+  const handleMajorTyping = (value) => {
+    setMajorQuery(value);
+    setIsMajorOpen(true);
+    setMajorHighlightIndex(0);
     setErrors((prev) => ({ ...prev, jurusan: '' }));
     setForm((prev) => ({ ...prev, jurusan: prev.jurusan.toLowerCase() === value.trim().toLowerCase() ? prev.jurusan : '' }));
   };
 
-  const handleJurusanKeyDown = (event) => {
-    if (!isJurusanOpen && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
-      setIsJurusanOpen(true);
-      setJurusanHighlightIndex(0);
+  const handleMajorKeyDown = (event) => {
+    if (!isMajorOpen && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+      setIsMajorOpen(true);
+      setMajorHighlightIndex(0);
       event.preventDefault();
       return;
     }
 
-    if (event.key === 'ArrowDown' && filteredJurusan.length > 0) {
+    if (event.key === 'ArrowDown' && filteredMajors.length > 0) {
       event.preventDefault();
-      setJurusanHighlightIndex((prev) => Math.min(prev + 1, filteredJurusan.length - 1));
+      setMajorHighlightIndex((prev) => Math.min(prev + 1, filteredMajors.length - 1));
       return;
     }
 
-    if (event.key === 'ArrowUp' && filteredJurusan.length > 0) {
+    if (event.key === 'ArrowUp' && filteredMajors.length > 0) {
       event.preventDefault();
-      setJurusanHighlightIndex((prev) => Math.max(prev - 1, 0));
+      setMajorHighlightIndex((prev) => Math.max(prev - 1, 0));
       return;
     }
 
-    if (event.key === 'Enter' && isJurusanOpen && jurusanHighlightIndex >= 0 && filteredJurusan[jurusanHighlightIndex]) {
+    if (event.key === 'Enter' && isMajorOpen && majorHighlightIndex >= 0 && filteredMajors[majorHighlightIndex]) {
       event.preventDefault();
-      selectJurusan(filteredJurusan[jurusanHighlightIndex]);
+      selectMajor(filteredMajors[majorHighlightIndex]);
       return;
     }
 
     if (event.key === 'Escape') {
-      setIsJurusanOpen(false);
-      setJurusanHighlightIndex(-1);
+      setIsMajorOpen(false);
+      setMajorHighlightIndex(-1);
     }
   };
 
@@ -226,7 +226,7 @@ export default function OnboardingView() {
 
   const validateStep1 = () => {
     if (!form.name.trim()) {
-      setErrors((prev) => ({ ...prev, name: 'Nama tidak boleh kosong. Silakan isi nama lengkapmu untuk melanjutkan.' }));
+      setErrors((prev) => ({ ...prev, name: 'Name cannot be empty. Please enter your full name to continue.' }));
       nameInputRef.current?.focus();
       return false;
     }
@@ -236,8 +236,8 @@ export default function OnboardingView() {
 
   const validateStep2 = () => {
     const e = {};
-    if (!form.jurusan)  e.jurusan  = 'Silakan pilih jurusanmu terlebih dahulu.';
-    if (!form.semester) e.semester = 'Silakan pilih semestermu.';
+    if (!form.jurusan)  e.jurusan  = 'Please select your major first.';
+    if (!form.semester) e.semester = 'Please select your semester.';
     if (Object.keys(e).length) { setErrors(e); return false; }
     return true;
   };
@@ -260,7 +260,7 @@ export default function OnboardingView() {
   };
 
   const handleGoogleContinue = () => {
-    showToast('Fitur Google Sign-In segera hadir!', 'info');
+    showToast('Google Sign-In coming soon!', 'info');
   };
 
   const handleStart = () => {
@@ -296,9 +296,9 @@ export default function OnboardingView() {
   const isStep1Complete = form.name.trim().length > 0;
   const isStep2Complete = Boolean(form.jurusan && form.semester);
   const STEP_DOT_TOOLTIP = {
-    1: '1. Nama',
-    2: '2. Info Akademik',
-    3: '3. Konfirmasi',
+    1: '1. Name',
+    2: '2. Academic Info',
+    3: '3. Confirmation',
   };
 
   return (
@@ -338,7 +338,7 @@ export default function OnboardingView() {
             Your Cognitive Lever for Academic Excellence
           </p>
           <p style={{ margin: '4px 0 0', fontSize: 12, color: '#6B7280', fontWeight: 600 }}>
-            Asisten Akademik Cerdasmu
+            Your Smart Academic Assistant
           </p>
         </div>
 
@@ -363,21 +363,21 @@ export default function OnboardingView() {
           ))}
         </div>
         <p style={{ margin: '0 0 16px', textAlign: 'center', fontSize: 12, color: 'var(--color-text-peripheral)' }}>
-          Step {step} dari 3
+          Step {step} of 3
         </p>
 
         {/* --- STEP 1 --- */}
         {step === 1 && (
           <div>
             <h2 style={{ margin: '0 0 8px', fontSize: 24, fontWeight: 700, textAlign: 'center', color: '#111827' }}>
-              Hei! Perkenalkan dirimu dulu
+              Hey! Introduce yourself first
             </h2>
             <p style={{ margin: '0 0 24px', fontSize: 14, color: '#6B7280', textAlign: 'center' }}>
-              Leva butuh sedikit info untuk mempersonalisasi pengalaman belajarmu.
+              Leva needs a little info to personalize your learning experience.
             </p>
 
             <label style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)', display: 'block', marginBottom: 4 }}>
-              Nama lengkap kamu
+              Your full name
             </label>
             <input
               ref={nameInputRef}
@@ -386,7 +386,7 @@ export default function OnboardingView() {
               value={form.name}
               onChange={e => update('name', e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleNext()}
-              placeholder="Contoh: Renisa Assyifa Putri"
+              placeholder="e.g., Renisa Assyifa Putri"
               aria-invalid={!!errors.name}
               style={inputStyle(!!errors.name)}
               onFocus={(event) => {
@@ -419,13 +419,13 @@ export default function OnboardingView() {
               }}
             >
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                Lanjut <AppIcon name="arrow-right" size={14} color="#fff" />
+                Continue <AppIcon name="arrow-right" size={14} color="#fff" />
               </span>
             </button>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '16px 0' }}>
               <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
-              <span style={{ fontSize: 12, color: 'var(--color-text-secondary)', fontWeight: 600 }}>atau</span>
+              <span style={{ fontSize: 12, color: 'var(--color-text-secondary)', fontWeight: 600 }}>or</span>
               <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
             </div>
 
@@ -457,7 +457,7 @@ export default function OnboardingView() {
                 event.currentTarget.style.background = '#fff';
               }}
             >
-              <AppIcon name="google" size={14} /> Atau lanjutkan dengan Google
+              <AppIcon name="google" size={14} /> Or continue with Google
             </button>
           </div>
         )}
@@ -466,45 +466,45 @@ export default function OnboardingView() {
         {step === 2 && (
           <div>
             <h2 style={{ margin: '0 0 8px', fontSize: 24, fontWeight: 700, textAlign: 'center', color: '#111827' }}>
-              Info Akademik Kamu
+              Your Academic Info
             </h2>
             <p style={{ margin: '0 0 24px', fontSize: 14, color: '#6B7280', textAlign: 'center' }}>
-              Ini membantu Leva merekomendasikan tools yang paling relevan untukmu.
+              This helps Leva recommend the most relevant tools for you.
             </p>
 
-            {/* Jurusan */}
-            <label style={{ fontSize: 14, fontWeight: 600, display: 'block', marginBottom: 4 }}>Jurusan</label>
-            {/* UI/UX Fix: Step 7 — Combo box menggabungkan text entry + list box untuk pencarian cepat. Radio button grid menampilkan semua opsi sekaligus (display as many choices as possible). */}
-            <div ref={jurusanBoxRef} style={{ position: 'relative' }}>
+            {/* Major */}
+            <label style={{ fontSize: 14, fontWeight: 600, display: 'block', marginBottom: 4 }}>Major</label>
+            {/* UI/UX Fix: Step 7 — Combo box combines text entry + list box for quick search. Radio button grid displays all options at once (display as many choices as possible). */}
+            <div ref={majorBoxRef} style={{ position: 'relative' }}>
               <input
-                ref={jurusanInputRef}
-                value={jurusanQuery}
-                onChange={(event) => handleJurusanTyping(event.target.value)}
+                ref={majorInputRef}
+                value={majorQuery}
+                onChange={(event) => handleMajorTyping(event.target.value)}
                 onFocus={() => {
-                  setIsJurusanOpen(true);
-                  setJurusanHighlightIndex(filteredJurusan.length ? 0 : -1);
+                  setIsMajorOpen(true);
+                  setMajorHighlightIndex(filteredMajors.length ? 0 : -1);
                 }}
-                onKeyDown={handleJurusanKeyDown}
+                onKeyDown={handleMajorKeyDown}
                 onBlur={(event) => {
-                  if (!jurusanBoxRef.current?.contains(event.relatedTarget)) {
-                    setIsJurusanOpen(false);
-                    setJurusanHighlightIndex(-1);
+                  if (!majorBoxRef.current?.contains(event.relatedTarget)) {
+                    setIsMajorOpen(false);
+                    setMajorHighlightIndex(-1);
                   }
                 }}
-                placeholder="Ketik atau pilih jurusan..."
+                placeholder="Type or select your major..."
                 role="combobox"
-                aria-expanded={isJurusanOpen}
-                aria-controls="jurusan-combobox-list"
+                aria-expanded={isMajorOpen}
+                aria-controls="major-combobox-list"
                 aria-autocomplete="list"
                 aria-invalid={!!errors.jurusan}
                 style={{ ...inputStyle(!!errors.jurusan), paddingRight: 64 }}
               />
 
-              {jurusanQuery && (
+              {majorQuery && (
                 <button
                   type="button"
-                  onClick={clearJurusan}
-                  aria-label="Reset jurusan"
+                  onClick={clearMajor}
+                  aria-label="Reset major"
                   style={{
                     position: 'absolute',
                     right: 32,
@@ -526,9 +526,9 @@ export default function OnboardingView() {
                 <AppIcon name="chevron-down" size={14} />
               </span>
 
-              {isJurusanOpen && (
+              {isMajorOpen && (
                 <div
-                  id="jurusan-combobox-list"
+                  id="major-combobox-list"
                   role="listbox"
                   style={{
                     position: 'absolute',
@@ -544,21 +544,21 @@ export default function OnboardingView() {
                     zIndex: 20,
                   }}
                 >
-                  {filteredJurusan.length === 0 ? (
+                  {filteredMajors.length === 0 ? (
                     <div style={{ padding: '10px 12px', fontSize: 13, color: 'var(--color-text-secondary)' }}>
-                      Jurusan tidak ditemukan
+                      Major not found
                     </div>
                   ) : (
-                    filteredJurusan.map((jurusan, index) => {
-                      const isHighlighted = index === jurusanHighlightIndex;
+                    filteredMajors.map((major, index) => {
+                      const isHighlighted = index === majorHighlightIndex;
                       return (
                         <button
-                          key={jurusan}
+                          key={major}
                           type="button"
                           role="option"
-                          aria-selected={form.jurusan === jurusan}
+                          aria-selected={form.jurusan === major}
                           onMouseDown={(event) => event.preventDefault()}
-                          onClick={() => selectJurusan(jurusan)}
+                          onClick={() => selectMajor(major)}
                           style={{
                             width: '100%',
                             textAlign: 'left',
@@ -570,7 +570,7 @@ export default function OnboardingView() {
                             fontSize: 14,
                           }}
                         >
-                          {jurusan}
+                          {major}
                         </button>
                       );
                     })
@@ -579,13 +579,13 @@ export default function OnboardingView() {
               )}
             </div>
             <p style={{ margin: '8px 0 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>
-              Ketik nama jurusanmu untuk mencari lebih cepat
+              Type your major name to search faster
             </p>
             {errText('jurusan')}
 
             {/* Semester */}
             <label style={{ fontSize: 14, fontWeight: 600, display: 'block', margin: '16px 0 8px' }}>Semester</label>
-            <div className="onboarding-semester-grid" role="radiogroup" aria-label="Pilih semester" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+            <div className="onboarding-semester-grid" role="radiogroup" aria-label="Select semester" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
               {SEMESTER_OPTIONS.map((semester, index) => {
                 const isSelected = form.semester === semester;
                 return (
@@ -623,23 +623,23 @@ export default function OnboardingView() {
               })}
             </div>
             <p style={{ margin: '8px 0 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>
-              Sistem perkuliahan S1 reguler di Indonesia = 8 semester
+              Regular undergraduate program = 8 semesters
             </p>
             {errText('semester')}
 
-            {/* Bahasa */}
+            {/* Language */}
             <label style={{ fontSize: 14, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 8, margin: '16px 0 8px' }}>
-              <span>Preferensi Bahasa</span>
+              <span>Language Preference</span>
               <span
                 className="tooltip-host tooltip-help-icon"
-                data-tooltip="Bahasa antarmuka dan rekomendasi tools Leva akan mengikuti pilihan ini."
-                aria-label="Info preferensi bahasa"
+                data-tooltip="Leva's interface and tool recommendations will follow this preference."
+                aria-label="Language preference info"
                 tabIndex={0}
               >
                 ?
               </span>
             </label>
-            <div role="radiogroup" aria-label="Preferensi bahasa" style={{ display: 'flex', gap: 8 }}>
+            <div role="radiogroup" aria-label="Language preference" style={{ display: 'flex', gap: 8 }}>
               {['Indonesia', 'English'].map((lang, index) => (
                 <button
                   key={lang}
@@ -663,13 +663,13 @@ export default function OnboardingView() {
               ))}
             </div>
             <p style={{ margin: '8px 0 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>
-              Bahasa antarmuka dan rekomendasi tools Leva akan mengikuti pilihan ini.
+              Leva's interface and tool recommendations will follow this preference.
             </p>
 
             <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
               <button className="btn-secondary" onClick={() => goToPreviousStep(1)} style={{ flex: 1, height: 48, borderRadius: 8 }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                  <AppIcon name="arrow-left" size={14} /> Kembali
+                  <AppIcon name="arrow-left" size={14} /> Back
                 </span>
               </button>
               <button
@@ -697,7 +697,7 @@ export default function OnboardingView() {
                 }}
               >
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                  Lanjut <AppIcon name="arrow-right" size={14} color="#fff" />
+                  Continue <AppIcon name="arrow-right" size={14} color="#fff" />
                 </span>
               </button>
             </div>
@@ -714,11 +714,11 @@ export default function OnboardingView() {
             </div>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}><AppIcon name="graduation-cap" size={48} /></div>
             <h2 style={{ margin: '0 0 16px', fontSize: 24, fontWeight: 700, lineHeight: 1.35, color: '#111827' }}>
-              Siap, <span style={{ color: 'var(--color-primary)' }}>{form.name.split(' ')[0]}</span>!
+              All set, <span style={{ color: 'var(--color-primary)' }}>{form.name.split(' ')[0]}</span>!
             </h2>
             <p style={{ margin: '0 0 24px', fontSize: 14, color: '#6B7280', lineHeight: 1.6 }}>
-              Kamu mahasiswa jurusan <strong>{form.jurusan}</strong>, semester <strong>{form.semester}</strong>.<br />
-              Leva siap jadi asisten akademikmu. Mulai jelajahi sekarang!
+              You're a <strong>{form.jurusan}</strong> student, semester <strong>{form.semester}</strong>.<br />
+              Leva is ready to be your academic assistant. Start exploring now!
             </p>
 
             {/* Summary card */}
@@ -727,10 +727,10 @@ export default function OnboardingView() {
               padding: 16, marginBottom: 24, textAlign: 'left',
             }}>
               {[
-                { label: 'Nama',    val: form.name },
-                { label: 'Jurusan', val: form.jurusan },
+                { label: 'Name',    val: form.name },
+                { label: 'Major', val: form.jurusan },
                 { label: 'Semester',val: `Semester ${form.semester}` },
-                { label: 'Bahasa',  val: form.bahasa },
+                { label: 'Language',  val: form.bahasa },
               ].map((row, index, arr) => (
                 <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, padding: '12px 0', borderBottom: index < arr.length - 1 ? '1px solid #E5E7EB' : 'none' }}>
                   <span style={{ color: '#6B7280' }}>{row.label}</span>
@@ -740,7 +740,7 @@ export default function OnboardingView() {
             </div>
 
             <p style={{ margin: '0 0 16px', fontSize: 12, color: '#6B7280', fontStyle: 'italic' }}>
-              Tenang, data ini bisa kamu ubah kapan saja di halaman Profil.
+              Don't worry, you can change this anytime on the Profile page.
             </p>
 
             <button
@@ -755,7 +755,7 @@ export default function OnboardingView() {
               onMouseLeave={e => e.currentTarget.style.background = 'var(--color-secondary)'}
             >
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                Masuk ke Dashboard <AppIcon name="arrow-right" size={14} color="#fff" />
+                Go to Dashboard <AppIcon name="arrow-right" size={14} color="#fff" />
               </span>
             </button>
 
