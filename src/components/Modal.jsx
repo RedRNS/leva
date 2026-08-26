@@ -55,7 +55,7 @@ export default function Modal({ title, onClose, children }) {
       }
     };
 
-    /* UI/UX Fix: Step 7 — Dialog konfirmasi harus menjadi overlay global agar fokus aksi destruktif tidak terpotong area scroll/layout parent. */
+    /* UI/UX Fix: Step 7 — Confirmation dialog must be a global overlay so focus on destructive actions isn't clipped by parent scroll/layout area. */
     document.body.style.overflow = 'hidden';
     window.addEventListener('keydown', handleKeyDown);
     setInitialFocus();
@@ -106,7 +106,7 @@ export default function Modal({ title, onClose, children }) {
           </h2>
           <button
             onClick={onClose}
-            aria-label="Tutup dialog"
+            aria-label="Close dialog"
             style={{
               background: 'var(--color-bg)', border: 'none', borderRadius: 8,
               padding: '6px 10px', cursor: 'pointer', fontSize: 16,

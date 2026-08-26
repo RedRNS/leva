@@ -26,11 +26,11 @@ function AppInner() {
 
   useEffect(() => {
     const pageTitleByView = {
-      onboarding: 'Leva — Perkenalan',
+      onboarding: 'Leva — Introduction',
       dashboard: 'Leva — Dashboard',
       chat: 'Leva — Chat & Task',
       library: 'Leva — Library',
-      profile: 'Leva — Profil & Pengaturan',
+      profile: 'Leva — Profile & Settings',
     };
 
     document.title = pageTitleByView[activeView] || 'Leva';
@@ -61,7 +61,7 @@ function AppInner() {
 
       const key = event.key.toLowerCase();
 
-      /* UI/UX Fix: Step 6 — Keyboard shortcuts minimalisir pergerakan tangan (47,5% user larut malam). Step 7 — Disabled state = "work the way it looks". Quick prompts kontekstual mengurangi 35,6% keluhan AI terlalu generik. */
+      /* UI/UX Fix: Step 6 — Keyboard shortcuts minimize hand movement (47.5% late-night users). Step 7 — Disabled state = "work the way it looks". Contextual quick prompts reduce 35.6% of complaints about AI being too generic. */
       if ((event.ctrlKey || event.metaKey) && key === 'k') {
         event.preventDefault();
         window.dispatchEvent(new CustomEvent('leva:focus-sidebar-search'));
@@ -98,7 +98,7 @@ function AppInner() {
       { id: 'dashboard', icon: 'home', label: 'Home' },
       { id: 'chat', icon: 'message', label: 'Chat' },
       { id: 'library', icon: 'library', label: 'Library' },
-      { id: 'profile', icon: 'user', label: 'Profil' },
+      { id: 'profile', icon: 'user', label: 'Profile' },
     ];
     return (
       <div

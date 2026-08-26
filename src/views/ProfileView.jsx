@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import AppIcon from '../components/AppIcon';
 import Modal from '../components/Modal';
 
-const JURUSAN_OPTIONS = ['Teknik Informatika', 'Sistem Informasi', 'Hukum', 'Kedokteran', 'Psikologi', 'Bisnis & Manajemen', 'Desain Komunikasi Visual', 'Akuntansi', 'Ilmu Komunikasi', 'Lainnya'];
+const JURUSAN_OPTIONS = ['Computer Science', 'Information Systems', 'Law', 'Medicine', 'Psychology', 'Business & Management', 'Visual Communication Design', 'Accounting', 'Communication Studies', 'Other'];
 const SEMESTER_OPTIONS = Array.from({ length: 8 }, (_, i) => `${i + 1}`);
 
 export default function ProfileView() {
@@ -35,17 +35,17 @@ export default function ProfileView() {
   const [hoveredStat, setHoveredStat] = useState('');
   const [form, setForm] = useState({
     name: user?.name ?? 'Renisa Mahardika',
-    jurusan: user?.jurusan ?? 'Teknik Informatika',
+    jurusan: user?.jurusan ?? 'Computer Science',
     semester: user?.semester ?? '6',
-    bahasa: user?.bahasa ?? 'Indonesia',
+    bahasa: user?.bahasa ?? 'English',
   });
   const [errors, setErrors] = useState({});
   const initialProfileRef = useRef({
     form: {
       name: user?.name ?? 'Renisa Mahardika',
-      jurusan: user?.jurusan ?? 'Teknik Informatika',
+      jurusan: user?.jurusan ?? 'Computer Science',
       semester: user?.semester ?? '6',
-      bahasa: user?.bahasa ?? 'Indonesia',
+      bahasa: user?.bahasa ?? 'English',
     },
     notifications: {
       soundEnabled,
@@ -68,9 +68,9 @@ export default function ProfileView() {
     const trimmedName = form.name.trim();
 
     if (!trimmedName) {
-      nextErrors.name = 'Nama tidak boleh kosong.';
+      nextErrors.name = 'Name cannot be empty.';
     } else if (trimmedName.length < 2) {
-      nextErrors.name = 'Nama minimal 2 karakter.';
+      nextErrors.name = 'Name must be at least 2 characters.';
     }
 
     setErrors(nextErrors);
@@ -82,7 +82,7 @@ export default function ProfileView() {
 
     try {
       if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-        throw new Error('Koneksi tidak tersedia');
+        throw new Error('Connection not available');
       }
 
       const sanitizedForm = { ...form, name: form.name.trim() };
@@ -101,10 +101,10 @@ export default function ProfileView() {
 
       setErrors({});
       setEditMode(false);
-      showToast('Perubahan profil berhasil disimpan!', 'success');
+      showToast('Profile changes saved successfully!', 'success');
       return true;
     } catch {
-      showToast('Perubahan gagal disimpan. Periksa koneksimu dan coba lagi.', 'error');
+      showToast('Failed to save changes. Check your connection and try again.', 'error');
       return false;
     }
   };
@@ -164,13 +164,13 @@ export default function ProfileView() {
   };
 
   const handleStatCardClick = (label) => {
-    if (label === 'Tasks Selesai') {
+    if (label === 'Tasks Completed') {
       setActiveTask(null);
       setActiveView('chat');
       return;
     }
 
-    if (label === 'Tools Tersimpan') {
+    if (label === 'Saved Tools') {
       setActiveView('library');
     }
   };
@@ -322,12 +322,12 @@ export default function ProfileView() {
   const Toggle = ({ val, set, label }) => (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
       <span style={{ fontSize: 11, fontWeight: 700, color: val ? 'var(--color-primary)' : 'var(--color-text-secondary)' }}>
-        {val ? 'Aktif' : 'Nonaktif'}
+        {val ? 'Active' : 'Inactive'}
       </span>
       <button
         type="button"
         aria-pressed={val}
-        aria-label={label ? `Ubah ${label}` : 'Ubah status'}
+        aria-label={label ? `Toggle ${label}` : 'Toggle status'}
         onClick={() => set(v => !v)}
         style={{
           width: 44,
@@ -352,7 +352,7 @@ export default function ProfileView() {
     <div className="main-content view-enter" style={{ padding: '32px 36px', maxWidth: 680, margin: '0 auto' }}>
 
       <h1 style={{ margin: '0 0 24px', fontSize: 24, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <AppIcon name="user" size={22} /> Profil & Pengaturan
+        <AppIcon name="user" size={22} /> Profile &amp; Settings
       </h1>
 
       {/* -- Profile Card */}
@@ -387,7 +387,7 @@ export default function ProfileView() {
           <div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
               <div>
-                <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 5 }}>Nama Lengkap</label>
+                <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 5 }}>Full Name</label>
                 <input
                   value={form.name}
                   onChange={e => update('name', e.target.value)}
@@ -406,13 +406,13 @@ export default function ProfileView() {
               </div>
             </div>
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 5 }}>Jurusan</label>
+              <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 5 }}>Major</label>
               <select value={form.jurusan} onChange={e => update('jurusan', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
                 {JURUSAN_OPTIONS.map(j => <option key={j} value={j}>{j}</option>)}
               </select>
             </div>
             <div style={{ marginBottom: 20 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 8 }}>Preferensi Bahasa</label>
+              <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 8 }}>Language Preference</label>
               <div style={{ display: 'flex', gap: 10 }}>
                 {['Indonesia', 'English'].map(lang => (
                   <button key={lang} onClick={() => update('bahasa', lang)} style={{ flex: 1, padding: '9px', borderRadius: 9, fontSize: 13, fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s', background: form.bahasa === lang ? 'var(--color-primary)' : 'var(--color-bg)', color: form.bahasa === lang ? '#fff' : 'var(--color-text-secondary)', border: `1.5px solid ${form.bahasa === lang ? 'var(--color-primary)' : 'var(--color-border)'}` }}>
@@ -422,8 +422,8 @@ export default function ProfileView() {
               </div>
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
-              <button className="btn-ghost" onClick={resetProfileDraft} style={{ flex: 1 }}>Batal</button>
-              <button className="btn-primary" onClick={handleSave} style={{ flex: 2, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}><AppIcon name="check" size={14} color="#fff" /> Simpan Perubahan</button>
+              <button className="btn-ghost" onClick={resetProfileDraft} style={{ flex: 1 }}>Cancel</button>
+              <button className="btn-primary" onClick={handleSave} style={{ flex: 2, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}><AppIcon name="check" size={14} color="#fff" /> Save Changes</button>
             </div>
           </div>
         )}
@@ -431,40 +431,40 @@ export default function ProfileView() {
 
       {/* -- Stats Card */}
       <div className="card" style={{ padding: '20px 24px', marginBottom: 20 }}>
-        <h3 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}><AppIcon name="dashboard" size={16} /> Statistik Penggunaan</h3>
+        <h3 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}><AppIcon name="dashboard" size={16} /> Usage Statistics</h3>
         <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
           {[
             {
               icon: 'clipboard',
               val: 12,
-              label: 'Tasks Selesai',
-              aria: 'Lihat riwayat task di Chat dan Task',
-              trendText: '↑ 3 dari minggu lalu',
+              label: 'Tasks Completed',
+              aria: 'View task history in Chat and Task',
+              trendText: '↑ 3 from last week',
               trendColor: '#065F46',
               graphic: 'sparkline',
             },
             {
               icon: 'book',
               val: savedTools.length,
-              label: 'Tools Tersimpan',
-              aria: 'Lihat daftar tools tersimpan di Library',
-              trendText: '↓ 1 dari minggu lalu',
+              label: 'Saved Tools',
+              aria: 'View saved tools list in Library',
+              trendText: '↓ 1 from last week',
               trendColor: '#991B1B',
               graphic: 'sparkline',
             },
             {
               icon: 'calendar-clock',
               val: 8,
-              label: 'Hari Berturut-turut',
-              aria: 'Lihat progres streak harian',
-              trendText: '- sama dengan minggu lalu',
+              label: 'Consecutive Days',
+              aria: 'View daily streak progress',
+              trendText: '- same as last week',
               trendColor: '#6B7280',
               graphic: 'streak',
             },
           ].map(stat => {
             const isHovered = hoveredStat === stat.label;
-            const statTooltipText = stat.label === 'Hari Berturut-turut'
-              ? 'Jumlah hari berturut-turut kamu menggunakan Leva.'
+            const statTooltipText = stat.label === 'Consecutive Days'
+              ? "Number of consecutive days you've used Leva."
               : '';
             const baseStyle = {
               textAlign: 'center',
@@ -496,7 +496,7 @@ export default function ProfileView() {
                 </div>
                 {stat.graphic === 'sparkline' && (
                   <div style={{ display: 'flex', justifyContent: 'center', marginTop: 6 }}>
-                    <svg width="50" height="16" viewBox="0 0 50 16" role="img" aria-label="Tren 4 minggu">
+                    <svg width="50" height="16" viewBox="0 0 50 16" role="img" aria-label="4-week trend">
                       <rect x="0" y="6" width="6" height="10" rx="2" fill="#6C47FF" />
                       <rect x="10" y="2" width="6" height="14" rx="2" fill="#6C47FF" />
                       <rect x="20" y="8" width="6" height="8" rx="2" fill="#6C47FF" />
@@ -507,7 +507,7 @@ export default function ProfileView() {
                 )}
                 {stat.graphic === 'streak' && (
                   <div style={{ display: 'flex', justifyContent: 'center', marginTop: 6 }}>
-                    <svg width="50" height="16" viewBox="0 0 50 16" role="img" aria-label="Streak 7 hari">
+                    <svg width="50" height="16" viewBox="0 0 50 16" role="img" aria-label="7-day streak">
                       {[0, 1, 2, 3, 4, 5, 6].map((i) => (
                         <rect key={i} x={i * 7} y="2" width="6" height="12" rx="2" fill={i < 5 ? '#6C47FF' : '#E2E8F0'} />
                       ))}
@@ -525,12 +525,12 @@ export default function ProfileView() {
 
       {/* -- Notification Preferences */}
       <div className="card" style={{ padding: '20px 24px', marginBottom: 20 }}>
-        <h3 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}><AppIcon name="bell" size={16} /> Preferensi Notifikasi</h3>
+        <h3 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}><AppIcon name="bell" size={16} /> Notification Preferences</h3>
         {[
-          { label: 'Efek Suara', sub: 'Putar suara saat menyelesaikan tugas', val: soundEnabled, set: setSoundEnabled },
-          { label: 'Pengingat Harian', sub: 'Ingatkan tools AI baru setiap hari', val: notif1, set: setNotif1 },
-          { label: 'Tips Penggunaan Mingguan', sub: 'Tips produktivitas setiap minggu', val: notif2, set: setNotif2 },
-          { label: 'Pembaruan Tool Baru', sub: 'Tools baru sesuai jurusanmu', val: notif3, set: setNotif3 },
+          { label: 'Sound Effects', sub: 'Play sound when completing tasks', val: soundEnabled, set: setSoundEnabled },
+          { label: 'Daily Reminders', sub: 'Remind about new AI tools daily', val: notif1, set: setNotif1 },
+          { label: 'Weekly Usage Tips', sub: 'Productivity tips every week', val: notif2, set: setNotif2 },
+          { label: 'New Tool Updates', sub: 'New tools tailored for your major', val: notif3, set: setNotif3 },
         ].map((item, i, arr) => (
           <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--color-border)' : 'none' }}>
             <div>
@@ -544,10 +544,10 @@ export default function ProfileView() {
 
       {/* -- Display Preferences */}
       <div className="card" style={{ padding: '20px 24px', marginBottom: 20 }}>
-        <h3 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}><AppIcon name="moon" size={16} /> Tampilan & Aksesibilitas</h3>
+        <h3 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}><AppIcon name="moon" size={16} /> Display &amp; Accessibility</h3>
         {[
-          { label: 'Dark Mode', sub: 'Mode gelap untuk fokus malam hari', val: darkMode, set: setDarkMode },
-          { label: 'Kontras Tinggi', sub: 'Tingkatkan kontras untuk aksesibilitas', val: highContrast, set: setHighContrast },
+          { label: 'Dark Mode', sub: 'Dark mode for late night focus', val: darkMode, set: setDarkMode },
+          { label: 'High Contrast', sub: 'Increase contrast for accessibility', val: highContrast, set: setHighContrast },
         ].map((item, i, arr) => (
           <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--color-border)' : 'none' }}>
             <div>
@@ -560,7 +560,7 @@ export default function ProfileView() {
       </div>
 
       {/* -- Session Actions */}
-      {/* UI/UX Fix: Step 6 — Hotspot harus mudah dikenali (accordion). Step 7 — Aksi destruktif (reset) butuh safeguard. Statistik clickable meningkatkan keterhubungan antar layar. */}
+      {/* UI/UX Fix: Step 6 — Hotspots must be easily recognizable (accordion). Step 7 — Destructive actions (reset) need safeguard. Clickable statistics improve cross-screen connectivity. */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         <button
           onClick={handleLogoutOnly}
@@ -572,7 +572,7 @@ export default function ProfileView() {
           onMouseEnter={e => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.color = 'var(--color-text-primary)'; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.color = 'var(--color-text-secondary)'; }}
         >
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><AppIcon name="logout" size={14} /> Keluar</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><AppIcon name="logout" size={14} /> Log Out</span>
         </button>
 
         <button
@@ -590,13 +590,13 @@ export default function ProfileView() {
       </div>
 
       {showResetModal && (
-        <Modal title="Reset Semua Data?" onClose={() => setShowResetModal(false)}>
+        <Modal title="Reset All Data?" onClose={() => setShowResetModal(false)}>
           <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
-            Semua data termasuk riwayat tugas, library tools, dan pengaturan akan dihapus. Aksi ini tidak bisa dibatalkan.
+            All data including task history, tool library, and settings will be deleted. This action cannot be undone.
           </p>
           <div style={{ display: 'flex', gap: 10 }}>
             <button className="btn-ghost" onClick={() => setShowResetModal(false)} style={{ flex: 1 }}>
-              Batal
+              Cancel
             </button>
             <button
               onClick={handleResetDemo}
@@ -612,32 +612,32 @@ export default function ProfileView() {
                 padding: '10px 16px',
               }}
             >
-              Hapus Semua Data
+              Delete All Data
             </button>
           </div>
         </Modal>
       )}
 
       {showJurusanChangeModal && (
-        <Modal title="Ubah Jurusan?" onClose={handleCancelJurusanChange}>
+        <Modal title="Change Major?" onClose={handleCancelJurusanChange}>
           <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
-            Mengubah jurusan dari <strong>{initialProfileRef.current.form.jurusan}</strong> ke <strong>{form.jurusan}</strong> akan memengaruhi rekomendasi tools di Dashboard. Lanjutkan?
+            Changing major from <strong>{initialProfileRef.current.form.jurusan}</strong> to <strong>{form.jurusan}</strong> will affect tool recommendations on the Dashboard. Continue?
           </p>
           <div style={{ display: 'flex', gap: 10 }}>
             <button className="btn-ghost" onClick={handleCancelJurusanChange} style={{ flex: 1 }}>
-              Batal
+              Cancel
             </button>
             <button className="btn-primary" onClick={handleConfirmJurusanChange} style={{ flex: 1 }}>
-              Ya, Ubah
+              Yes, Change
             </button>
           </div>
         </Modal>
       )}
 
       {showUnsavedModal && (
-        <Modal title="Perubahan Belum Disimpan" onClose={closeUnsavedModal}>
+        <Modal title="Unsaved Changes" onClose={closeUnsavedModal}>
           <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
-            Kamu memiliki perubahan profil/notifikasi yang belum disimpan. Apa yang ingin kamu lakukan?
+            You have unsaved profile or notification changes. What would you like to do?
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 8 }}>
             <button
@@ -655,7 +655,7 @@ export default function ProfileView() {
                 cursor: 'pointer',
               }}
             >
-              Simpan & Lanjut
+              Save &amp; Continue
             </button>
             <button
               type="button"
@@ -672,10 +672,10 @@ export default function ProfileView() {
                 cursor: 'pointer',
               }}
             >
-              Buang Perubahan
+              Discard Changes
             </button>
             <button className="btn-ghost" onClick={closeUnsavedModal}>
-              Batal
+              Cancel
             </button>
           </div>
         </Modal>

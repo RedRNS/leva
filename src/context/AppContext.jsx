@@ -74,34 +74,33 @@ export function AppProvider({ children }) {
   const saveToolToLibrary = (tool) => {
     const already = savedTools.find((t) => t.name === tool.name);
     if (already) {
-      showToast(`Tool ${tool.name} sudah ada di Library-mu.`, 'info');
+      showToast(`Tool ${tool.name} is already in your Library.`, 'info');
       return false;
     }
 
-    /* UI/UX Fix: Step 6 — Output device harus memberi respond jelas ke aksi user. Step 7 — Aksi destruktif (hapus) harus ada safeguard/konfirmasi. Survei: 52,5% user sulit temukan referensi. */
     const newEntry = {
       id: Date.now(),
       name: tool.name,
       url: tool.url,
-      priority: 'Sangat Bagus',
+      priority: 'Very Good',
       priorityKey: 'good',
       pricingType: tool.pricingType ?? 'freemium',
       category: tool.category,
       keywords: [tool.category.toLowerCase(), 'ai tools', 'leva'],
-      savedAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+      savedAt: new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
       savedTimestamp: Date.now(),
       description: tool.desc || '',
       rating: tool.rating ?? 0,
       note: '',
     };
     setSavedTools((prev) => [newEntry, ...prev]);
-    showToast(`${tool.name} berhasil disimpan ke Library!`, 'success');
+    showToast(`${tool.name} saved to Library!`, 'success');
     return true;
   };
 
   const removeToolFromLibrary = (toolId) => {
     setSavedTools((prev) => prev.filter((t) => t.id !== toolId));
-    showToast('Tool berhasil dihapus', 'info');
+    showToast('Tool removed successfully', 'info');
   };
 
   return (

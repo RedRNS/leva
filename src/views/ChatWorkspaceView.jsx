@@ -21,23 +21,23 @@ const tagStyle = (cat) => {
 const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024;
 const ACCEPTED_ATTACHMENT_EXTENSIONS = ['pdf', 'txt'];
 const QUICK_PROMPTS_BY_JURUSAN = {
-  teknikInformatika: ['Bantu susun skripsi', 'Debug kode Python', 'Review jurnal IEEE', 'Belajar framework baru'],
-  ilmuKomunikasi: ['Analisis konten media', 'Susun proposal riset', 'Review teori komunikasi', 'Buat kerangka esai'],
-  default: ['Bantu susun skripsi', 'Cara belajar coding dari 0', 'Buat essay etika profesi', 'Analisis jurnal terkait'],
+  computerScience: ['Help me plan my thesis', 'Debug Python code', 'Review IEEE journal', 'Learn a new framework'],
+  communicationStudies: ['Analyze media content', 'Draft research proposal', 'Review communication theory', 'Create essay outline'],
+  default: ['Help me plan my thesis', 'How to learn coding from scratch', 'Write a professional ethics essay', 'Analyze related journals'],
 };
 
 const getFileExtension = (fileName = '') => fileName.split('.').pop()?.toLowerCase() || '';
 
 const validateAttachment = (file) => {
-  if (!file) return 'Pilih file terlebih dahulu.';
+  if (!file) return 'Please select a file first.';
   if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
     const fileSizeMb = (file.size / (1024 * 1024)).toFixed(1);
-    return `Ukuran file maksimal 10MB. File kamu ${fileSizeMb}MB. Coba kompres terlebih dahulu.`;
+    return `Maximum file size is 10MB. Your file is ${fileSizeMb}MB. Try compressing it first.`;
   }
 
   const extension = getFileExtension(file.name);
   if (!ACCEPTED_ATTACHMENT_EXTENSIONS.includes(extension)) {
-    return 'Format file belum didukung. Saat ini Leva menerima file PDF dan TXT.';
+    return 'File format not supported. Currently Leva accepts PDF and TXT files.';
   }
 
   return '';
@@ -46,13 +46,13 @@ const validateAttachment = (file) => {
 const getGeneratedTaskTitle = (text, jurusan, attachedFile) => {
   const raw = text.toLowerCase();
 
-  if (attachedFile?.name) return `Memecah Tugas dari ${attachedFile.name}`;
-  if (raw.includes('skripsi')) return `Menyusun Skripsi ${jurusan}`;
-  if (raw.includes('essay')) return `Menulis Essay ${jurusan}`;
-  if (raw.includes('koding') || raw.includes('coding')) return 'Belajar Koding dari Nol';
-  if (raw.includes('resume')) return 'Membuat Resume Magang';
+  if (attachedFile?.name) return `Breaking Down Task from ${attachedFile.name}`;
+  if (raw.includes('skripsi') || raw.includes('thesis')) return `Writing Thesis — ${jurusan}`;
+  if (raw.includes('essay')) return `Writing Essay — ${jurusan}`;
+  if (raw.includes('koding') || raw.includes('coding')) return 'Learning Coding from Scratch';
+  if (raw.includes('resume')) return 'Creating Internship Resume';
 
-  return 'Menyelesaikan Tugas Akademik';
+  return 'Completing Academic Task';
 };
 
 const getEstimatedProcessingMs = ({ text, attachedFile }) => {
@@ -63,18 +63,18 @@ const getEstimatedProcessingMs = ({ text, attachedFile }) => {
 };
 
 const getProcessingMessage = (elapsedSeconds) => {
-  if (elapsedSeconds < 5) return 'Leva sedang membaca tugasmu...';
-  if (elapsedSeconds < 15) return 'Memecah tugas menjadi langkah-langkah kecil...';
-  if (elapsedSeconds < 30) return 'Mencari tools AI yang paling relevan...';
-  return 'Hampir selesai, mohon tunggu sebentar...';
+  if (elapsedSeconds < 5) return 'Leva is reading your task...';
+  if (elapsedSeconds < 15) return 'Breaking down task into small steps...';
+  if (elapsedSeconds < 30) return 'Finding the most relevant AI tools...';
+  return 'Almost done, please wait a moment...';
 };
 
-const RAG_ERROR_MESSAGE = 'Maaf, Leva belum bisa memproses tugasmu saat ini. Coba ulangi atau tulis ulang dengan deskripsi yang lebih spesifik.';
+const RAG_ERROR_MESSAGE = 'Sorry, Leva cannot process your task right now. Please try again or rewrite with a more specific description.';
 
 // --- Subtask Card
 function SubTaskCard({ task, index, isExpanded, onToggle, onMarkDone, onSaveTool, isDoneJustNow }) {
   const tools = mockTools.filter(t => task.toolIds.includes(t.id));
-  const ts = tagStyle(task.kategori);
+  const ts = tagStyle(task.category);
   const [isHeaderHovered, setIsHeaderHovered] = useState(false);
   const isDone = task.status === 'done';
   const isActive = !isDone && isExpanded;
@@ -101,7 +101,7 @@ function SubTaskCard({ task, index, isExpanded, onToggle, onMarkDone, onSaveTool
         role="button"
         tabIndex={0}
         aria-expanded={isExpanded}
-        /* UI/UX Fix: Step 6 — Hotspot harus mudah dikenali (accordion). Step 7 — Aksi destruktif (reset) butuh safeguard. Statistik clickable meningkatkan keterhubungan antar layar. */
+        /* UI/UX Fix: Step 6 — Hotspot must be easily recognizable (accordion). Step 7 — Destructive actions (reset) need safeguard. Clickable statistics improve cross-screen connectivity. */
         style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: 16, cursor: 'pointer',
@@ -112,7 +112,7 @@ function SubTaskCard({ task, index, isExpanded, onToggle, onMarkDone, onSaveTool
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {/* Step number */}
           <div
-            aria-label={isDone ? 'Subtask selesai' : isActive ? 'Subtask aktif' : 'Subtask belum dimulai'}
+            aria-label={isDone ? 'Subtask completed' : isActive ? 'Subtask active' : 'Subtask not started'}
             style={{
               width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
               background: isDone ? 'var(--color-secondary)' : isActive ? 'var(--color-primary-light)' : 'transparent',
@@ -130,11 +130,11 @@ function SubTaskCard({ task, index, isExpanded, onToggle, onMarkDone, onSaveTool
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {task.status === 'done'
-            ? <span className={`badge-done ${isDoneJustNow ? 'badge-done-pop' : ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>Selesai <AppIcon name="check" size={12} color="var(--color-secondary)" /></span>
+            ? <span className={`badge-done ${isDoneJustNow ? 'badge-done-pop' : ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>Done <AppIcon name="check" size={12} color="var(--color-secondary)" /></span>
             : (
               <span
                 className="badge-next tooltip-host"
-                data-tooltip="Lanjut ke subtask berikutnya"
+                data-tooltip="Continue to next subtask"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
               >
                 Next Section <AppIcon name="arrow-right" size={12} />
@@ -155,16 +155,16 @@ function SubTaskCard({ task, index, isExpanded, onToggle, onMarkDone, onSaveTool
           {/* Meta row */}
           <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
             <span style={{ fontSize: 12, fontWeight: 600, padding: '0 10px', height: 24, borderRadius: 12, display: 'inline-flex', alignItems: 'center', ...ts }}>
-              {task.kategori}
+              {task.category}
             </span>
             <span style={{ fontSize: 12, color: 'var(--color-text-secondary)', padding: '0 10px', height: 24, background: 'var(--color-bg)', borderRadius: 12, display: 'inline-flex', alignItems: 'center' }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}><AppIcon name="clock" size={12} /> {task.estimasi}</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}><AppIcon name="clock" size={12} /> {task.estimate}</span>
             </span>
           </div>
 
           {/* Description */}
           <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.7 }}>
-            {task.deskripsi}
+            {task.description}
           </p>
 
           {/* Action button */}
@@ -174,7 +174,7 @@ function SubTaskCard({ task, index, isExpanded, onToggle, onMarkDone, onSaveTool
               onClick={() => onMarkDone(task.id)}
               style={{ height: 40, padding: '0 16px', fontSize: 14, borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 8 }}
             >
-              <AppIcon name="check" size={14} color="#fff" /> Tandai Selesai
+              <AppIcon name="check" size={14} color="#fff" /> Mark as Done
             </button>
           ) : (
             <button
@@ -182,7 +182,7 @@ function SubTaskCard({ task, index, isExpanded, onToggle, onMarkDone, onSaveTool
               onClick={() => onMarkDone(task.id)}
               style={{ height: 40, padding: '0 16px', fontSize: 14, borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 8 }}
             >
-              <AppIcon name="undo" size={14} /> Tandai Ulang
+              <AppIcon name="undo" size={14} /> Unmark
             </button>
           )}
         </div>
@@ -214,10 +214,10 @@ function RightPanel({ task, isOpen, onSave, savedToolNames, onCopyTips, copiedTi
     >
       {!isOpen || !task ? null : (
         <>
-          {/* Rekomendasi Tools */}
+          {/* Tool Recommendations */}
           <div style={{ marginBottom: 24 }}>
             <p style={{ margin: '0 0 16px', fontSize: 12, fontWeight: 700, color: 'var(--color-text-secondary)', letterSpacing: '0.07em' }}>
-              REKOMENDASI TOOLS AI
+              AI TOOL RECOMMENDATIONS
             </p>
             {tools.map(tool => {
               const isSaved = savedToolNames.has(tool.name.toLowerCase());
@@ -235,7 +235,7 @@ function RightPanel({ task, isOpen, onSave, savedToolNames, onCopyTips, copiedTi
                   </div>
                   <a
                     href={`https://${tool.url}`} target="_blank" rel="noreferrer"
-                    aria-label={`Buka ${tool.name}`}
+                    aria-label={`Open ${tool.name}`}
                     style={{ display: 'flex', color: 'var(--color-primary)', textDecoration: 'none' }}
                   ><AppIcon name="external-link" size={14} /></a>
                 </div>
@@ -263,14 +263,14 @@ function RightPanel({ task, isOpen, onSave, savedToolNames, onCopyTips, copiedTi
                   }}
                 >
                   <AppIcon name="bookmark" size={16} color="var(--color-primary)" filled={isSaved} aria-hidden="true" />
-                  {isSaved ? 'Tersimpan ✓' : 'Simpan ke Library'}
+                  {isSaved ? 'Saved ✓' : 'Save to Library'}
                 </button>
               </div>
               );
             })}
           </div>
 
-          {/* Tips Penggunaan */}
+          {/* Usage Tips */}
           <div style={{
             background: '#FEF3C7',
             border: '1px solid #FDE68A',
@@ -280,7 +280,7 @@ function RightPanel({ task, isOpen, onSave, savedToolNames, onCopyTips, copiedTi
             <p style={{ margin: '0 0 8px', fontSize: 12, fontWeight: 700, color: '#92400E' }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                 <AppIcon name="lamp" size={14} color="#92400E" aria-hidden="true" />
-                CARA MENGGUNAKAN TOOL INI
+                HOW TO USE THIS TOOL
               </span>
             </p>
             <p style={{ margin: 0, fontSize: 12, color: '#78350F', lineHeight: 1.6 }}>
@@ -295,7 +295,7 @@ function RightPanel({ task, isOpen, onSave, savedToolNames, onCopyTips, copiedTi
               style={{ fontSize: 12, padding: '8px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
               onClick={() => onCopyTips(task)}
             >
-              <AppIcon name="copy" size={12} /> {copiedTipsTaskId === task.id ? '✓ Tersalin!' : 'Salin Prompt Tips'}
+              <AppIcon name="copy" size={12} /> {copiedTipsTaskId === task.id ? '✓ Copied!' : 'Copy Prompt Tips'}
             </button>
           </div>
         </>
@@ -318,7 +318,7 @@ export default function ChatWorkspaceView() {
     soundEnabled,
   } = useApp();
   const firstName = user ? user.name.split(' ')[0] : 'Renisa';
-  const jurusan   = user ? user.jurusan : 'Teknik Informatika';
+  const jurusan   = user ? user.jurusan : 'Computer Science';
 
   const [inputVal, setInputVal]         = useState('');
   const [taskTitle, setTaskTitle]       = useState('');
@@ -395,7 +395,7 @@ export default function ChatWorkspaceView() {
   // Load from history task if set
   useEffect(() => {
     if (activeTask) {
-      setTaskTitle('Menyusun Skripsi ' + jurusan);
+      setTaskTitle('Writing Thesis — ' + jurusan);
       setSubTasks(mockSubTasks.map(t => ({ ...t })));
       setExpandedId(1);
     } else {
@@ -488,7 +488,7 @@ export default function ChatWorkspaceView() {
   }, [isLoading]);
 
   const applyAttachment = (file) => {
-    /* UI/UX Fix: Step 6 — Menambah alternatif input device (file upload + drag-drop) untuk mengurangi beban kognitif memecah tugas. Survei: 76,3% user habiskan >15 menit sebelum mulai kerja. */
+    /* UI/UX Fix: Step 6 — Adding alternative input device (file upload + drag-drop) to reduce cognitive load of breaking down tasks. Survey: 76.3% users spend >15 minutes before starting work. */
     const validationError = validateAttachment(file);
 
     if (validationError) {
@@ -503,7 +503,7 @@ export default function ChatWorkspaceView() {
   };
 
   const removeAttachment = () => {
-    /* UI/UX Fix: Step 7 — Kontrol screen-based berupa chip removable membantu pengguna mengecek dan mengoreksi file sebelum mengirim. */
+    /* UI/UX Fix: Step 7 — Screen-based control with removable chip helps users check and correct files before sending. */
     setAttachedFile(null);
     setFileError('');
   };
@@ -685,7 +685,7 @@ export default function ChatWorkspaceView() {
       })
     );
 
-    /* UI/UX Fix: Step 6 — Output device speaker (sound feedback) untuk positive reinforcement. Micro-animations memberikan reward psikologis, mendukung habit loop. 47,5% user bekerja larut malam — dopamine hit kecil membantu. */
+    /* UI/UX Fix: Step 6 — Output device speaker (sound feedback) for positive reinforcement. Micro-animations provide psychological reward, supporting habit loop. 47.5% users work late at night — small dopamine hits help. */
     if (isMarkingDone && soundEnabled) {
       playSoundEffect('chime');
     }
@@ -705,7 +705,7 @@ export default function ChatWorkspaceView() {
     setFollowUpReply('');
     setTimeout(() => {
       setFollowUpReply(
-        `Untuk subtask "${subTasks.find(t => t.id === expandedId)?.title ?? 'ini'}", aku sarankan mulai dengan Perplexity AI - masukkan kata kunci jurusan kamu dan minta ia menganalisis tren topik 2024-2025. Ini jauh lebih efisien dibandingkan browsing manual di Google Scholar.`
+        `For the subtask "${subTasks.find(t => t.id === expandedId)?.title ?? 'this'}", I recommend starting with Perplexity AI — enter your major keywords and ask it to analyze topic trends from 2024-2025. This is far more efficient than manually browsing Google Scholar.`
       );
       setFollowUpVal('');
     }, 1200);
@@ -733,17 +733,17 @@ export default function ChatWorkspaceView() {
   const handleCopyTips = async (task) => {
     try {
       if (!navigator.clipboard?.writeText) {
-        throw new Error('Clipboard API tidak tersedia');
+        throw new Error('Clipboard API not available');
       }
 
       await navigator.clipboard.writeText(task.tips);
       setCopiedTipsTaskId(task.id);
-      showToast('Tersalin! Prompt tips berhasil disalin ke clipboard.', 'success');
+      showToast('Copied! Prompt tips successfully copied to clipboard.', 'success');
 
       if (copyResetTimerRef.current) clearTimeout(copyResetTimerRef.current);
       copyResetTimerRef.current = setTimeout(() => setCopiedTipsTaskId(null), 2000);
     } catch {
-      showToast('Gagal menyalin prompt tips.', 'error');
+      showToast('Failed to copy prompt tips.', 'error');
     }
   };
 
@@ -754,9 +754,9 @@ export default function ChatWorkspaceView() {
   const quickPromptChips = useMemo(() => {
     const normalizedJurusan = jurusan.trim().toLowerCase();
 
-    /* UI/UX Fix: Step 6 — Keyboard shortcuts minimalisir pergerakan tangan (47,5% user larut malam). Step 7 — Disabled state = "work the way it looks". Quick prompts kontekstual mengurangi 35,6% keluhan AI terlalu generik. */
-    if (normalizedJurusan.includes('teknik informatika')) return QUICK_PROMPTS_BY_JURUSAN.teknikInformatika;
-    if (normalizedJurusan.includes('ilmu komunikasi')) return QUICK_PROMPTS_BY_JURUSAN.ilmuKomunikasi;
+    /* UI/UX Fix: Step 6 — Keyboard shortcuts minimize hand movement (47.5% late-night users). Step 7 — Disabled state = "work the way it looks". Contextual quick prompts reduce 35.6% of complaints about AI being too generic. */
+    if (normalizedJurusan.includes('computer science')) return QUICK_PROMPTS_BY_JURUSAN.computerScience;
+    if (normalizedJurusan.includes('communication')) return QUICK_PROMPTS_BY_JURUSAN.communicationStudies;
 
     return QUICK_PROMPTS_BY_JURUSAN.default;
   }, [jurusan]);
@@ -817,15 +817,15 @@ export default function ChatWorkspaceView() {
                 <AppIcon name="sparkles" size={64} color="#6C47FF" className="sparkle-pulse" aria-hidden="true" />
               </div>
               <h2 style={{ margin: '0 0 8px', fontSize: 20, fontWeight: 700, textAlign: 'center', color: '#111827' }}>
-                Hei, {firstName}! Ceritakan tugasmu hari ini.
+                Hey, {firstName}! Tell us about your task today.
               </h2>
               <p style={{ margin: '0 0 24px', fontSize: 14, color: '#6B7280', textAlign: 'center', maxWidth: 400, lineHeight: 1.65 }}>
-                Leva akan memecahnya jadi langkah-langkah kecil dan merekomendasikan tools AI terbaik untukmu.
+                Leva will break it down into small steps and recommend the best AI tools for you.
               </p>
 
               {/* Main Input */}
               <div style={{ width: '100%', maxWidth: 560, position: 'relative' }}>
-                {/* UI/UX Fix: Step 6 — Filter file picker disiapkan untuk skenario dokumen tugas kampus yang paling umum dipakai user. */}
+                {/* UI/UX Fix: Step 6 — File picker filter prepared for the most common campus task document scenarios used by users. */}
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -847,7 +847,7 @@ export default function ChatWorkspaceView() {
                     <span>{attachedFile.name}</span>
                     <button
                       onClick={removeAttachment}
-                      aria-label="Hapus file"
+                      aria-label="Remove file"
                       style={{
                         border: 'none', background: 'transparent', color: 'var(--color-primary)',
                         cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center',
@@ -867,14 +867,14 @@ export default function ChatWorkspaceView() {
                     if (ragError) setRagError('');
                   }}
                   onKeyDown={e => {
-                    /* UI/UX Fix: Step 7 — Menyediakan kontrol keyboard (Enter/Ctrl+Enter) untuk efisiensi pada user laptop/desktop. */
+                    /* UI/UX Fix: Step 7 — Providing keyboard controls (Enter/Ctrl+Enter) for efficiency on laptop/desktop users. */
                     const shouldSend = e.key === 'Enter' && (e.ctrlKey || !e.shiftKey);
                     if (shouldSend && !isLoading) {
                       e.preventDefault();
                       handleSubmit();
                     }
                   }}
-                  placeholder="Contoh: aku mau bikin skripsi, atau bantu aku buat essay etika profesi..."
+                  placeholder="e.g., I want to write my thesis, or help me write a professional ethics essay..."
                   rows={3}
                   onDragEnter={handleDragEnter}
                   onDragOver={handleDragOver}
@@ -899,9 +899,9 @@ export default function ChatWorkspaceView() {
                 <button
                   onClick={handlePickAttachment}
                   disabled={isLoading}
-                  aria-label="Unggah file"
+                  aria-label="Upload file"
                   className="tooltip-host"
-                  data-tooltip="Lampirkan file PDF silabus atau dokumen tugasmu"
+                  data-tooltip="Attach your syllabus PDF or task document"
                   style={{
                     position: 'absolute', left: 16, bottom: 16,
                     background: 'transparent',
@@ -918,7 +918,7 @@ export default function ChatWorkspaceView() {
                 <button
                   onClick={handleSubmit}
                   disabled={isLoading || !canSendMessage || !!fileError}
-                  aria-label="Kirim pesan"
+                  aria-label="Send message"
                   style={{
                     position: 'absolute', right: 16, bottom: 16,
                     background: canSendMessage ? 'var(--color-primary)' : 'var(--color-border)',
@@ -941,7 +941,7 @@ export default function ChatWorkspaceView() {
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
                   >
-                    Lepaskan file di sini
+                    Drop file here
                   </div>
                 )}
               </div>
@@ -968,7 +968,7 @@ export default function ChatWorkspaceView() {
                         </span>
                       </p>
                       <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>
-                        (estimasi ~{estimatedProcessingSeconds} detik)
+                        (estimated ~{estimatedProcessingSeconds} seconds)
                       </p>
                     </div>
                   </div>
@@ -987,20 +987,20 @@ export default function ChatWorkspaceView() {
                     disabled={!lastSubmission || isLoading}
                     style={{ marginTop: 8, border: '1px solid #FCA5A5', background: '#fff', color: '#B91C1C', borderRadius: 8, fontSize: 12, fontWeight: 700, height: 40, padding: '0 16px', cursor: !lastSubmission || isLoading ? 'not-allowed' : 'pointer', opacity: !lastSubmission || isLoading ? 0.6 : 1 }}
                   >
-                    🔄 Coba Lagi
+                    🔄 Try Again
                   </button>
                 </div>
               )}
 
               {!isLoading && (
                 <p style={{ marginTop: 8, fontSize: 12, color: '#9CA3AF', textAlign: 'center' }}>
-                  Tekan Enter atau Ctrl+Enter untuk kirim
+                  Press Enter or Ctrl+Enter to send
                 </p>
               )}
 
               {/* Quick suggestions */}
               <p style={{ margin: '24px 0 8px', fontSize: 14, color: 'var(--color-text-secondary)' }}>
-                Atau coba salah satu contoh ini:
+                Or try one of these examples:
               </p>
               <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'nowrap', justifyContent: 'flex-start', overflowX: 'auto', paddingBottom: 8, width: '100%', maxWidth: 560 }}>
                 {quickPromptChips.map(s => (
@@ -1041,16 +1041,16 @@ export default function ChatWorkspaceView() {
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
                   <div>
-                    <p style={{ margin: '0 0 8px', fontSize: 12, opacity: 0.85, fontWeight: 600, letterSpacing: '0.08em' }}>TASK AKTIF</p>
+                    <p style={{ margin: '0 0 8px', fontSize: 12, opacity: 0.85, fontWeight: 600, letterSpacing: '0.08em' }}>ACTIVE TASK</p>
                     <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>{taskTitle}</h2>
                   </div>
                   <p style={{ margin: 0, fontSize: 12, opacity: 0.9 }}>
-                    {completedCount}/{subTasks.length} selesai ({progressPct}%)
+                    {completedCount}/{subTasks.length} completed ({progressPct}%)
                   </p>
                 </div>
                 <div
                   role="progressbar"
-                  aria-label="Progres task"
+                  aria-label="Task progress"
                   aria-valuemin={0}
                   aria-valuemax={100}
                   aria-valuenow={progressPct}
@@ -1108,7 +1108,7 @@ export default function ChatWorkspaceView() {
                     })}
                   </div>
                   <p style={{ margin: '12px 0 0', fontSize: 12, color: '#9CA3AF' }}>
-                    Langkah {activeStepIndex} dari {subTasks.length}
+                    Step {activeStepIndex} of {subTasks.length}
                   </p>
                 </div>
               )}
@@ -1133,9 +1133,9 @@ export default function ChatWorkspaceView() {
                   borderRadius: 16, padding: '24px', textAlign: 'center', marginTop: 16, color: '#fff',
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}><AppIcon name="check" size={40} color="#fff" /></div>
-                  <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700 }}>🎉 Task Selesai!</h3>
+                  <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700 }}>🎉 Task Complete!</h3>
                   <p style={{ margin: 0, fontSize: 14, opacity: 0.9 }}>
-                    Kamu berhasil menyelesaikan: {taskTitle}
+                    You successfully completed: {taskTitle}
                   </p>
                 </div>
               )}
@@ -1162,7 +1162,7 @@ export default function ChatWorkspaceView() {
                         handleFollowUp();
                       }
                     }}
-                    placeholder="Tanya lebih lanjut tentang task ini..."
+                    placeholder="Ask more about this task..."
                     rows={1}
                     style={{
                       flex: 1, padding: '10px 14px',
@@ -1177,8 +1177,8 @@ export default function ChatWorkspaceView() {
                     onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
                     onBlur={e  => e.target.style.borderColor = 'var(--color-border)'}
                   />
-                  <button className="btn-primary tooltip-host" data-tooltip="Kirim (Enter)" onClick={handleFollowUp} style={{ padding: '10px 18px', fontSize: 13 }}>
-                    Kirim
+                  <button className="btn-primary tooltip-host" data-tooltip="Send (Enter)" onClick={handleFollowUp} style={{ padding: '10px 18px', fontSize: 13 }}>
+                    Send
                   </button>
                 </div>
               </div>
@@ -1216,18 +1216,18 @@ export default function ChatWorkspaceView() {
             </div>
           )}
 
-          <div className="completion-card" role="dialog" aria-modal="true" aria-label="Semua subtask selesai" onClick={(event) => event.stopPropagation()}>
+          <div className="completion-card" role="dialog" aria-modal="true" aria-label="All subtasks completed" onClick={(event) => event.stopPropagation()}>
             <div className="completion-icon-wrap">
               <AppIcon name="check" size={44} color="#fff" />
             </div>
-            <h3 className="completion-title">🎉 Task Selesai!</h3>
-            <p className="completion-subtitle">Kamu berhasil menyelesaikan: {taskTitle}</p>
+            <h3 className="completion-title">🎉 Task Complete!</h3>
+            <p className="completion-subtitle">You successfully completed: {taskTitle}</p>
             <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
               <button ref={completionPrimaryActionRef} className="btn-primary" onClick={handleViewSummary} style={{ flex: 1 }}>
-                Lihat Ringkasan
+                View Summary
               </button>
               <button className="btn-ghost" onClick={handleStartNewTask} style={{ flex: 1 }}>
-                Kembali ke Chat
+                Back to Chat
               </button>
             </div>
           </div>
@@ -1235,9 +1235,9 @@ export default function ChatWorkspaceView() {
       )}
 
       {showLeaveDraftModal && (
-        <Modal title="Teks Belum Terkirim" onClose={handleStayInChat}>
+        <Modal title="Unsent Text" onClose={handleStayInChat}>
           <p style={{ margin: '0 0 18px', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
-            Kamu memiliki teks yang belum dikirim. Yakin ingin meninggalkan halaman?
+            You have unsent text. Are you sure you want to leave this page?
           </p>
           <div style={{ display: 'flex', gap: 10 }}>
             <button
@@ -1255,7 +1255,7 @@ export default function ChatWorkspaceView() {
                 cursor: 'pointer',
               }}
             >
-              Tetap di Sini
+              Stay Here
             </button>
             <button
               type="button"
@@ -1272,7 +1272,7 @@ export default function ChatWorkspaceView() {
                 cursor: 'pointer',
               }}
             >
-              Tinggalkan
+              Leave
             </button>
           </div>
         </Modal>

@@ -4,21 +4,21 @@ import { mockTools } from '../data/mockData';
 import Modal from '../components/Modal';
 import AppIcon from '../components/AppIcon';
 
-const PRIORITY_FILTERS = ['Semua', 'Prioritas Tinggi', 'Sangat Bagus', 'Coba Nanti'];
-const CATEGORY_FILTERS = ['Semua', 'Research', 'Writing', 'Coding', 'Data', 'Academic', 'Productivity'];
-const PRIORITY_OPTIONS = PRIORITY_FILTERS.filter((item) => item !== 'Semua');
+const PRIORITY_FILTERS = ['All', 'High Priority', 'Great Tool', 'Try Later'];
+const CATEGORY_FILTERS = ['All', 'Research', 'Writing', 'Coding', 'Data', 'Academic', 'Productivity'];
+const PRIORITY_OPTIONS = PRIORITY_FILTERS.filter((item) => item !== 'All');
 const SORT_OPTIONS = [
-  { value: 'latest', label: 'Terbaru disimpan' },
-  { value: 'oldest', label: 'Terlama disimpan' },
-  { value: 'rating', label: 'Rating tertinggi' },
+  { value: 'latest', label: 'Newest saved' },
+  { value: 'oldest', label: 'Oldest saved' },
+  { value: 'rating', label: 'Highest rating' },
   { value: 'az', label: 'A-Z' },
   { value: 'za', label: 'Z-A' },
 ];
 
 const PRIORITY_META = {
-  'Prioritas Tinggi': { key: 'high' },
-  'Sangat Bagus': { key: 'good' },
-  'Coba Nanti': { key: 'later' },
+  'High Priority': { key: 'high' },
+  'Great Tool': { key: 'good' },
+  'Try Later': { key: 'later' },
 };
 
 const INDONESIAN_MONTH_MAP = {
@@ -38,9 +38,9 @@ const INDONESIAN_MONTH_MAP = {
 
 const pricingMeta = (pricingType) => {
   const map = {
-    free: { label: 'Gratis', bg: '#047857', color: '#FFFFFF', icon: 'check' },
+    free: { label: 'Free', bg: '#047857', color: '#FFFFFF', icon: 'check' },
     freemium: { label: 'Freemium', bg: '#7C3AED', color: '#FFFFFF', icon: 'sparkles' },
-    paid: { label: 'Berbayar', bg: '#DC2626', color: '#FFFFFF', icon: 'warning' },
+    paid: { label: 'Paid', bg: '#DC2626', color: '#FFFFFF', icon: 'warning' },
     opensource: { label: 'Open Source', bg: '#1E40AF', color: '#FFFFFF', icon: 'link' },
   };
 
@@ -126,7 +126,7 @@ function SavedToolCard({ tool, onDelete }) {
           {tool.category}
         </span>
         <span style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>
-          Disimpan {tool.savedAt}
+          Saved {tool.savedAt}
         </span>
       </div>
 
@@ -161,7 +161,7 @@ function SavedToolCard({ tool, onDelete }) {
           }}
         >
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            Buka Tool <AppIcon name="external-link" size={14} color="#fff" />
+            Open Tool <AppIcon name="external-link" size={14} color="#fff" />
           </span>
         </a>
         <button
@@ -175,7 +175,7 @@ function SavedToolCard({ tool, onDelete }) {
           onMouseLeave={e => e.currentTarget.style.background = '#FFF5F5'}
         >
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            <AppIcon name="trash" size={14} /> Hapus
+            <AppIcon name="trash" size={14} /> Delete
           </span>
         </button>
       </div>
@@ -186,14 +186,14 @@ function SavedToolCard({ tool, onDelete }) {
 // Main Library View
 export default function LibraryView() {
   const { savedTools, setSavedTools, setActiveView, removeToolFromLibrary } = useApp();
-  const [priorityFilter, setPriorityFilter] = useState('Semua');
-  const [categoryFilter, setCategoryFilter] = useState('Semua');
+  const [priorityFilter, setPriorityFilter] = useState('All');
+  const [categoryFilter, setCategoryFilter] = useState('All');
   const [searchVal, setSearchVal] = useState('');
   const [debouncedSearchVal, setDebouncedSearchVal] = useState('');
   const [sortBy, setSortBy] = useState('latest');
   const [showAddModal, setShowAddModal] = useState(false);
   const [toolToDelete, setToolToDelete] = useState(null);
-  const [newTool, setNewTool] = useState({ name: '', url: '', note: '', category: 'Research', priority: 'Sangat Bagus' });
+  const [newTool, setNewTool] = useState({ name: '', url: '', note: '', category: 'Research', priority: 'Great Tool' });
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -221,8 +221,8 @@ export default function LibraryView() {
 
   const filtered = useMemo(() => {
     const base = savedTools.filter((tool) => {
-      const matchPriority = priorityFilter === 'Semua' || tool.priority === priorityFilter;
-      const matchCategory = categoryFilter === 'Semua' || tool.category === categoryFilter;
+      const matchPriority = priorityFilter === 'All' || tool.priority === priorityFilter;
+      const matchCategory = categoryFilter === 'All' || tool.category === categoryFilter;
 
       const searchableText = [
         tool.name,
@@ -236,7 +236,7 @@ export default function LibraryView() {
       return matchPriority && matchCategory && matchSearch;
     });
 
-    /* UI/UX Fix: Step 7 — Display as many choices as possible (grid vs scroll). Drop-down untuk sorting meminimalisir pencarian manual. Survei: 52,5% kesulitan temukan referensi tersimpan. */
+    /* UI/UX Fix: Step 7 — Display as many choices as possible (grid vs scroll). Drop-down for sorting minimizes manual search. Survey: 52.5% difficulty finding saved references. */
     const withMeta = base.map((tool, index) => ({
       ...tool,
       _timestamp: tool.savedTimestamp ?? parseSavedAtToTimestamp(tool.savedAt, 0),
@@ -257,7 +257,7 @@ export default function LibraryView() {
   }, [savedTools, priorityFilter, categoryFilter, debouncedSearchVal, sortBy, ratingByName, pricingByName]);
 
   const handleDeleteRequest = (tool) => {
-    /* UI/UX Fix: Step 6 — Output device harus memberi respond jelas ke aksi user. Step 7 — Aksi destruktif (hapus) harus ada safeguard/konfirmasi. Survei: 52,5% user sulit temukan referensi. */
+    /* UI/UX Fix: Step 6 — Output device must give clear response to user action. Step 7 — Destructive actions (delete) must have safeguard/confirmation. Survey: 52.5% users difficulty finding references. */
     setToolToDelete(tool);
   };
 
@@ -269,7 +269,7 @@ export default function LibraryView() {
 
   const handleAddTool = () => {
     if (!newTool.name.trim() || !newTool.url.trim()) return;
-    const priorityConfig = PRIORITY_META[newTool.priority] || PRIORITY_META['Sangat Bagus'];
+    const priorityConfig = PRIORITY_META[newTool.priority] || PRIORITY_META['Great Tool'];
     const entry = {
       id: Date.now(),
       name: newTool.name,
@@ -279,14 +279,14 @@ export default function LibraryView() {
       pricingType: 'freemium',
       category: newTool.category,
       keywords: [newTool.category.toLowerCase(), 'ai tools', 'manual'],
-      savedAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+      savedAt: new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
       savedTimestamp: Date.now(),
       description: '',
       rating: 0,
       note: newTool.note,
     };
     setSavedTools(prev => [entry, ...prev]);
-    setNewTool({ name: '', url: '', note: '', category: 'Research', priority: 'Sangat Bagus' });
+    setNewTool({ name: '', url: '', note: '', category: 'Research', priority: 'Great Tool' });
     setShowAddModal(false);
   };
 
@@ -300,8 +300,8 @@ export default function LibraryView() {
   const isLibraryEmpty = savedTools.length === 0;
 
   const handleResetFilters = () => {
-    setPriorityFilter('Semua');
-    setCategoryFilter('Semua');
+    setPriorityFilter('All');
+    setCategoryFilter('All');
     setSearchVal('');
     setDebouncedSearchVal('');
     setSortBy('latest');
@@ -314,15 +314,15 @@ export default function LibraryView() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <AppIcon name="library" size={22} /> Library Tools Saya
+            <AppIcon name="library" size={22} /> My Tool Library
           </h1>
           <p style={{ margin: '6px 0 0', fontSize: 14, color: 'var(--color-text-secondary)' }}>
-            Koleksi alat AI yang sudah kamu simpan, dilengkapi label prioritas otomatis.
+            Collection of AI tools you've saved, complete with automatic priority tags.
           </p>
         </div>
         <button className="btn-primary" onClick={() => setShowAddModal(true)} style={{ whiteSpace: 'nowrap' }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            <AppIcon name="plus" size={14} color="#fff" /> Tambah Manual
+            <AppIcon name="plus" size={14} color="#fff" /> Add Manually
           </span>
         </button>
       </div>
@@ -330,7 +330,7 @@ export default function LibraryView() {
       {isLibraryEmpty ? (
         <div style={{ minHeight: 420, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '24px 12px' }}>
           <div style={{ width: 120, height: 90, borderRadius: 18, background: '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, border: '1px solid var(--color-border)' }}>
-            <svg width="90" height="60" viewBox="0 0 90 60" role="img" aria-label="Ilustrasi rak buku kosong">
+            <svg width="90" height="60" viewBox="0 0 90 60" role="img" aria-label="Illustration of an empty bookshelf">
               <rect x="6" y="10" width="78" height="40" rx="8" fill="#FFFFFF" stroke="#6C47FF" strokeWidth="1.5" />
               <rect x="14" y="18" width="16" height="24" rx="3" fill="#F5F5F5" stroke="#6C47FF" strokeWidth="1.5" />
               <rect x="34" y="18" width="16" height="24" rx="3" fill="#F5F5F5" stroke="#6C47FF" strokeWidth="1.5" />
@@ -341,13 +341,13 @@ export default function LibraryView() {
             </svg>
           </div>
           <h3 style={{ margin: '0 0 10px', fontSize: 24, fontWeight: 800, color: 'var(--color-text-primary)' }}>
-            Library-mu masih kosong
+            Your Library is empty
           </h3>
           <p style={{ margin: '0 0 22px', maxWidth: 520, fontSize: 14, lineHeight: 1.7, color: 'var(--color-text-secondary)' }}>
-            Mulai simpan tools dari Dashboard atau Chat &amp; Task untuk membangun koleksimu!
+            Start saving tools from Dashboard or Chat &amp; Task to build your collection!
           </p>
           <button className="btn-primary" onClick={() => setActiveView('dashboard')} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 16px' }}>
-            Ke Dashboard <AppIcon name="arrow-right" size={14} color="#fff" />
+            Go to Dashboard <AppIcon name="arrow-right" size={14} color="#fff" />
           </button>
         </div>
       ) : (
@@ -356,8 +356,8 @@ export default function LibraryView() {
           <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
             {[
               { label: 'Total Tools', val: savedTools.length, icon: 'folder' },
-              { label: 'Prioritas Tinggi', val: savedTools.filter(t => t.priorityKey === 'high').length, icon: 'flame' },
-              { label: 'Sangat Bagus', val: savedTools.filter(t => t.priorityKey === 'good').length, icon: 'check' },
+              { label: 'High Priority', val: savedTools.filter(t => t.priorityKey === 'high').length, icon: 'flame' },
+              { label: 'Great Tools', val: savedTools.filter(t => t.priorityKey === 'good').length, icon: 'check' },
             ].map(stat => (
               <div key={stat.label} className="card" style={{ flex: 1, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 12 }}>
                 <span style={{ display: 'flex' }}><AppIcon name={stat.icon} size={22} /></span>
@@ -377,18 +377,18 @@ export default function LibraryView() {
               <input
                 value={searchVal}
                 onChange={e => setSearchVal(e.target.value)}
-                placeholder="Cari nama tool, tag, atau kategori..."
+                placeholder="Search tool name, tag, or category..."
                 style={{ ...inputStyle, marginBottom: 20 }}
                 onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
                 onBlur={e => e.target.style.borderColor = 'var(--color-border)'}
               />
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-secondary)', letterSpacing: '0.07em', margin: 0 }}>PRIORITAS</p>
+                <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-secondary)', letterSpacing: '0.07em', margin: 0 }}>PRIORITY</p>
                 <span
                   className="tooltip-host tooltip-help-icon"
-                  data-tooltip="Prioritas ditentukan otomatis berdasarkan frekuensi penggunaan dan rating tool."
-                  aria-label="Info prioritas"
+                  data-tooltip="Priority is automatically assigned based on usage frequency and tool rating."
+                  aria-label="Priority info"
                   tabIndex={0}
                 >
                   ?
@@ -414,7 +414,7 @@ export default function LibraryView() {
                 </button>
               ))}
 
-              <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-secondary)', letterSpacing: '0.07em', margin: '20px 0 8px' }}>KATEGORI</p>
+              <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-secondary)', letterSpacing: '0.07em', margin: '20px 0 8px' }}>CATEGORY</p>
               {CATEGORY_FILTERS.map(f => (
                 <button
                   key={f}
@@ -440,11 +440,11 @@ export default function LibraryView() {
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
                 <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', margin: 0 }}>
-                  Menampilkan <strong>{filtered.length}</strong> dari {savedTools.length} tools
+                  Showing <strong>{filtered.length}</strong> of {savedTools.length} tools
                 </p>
 
                 <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--color-text-secondary)' }}>
-                  <span style={{ fontWeight: 600 }}>Urutkan:</span>
+                  <span style={{ fontWeight: 600 }}>Sort by:</span>
                   <select
                     value={sortBy}
                     onChange={(event) => setSortBy(event.target.value)}
@@ -474,10 +474,10 @@ export default function LibraryView() {
                     </span>
                   </span>
                   <p style={{ margin: '14px 0 14px', color: 'var(--color-text-secondary)', fontSize: 14, lineHeight: 1.7 }}>
-                    Tidak ada tools yang cocok dengan filter ini. Coba ubah filter atau tambah tools baru.
+                    No tools match this filter. Try changing filters or adding new tools.
                   </p>
                   <button className="btn-secondary" onClick={handleResetFilters}>
-                    Reset Filter
+                    Reset Filters
                   </button>
                 </div>
               ) : (
@@ -494,17 +494,17 @@ export default function LibraryView() {
 
       {/* Add Tool Modal */}
       {showAddModal && (
-        <Modal title="Tambah Tool Manual" onClose={() => setShowAddModal(false)}>
+        <Modal title="Add Tool Manually" onClose={() => setShowAddModal(false)}>
           <div>
-            <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Nama Tool *</label>
-            <input value={newTool.name} onChange={e => setNewTool(p => ({ ...p, name: e.target.value }))} placeholder="Contoh: Perplexity AI" style={inputStyle} />
-            <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>URL Tool *</label>
+            <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Tool Name *</label>
+            <input value={newTool.name} onChange={e => setNewTool(p => ({ ...p, name: e.target.value }))} placeholder="e.g., Perplexity AI" style={inputStyle} />
+            <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Tool URL *</label>
             <input value={newTool.url} onChange={e => setNewTool(p => ({ ...p, url: e.target.value }))} placeholder="https://perplexity.ai" style={inputStyle} />
-            <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Kategori</label>
+            <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Category</label>
             <select value={newTool.category} onChange={e => setNewTool(p => ({ ...p, category: e.target.value }))} style={{ ...inputStyle }}>
-              {CATEGORY_FILTERS.filter(f => f !== 'Semua').map(c => <option key={c} value={c}>{c}</option>)}
+              {CATEGORY_FILTERS.filter(f => f !== 'All').map(c => <option key={c} value={c}>{c}</option>)}
             </select>
-            <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Prioritas</label>
+            <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Priority</label>
             <div style={{ display: 'grid', gap: 8, marginBottom: 12 }}>
               {PRIORITY_OPTIONS.map((priority) => {
                 const isActive = newTool.priority === priority;
@@ -538,16 +538,16 @@ export default function LibraryView() {
                 );
               })}
             </div>
-            <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Catatan (opsional)</label>
-            <textarea value={newTool.note} onChange={e => setNewTool(p => ({ ...p, note: e.target.value }))} placeholder="Untuk apa tool ini?" rows={3} style={{ ...inputStyle, resize: 'none' }} />
+            <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Notes (optional)</label>
+            <textarea value={newTool.note} onChange={e => setNewTool(p => ({ ...p, note: e.target.value }))} placeholder="What is this tool for?" rows={3} style={{ ...inputStyle, resize: 'none' }} />
             <p style={{ fontSize: 12, color: 'var(--color-text-secondary)', margin: '0 0 16px' }}>
-              Detail ini bisa kamu ubah lagi kapan saja dari kartu tool di Library.
+              You can edit these details anytime from the tool card in your Library.
             </p>
             <div style={{ display: 'flex', gap: 10 }}>
-              <button className="btn-ghost" onClick={() => setShowAddModal(false)} style={{ flex: 1 }}>Batal</button>
+              <button className="btn-ghost" onClick={() => setShowAddModal(false)} style={{ flex: 1 }}>Cancel</button>
               <button className="btn-primary" onClick={handleAddTool} style={{ flex: 2 }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                  <AppIcon name="check" size={14} color="#fff" /> Simpan Tool
+                  <AppIcon name="check" size={14} color="#fff" /> Save Tool
                 </span>
               </button>
             </div>
@@ -556,13 +556,13 @@ export default function LibraryView() {
       )}
 
       {toolToDelete && (
-        <Modal title="Hapus Tool" onClose={() => setToolToDelete(null)}>
+        <Modal title="Delete Tool" onClose={() => setToolToDelete(null)}>
           <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
-            Hapus {toolToDelete.name} dari library?
+            Delete {toolToDelete.name} from your library?
           </p>
           <div style={{ display: 'flex', gap: 10 }}>
             <button className="btn-ghost" onClick={() => setToolToDelete(null)} style={{ flex: 1 }}>
-              Batal
+              Cancel
             </button>
             <button
               onClick={handleConfirmDelete}
@@ -578,7 +578,7 @@ export default function LibraryView() {
                 padding: '10px 16px',
               }}
             >
-              Hapus
+              Delete
             </button>
           </div>
         </Modal>
